@@ -1,0 +1,68 @@
+@font-face {font-family: 'Regular';src: url('font/Travel_font.ttf');}
+@font-face {font-family: 'RanTian';src: url('font/HYBiRanTianTianQuanW.ttf');}
+
+#dTravelSmallContainer{display:none}
+.Travel_Background{background:url(new_skin/InterFace/Travel_Background.png) no-repeat;width:900px;height:600px;background-size:100% 100%}
+.Travel_Title{position:relative; text-align:center; line-height:95px; height:95px; width:100%; font-size:30px; font-weight:bold; font-family:Regular; color:#FFF; -webkit-text-stroke:1px rgb(0,0,0);}
+
+
+#dTravel0 td{
+	cursor:pointer;
+	width:20%;
+	text-align:center;
+	background:url(new_skin/InterFace/Challenge_Window.png) no-repeat calc(50% + 2px);
+	padding-top:18px;
+	word-break: break-all;
+}
+#dTravel0 td:hover{background:url(new_skin/InterFace/Challenge_Window_Highlight.png) no-repeat calc(50% + 2px);}
+#dTravel0 td:active{transform:translateX(1px) translateY(1px);}
+#dTravel0 .list{
+	margin-top:7.5px;height:30px;word-break:break-all;
+	display:inline-block;overflow:hidden;word-wrap:break-word;word-break:break-all;white-space:pre-wrap !important; width:100px;
+	text-align:center;vertical-align:middle;
+}
+
+#dTravel0 .button_close{
+	font-family:Regular;
+	text-align:center;
+	line-height:32px;
+	font-size:17.5px;
+	color:#FDEE00;
+	position:absolute;
+	left:25px;
+	top:565px;
+	cursor:pointer;
+	width:150px;
+	height:35px;
+	background:url(new_skin/InterFace/options_backtogamebutton0.png) no-repeat;
+	background-size:100% 100%;
+}
+#dTravel0 .button_close:hover{background:url(new_skin/InterFace/options_backtogamebutton1.png) no-repeat; background-size:100% 100%;}
+#dTravel0 .button_close:active{transform:translateX(1px) translateY(1px);}
+
+
+#dTravel0 .button_none{
+	position:absolute;
+	left:700px;
+	top:564px;
+	font-family:Regular;
+	text-align:center;
+	line-height:26px;
+	cursor:pointer;
+	font-size:12px;
+	color:#FDEE00;
+	height:26px;
+	width:60px;
+}
+#dTravel0 .button_none:hover{color:#DBDB00;}
+#dTravel0 .button_none:active{transform:translateX(1px) translateY(1px);}
+
+.Shadow{ position:absolute; width: 86px; height: 36px; background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFYAAAAkCAMAAAAkYj0PAAAAP1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACzJYIvAAAAFXRSTlNYAFIECE0MSBJDMh0WNiE+KS06JRpm1DAfAAABwUlEQVRIx7XW25aDIAwFUKbWC4OiVv7/W+ckYQwu76yaJ+zD7jHQEvPzSB2zBdebq0LJSj7NY5mD1TRt24YQHBcWeGwafAXzt1iIAgbn/TQM4zj+xsJyGCbvXSCco5+yaoJ0AKF1n763qJqLVn3/6eADd0RvymbTDA4kiaSVZflKCo/kwwY9y0cs0KqinDBB2jqCZlERr5EbMmWWyHusoAgqOcU0myUyZ0Y3IrxkNSonZRSvTuRRpTAnTgObBRr8xK+v6CWYWhGaCrCy8f3nqEBVPXENYGwfdm/wIQ1s0gZMopaqXg0Md0obYY7UfNeo6hdqhqsbp6zslqp3Xdm3lF2FNbdqFVdYCesQVs7rbdbQceBj5iSusO/Yg057kNOFLnbh/SXWZLDZadPe2tze2rS3D54Ejpvfhdf63D70K3vyP2HTReWq+f+367OlHTi+HQjOuB2K/bts7BS+hO7fZctOIPGVm7dWdPvm1cBzKzQy6DUpQWmn9BLbYXUCCYgs8mqoEVLMOHsQem8GAw3bQv8vayESGXNemMFULuLESDZwTHixsOSR0YGUnMXd+VbHW5eUDLg5863ajBOvRc+n0/gfyOwxiDfAPA4AAAAASUVORK5CYII=); }
+
+
+
+.Hidden_Container { scrollbar-width: none; -ms-overflow-style: none; }
+.Hidden_Container::-webkit-scrollbar { display: none; width: 0; height: 0; color: transparent; }
+.Not_Chose{ -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+.Can_Chose{ -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+.TXT_RED { color:#FF1C1C; text-shadow:#000 2px 0 0,#000 0 2px 0,#000 -2px 0 0,#000 0 -2px 0; }
