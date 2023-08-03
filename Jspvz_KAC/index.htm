@@ -636,10 +636,28 @@ google_ad_height = 15;
 	<div class="title">应玩家要求，特推出游戏调速功能</div>
 	<div class="dSpeed" title="点击一个速度选择软加速">
 		<div class="dS1">在相应的速度上点击</div>
-		<div class="dS2"><div onclick="CSpeed(1,20,.5)">1/2<br><br>┕━</div><div onclick="CSpeed(1,10,1)">原速<br><br>━┻━</div><div onclick="CSpeed(2,10,2)">2<br><br>━┻━</div><div onclick="CSpeed(5,10,5)">5<br><br>━┻━</div><div onclick="CSpeed(5,5,10)">10<br><br>━┛</div></div>
+		<div class="dS2">
+			<div onclick="CSpeed(1,20,.5)">1/2<br><br>┕━</div>
+			<div onclick="CSpeed(1,10,1)">原速<br><br>━┻━</div>
+			<div onclick="CSpeed(2,10,2)">2<br><br>━┻━</div>
+			<div onclick="CSpeed(5,10,5)">5<br><br>━┻━</div>
+			<div onclick="CSpeed(5,5,10)">10<br><br>━┛</div>
+		</div>
 	</div>
+	<div class="dSpeed" title="不稳定倍速">
+		<div class="dS1" style="width:30%">低性能设备特制倍速</div>
+		<div class="dS2">
+			<div onclick="CSpeed(2, 40, ' 低配 0.5')">低1/2<br><br>┕━—</div>
+			<div onclick="CSpeed(2, 20, ' 低配 1')">低1<br><br>—━┻━—</div>
+			<div onclick="CSpeed(4, 40, ' 超低配 1')">超低1<br><br>—━┻━—</div>
+			<div onclick="CSpeed(4, 20, ' 低配 2')">低2<br><br>—━┻━—</div>
+			<div onclick="CSpeed(10, 20, ' 低配 5')">低5<br><br>—━┻━—</div>
+			<div onclick="CSpeed(10, 10, ' 低配 10')">低10<br><br>—━┛</div>
+		</div>
+	</div>
+	<br>
 	<div class="nowspeed">当前的游戏速度:<span id="dDisplaySpeed">1</span> 倍速</div>
-	<div class="content"><span>&nbsp;&nbsp;&nbsp; 调速说明</span>：理想状态下，游戏提供的速度调节是<font color="#FFFF00">1/2倍速-10倍速</font>。但是调速效果跟你的浏览器以及电脑有关，比如IE6浏览器在再好的电脑上也别指望能上10倍速。<br>&nbsp;&nbsp;&nbsp; 调速后可能画面视觉会出现偶尔有点一顿一顿的感觉，并且在比较高的速度时某些浏览器可能无法实现加速效果或者只能短时间加速然后速度便慢下来。<br>&nbsp;&nbsp;&nbsp; <span style="color:#FF0"><b>最后强烈推荐使用IE9,Chrome,FireFox,Opera浏览器，能让你用豌豆射手体验到机关枪的感觉！<br>&nbsp;&nbsp;&nbsp; 声明：受浏览器和电脑限制，该调速不保证一定能达到选择速度的效果！</b></span></div>
+	<div class="content"><span>&nbsp;&nbsp;&nbsp; 调速介绍：提供1/2 ~ 10倍速选择</span><br>&nbsp;&nbsp;&nbsp; 考虑到低性能设备运行问题，设立低配倍速以供玩家选择。<br><font color="#FFFF00">&nbsp;&nbsp;&nbsp; 注意事项: 低配倍速下，游戏并不能按照原有期望运行，而是放慢速度运行。例如低配倍速下，豌豆子弹会减速，请谨慎选择。</font></div>
 	<br>
 	<div><input type=button value="返回游戏" onclick="HiddenSpeed()">&nbsp;&nbsp; <input type=button value="恢复原速" onclick="CSpeed(1,10,1)"></div>
 </div>

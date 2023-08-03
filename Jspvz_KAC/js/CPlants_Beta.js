@@ -98,11 +98,11 @@ var oMelonPult = InheritO(oCabbage, {
 	height: 120,
 	beAttackedPointL: 65,
 	beAttackedPointR: 120,
-	SunNum: 250,
+	SunNum: 300,
 	coolTime: 7.5,
 	AttackGif: 4,
-	Attack: 90, // 西瓜伤害
-	Attack2: 30, // 溅射伤害
+	Attack: 100, // 西瓜伤害
+	Attack2: 40, // 溅射伤害
 	Is_AOE: true,
 	Judge_Strength: 2.2,
 	Attack_Await_Time: 290, // 等待时间
@@ -120,7 +120,7 @@ var oMelonPult = InheritO(oCabbage, {
 		let R = self.R, C = self.C, e, b;
 
 		for (let i = Math.max(1, R - 1); i <= Math.min(R + 1, oS.R); ++i) {
-			b = oZ.getArZ(x2 - 60, x2 + 80, i), e = b.length; // 获取
+			b = oZ.getArZ(x2 - 70, x2 + 90, i), e = b.length; // 获取
 			while(e--) (b[e] != f && b[e].Altitude == 1) && b[e].getHit2(b[e], self.Attack2); // 溅射
 		}
 	},
