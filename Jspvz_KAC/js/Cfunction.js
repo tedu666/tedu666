@@ -66,11 +66,10 @@ var $User = function() {
 	}
 } (),
 oSym = {
-	DebugMode: true, 
-	UnstableTimeSync: true, 
+	DebugMode: true,
 	Init: function(b, a) {
 		let self = this;
-		self["Now"] = 0, self["Timer"] = null, self["LastTime"] = Infinity; // 重置时间
+		self["Now"] = 0, self["Timer"] = null; // 重置时间
 		self["NowStep"] = 1, self["TimeStep"] = 10; // 重置速度
 		self["TQ"] = new LimitAVL(100), self["TQ"]["push"](new TimerObj({ T: 0, f: b, ar: a || [] }, "T")); // 创建优先队列
 		self["AddTaskQ"] = []; // 待加入的 TQ，防止死循环
@@ -85,24 +84,18 @@ oSym = {
 	Start: function() {
 		if (this["Timer"] == null) { 
 			this["Timer"] = Infinity, (function() { 
-				let a = oSym, b = a["TQ"], l, c, e, f = a["AddTaskQ"], D = a["SysTime"](), q; a["Now"] += a["NowStep"];
+				let a = oSym, b = a["TQ"], l, c, e, f = a["AddTaskQ"], D = a["SysTime"](); a["Now"] += a["NowStep"];
 
 				a["TQ"]["pushList"](f), f["length"] = 0; // 插入预备任务
 
 				l = a["TQ"]["QueryLimit"](a["Now"], 1); // 筛选并删除
-
-				if (a["UnstableTimeSync"] && D - self["LastTime"] > a["TimeStep"]) a["Now"] += (D - self["LastTime"] - a["TimeStep"]) / a["TimeStep"] * a["NowStep"]; // 强制流逝已经损失的时间
-				self["LastTime"] = D;
 
 				for (let c of l) {
 					if (a["DebugMode"]) { try { (e = c["f"]).apply(e, c["ar"]); } catch (why) { console.error(why); };
 					} else (e = c["f"]).apply(e, c["ar"]);
 				};
 
-				q = Math["ceil"](a["SysTime"]() - D); // 判断运行时间
-				// if (a["UnstableTimeSync"] && a["TimeStep"] - q < 0) a["Now"] += (q - a["TimeStep"]) / a["TimeStep"] * a["NowStep"], q = a["TimeStep"]; // 强制流逝已经损失的时间
-
-				if (a["Timer"] != null) a["Timer"] = setTimeout(arguments.callee, a["TimeStep"] - q);
+				if (a["Timer"] != null) a["Timer"] = setTimeout(arguments.callee, Math["max"](a["TimeStep"] - Math["ceil"](a["SysTime"]() - D), 0));
 			})();
 		}
 	},
