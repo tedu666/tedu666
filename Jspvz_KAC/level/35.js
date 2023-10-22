@@ -105,37 +105,7 @@ oS.Init({
         });
         NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDAll);
 	}
-},{
-	GrowPlant : function(l, d, c, e, b) {
-		var j=oS.ChoseCard,f=ArCard[j],h=f.PName,k=h.prototype,i=k.coolTime,a,g=oGd.$LF[e],ChooseCardIsNan=isNaN(j);if(k.CanGrow(l,e,b)){PlayAudio(g!=2?"plant"+Math.floor(1+Math.random()*2):"plant_water");if(!oS.CardKind){var defplt=new h;defplt.Birth(d,c,e,b,l);if(defplt.EName=="oPlantern"){CekoPlantern(e,b);defplt.PrivateDie=function(c){var a=c.R,b=c.C;delete oGd.$Plantern[a+"_"+b];oS.HaveFog&&oGd.GatherFog(a,b,2,3,1);CekoPlantern(a,b);}};}else{asyncInnerHTML((a=new h).CustomBirth(e,b,0,"auto"),function(n,m){EDPZ.appendChild(n);m.Birth();},a);};!ChooseCardIsNan&&innerText(ESSunNum,oS.SunNum-=k.SunNum);!ChooseCardIsNan&&i&&(f.CDReady=0,DoCoolTimer(j,k.coolTime));oSym.addTask(20,SetHidden,[SetStyle(g!=2?$("imgGrowSoil"):$("imgGrowSpray"),{left:d-30+"px",top:c-30+"px",zIndex:3*e+1,visibility:"visible"})]);ChooseCardIsNan&&f&&(delete ArCard[j],ClearChild($(j)));};CancelPlant();
-	},
-	MoveDropCard : function(c, b, DisappearTime, C) {//选的卡id、落点y
-		var a=ArCard[c];a&&(C=$(c))&&((!(oS.Chose==1&&oS.ChoseCard==c)&&a.top<b-52)?(C.style.top=(a.top+=2)+"px",oSym.addTask(5,MoveDropCard,[c,b,DisappearTime])):(CardStartTiming(c,(DisappearTime||1500))));	
-	},
-	CardStartTiming : function(id, AllTime) {
-		if(!isNaN(id)&&(NCard=ArCard[id])){return;};isNaN(AllTime)&&(AllTime=1500),AllTime-=500;oSym.addTask(Math.max(0,AllTime),function(Time,id){Time>=0&&(Time=0),Time+=500;oSym.addTask(10,function(Time,id){if((ischoose=(oS.Chose==1&&oS.ChoseCard==id))||Time>0){oSym.addTask(10,arguments.callee,[Time-10,id]);}else{delete ArCard[id],ClearChild($(id));return;};!ischoose&&ArCard[id]&&$(id).style&&($(id).style.opacity=(0.5+Math.floor((Time-1)/50)%2*0.5));},[Time,id]);},[AllTime,id]);	
-	},
-	CancelPlant : function(c) {
-		ClearChild($("MovePlant"),$("MovePlantAlpha"));oS.Chose=0;MonitorCard();isNaN(oS.ChoseCard)&&(c=$(oS.ChoseCard))&&c.style&&(c.style.opacity=1);GroundOnmousemove=function(){};
-	},
-	AppearCard : function(h, f, CardID, Fallsize, freetime, c) {//x,y,id,size
-		freetime=freetime||1500;var b,d,g="dCard"+Math.random(),c="opacity:1;width:100px;height:120px;cursor:pointer;clip:rect(auto,auto,60px,auto);left:"+h+"px;top:-1000";if(Fallsize){d=0,oSym.addTask(1,MoveDropCard,[g,f,freetime]);}else{d=f-15-20,c+=";top:"+d+"px";oSym.addTask(1,function(q,p,n,j,l,k,m,i){if(ArCard[q]&&$(q)){SetStyle($(q),{left:(p=p+j*k)+"px",top:(n=n+Number(l[0]))+"px"});l.shift();--m;m>0&&((l.length==0)&&(l=[8,16,24,32]),oSym.addTask(i,arguments.callee,[q,p,n,j,l,k,m,++i]))}},[g,h,d,Math.floor(Math.random()*4),[-32,-24,-16,-8],[-1,1][Math.floor(Math.random()*2)],8,2]);oSym.addTask(1,CardStartTiming,[g,freetime]);};ArCard[g]={DID:g,PName:CardID,PixelTop:600,CDReady:1,SunReady:1,top:d};NewImg(g,CardID.prototype.PicArr[CardID.prototype.CardGif],c,$("dCardList"),{onclick:function(g){ClearChild($("MovePlant"),$("MovePlantAlpha"));CancelPlant();this.style&&(this.style.opacity=0.5);ChosePlant(g,this.id);}});
-	},
-	SummonVase : function(y,x,size,item,vasesize){
-		let p=new oFlowerVase;p.Pot_Size=(vasesize?vasesize:0);p.Birth(GetX(x),GetY(y),y,x,[]);oS.Vase[y+"_"+x]={size:size,item:item};
-	},
-	CekWin : function(){
-		return (function(){for(let item in $Z){if($Z[item].PZ != 0){return false}};return true;})() && (function(){for(let item in $P){if($P[item].EName == "oFlowerVase"){return false;}};return true;})();
-	},
-	CekoPlantern : function(a,b) {
-		let p=oGd.$Plantern,q=a+"_"+b,o=$P[p[q]];if(o){for(let s=a-1;s<=a+1;s++){for(let r=b-1;r<=b+1;r++){i=s+"_"+r;if(!oS.oPenVase[i]&&(info=oS.Vase[i])&&(obj=oGd.$[i+"_1"])&&obj.EName=="oFlowerVase"){oS.oPenVase[i]=true;obj.ChangeStyle(obj.Pot_Size,(obj.is_show=1));SetVaseXray(s,r,1);};};};}else{for(let s=a-1;s<=a+1;s++){for(let r=b-1;r<=b+1;r++){i=s+"_"+r;if(oS.oPenVase[i]&&(info=oS.Vase[i])&&(obj=oGd.$[i+"_1"])&&obj.EName=="oFlowerVase"){oS.oPenVase[i]=false;obj.ChangeStyle(obj.Pot_Size,(obj.is_show=0));SetVaseXray(s,r,0);};};};for(let item in p){g=item.split('_'),y=g[0]*1,x=g[1]*1;for(let s=y-1;s<=y+1;s++){for(let r=x-1;r<=x+1;r++){i=s+"_"+r;if(!oS.oPenVase[i]&&(info=oS.Vase[i])&&(obj=oGd.$[i+"_1"])&&obj.EName=="oFlowerVase"){oS.oPenVase[i]=true;obj.ChangeStyle(obj.Pot_Size,(obj.is_show=1));SetVaseXray(s,r,1);};};};};};
-	},
-	SetVaseXray: function(y,x,is_show) {
-		if(!((info=oS.Vase[y+"_"+x])&&(obj=oGd.$[y+"_"+x+"_1"])&&obj.EName=="oFlowerVase")){return;};if(is_show){if(info.size==0){NewImg(0,info.item.prototype.PicArr[info.item.prototype.CardGif],"clip:rect(auto,auto,34px,auto);width: 55px; height: 66px; top: 25px; left: 13.5px",$(obj.id));}else if(info.size==1){NewImg(0,info.item.prototype.PicArr[info.item.prototype.StandGif],"top:15px;left:0px;height:50px;position:absolute;",$(obj.id));}else{NewImg(0,"images/interface/Sun.gif","left:12.5px;top:12.5px;width:60px;height:60px;position:absolute",$(obj.id));};}else{ClearChild($(obj.id).childNodes[2]);};	
-	},
-	AutoSelectCard: function() {
-		SelectCard(oCherryBomb.prototype.EName);
-	},
+}, __Template_ReSet_Object__(__Template_FlowerVase__, {
 	DaveTalk: function(text,talknum,b,Audio,waittime){
 		let c=$("DivTeach"); c.onclick = null;
 		PlayAudio((Audio || "crazydavelong" + Math.floor(1 + Math.random() * 3)));
@@ -266,4 +236,4 @@ oS.Init({
 		)(0);
 	}
 
-});
+}));

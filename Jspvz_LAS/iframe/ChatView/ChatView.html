@@ -1,0 +1,74 @@
+<!doctype html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title></title>
+</head>
+<body style="font-size:14px;font-family:宋体,黑体" topmargin="0" leftmargin="0">
+
+	<!--接收部分--><div style="position:relative; margin-left:5px; margin-top:10px; width:800px; font-family:楷体,宋体,黑体; height:35px; line-height:35px; font-size:20px; font-weight:bold; text-align:center">欢迎加入在线交流！</div>
+	<input id="dConnect" type="button" value="连接至他人聊天" style="position:absolute; left:25px; top:20px; width:175px; height:25px; border-radius:12.5px; white-space:pre; background:#000000BB; color:#FFFFFF; font-family:楷体,宋体,黑体; font-size:17.5px; cursor:pointer;"></input>
+	<input id="dReConnect" type="button" value="重新连接服务器" style="position:absolute; left:625px; top:20px; width:175px; height:25px; border-radius:12.5px; white-space:pre; background:#000000BB; color:#FFFFFF; font-family:楷体,宋体,黑体; font-size:17.5px; cursor:pointer;"></input>
+	<div id="dLoader" style="position:absolute; width:800px; text-align:center"><br><br><br><br><img src="AjaxLoader.gif"></div>
+	<div id="dbody" style="position:relative; visibility:hidden; margin-left:25px; *margin-left:30px; margin-top:5px; width:94%; overflow-y:scroll; height:330px"></div>
+	<div id="dPeerID" value="" style="position:relative; margin-left:30px; width:800px; font-family:楷体,宋体,黑体; height:35px; line-height:35px; font-size:20px; text-align:left;">PeerID: 未连接</div>
+	<!-- <div style="text-align:center;position:absolute;top:425px;width:728px;left:50%;margin-left:-364px"></div> -->
+
+	<!--发言部分-->
+	<div id="dChose" style="position:absolute; top:425px; left:700px; line-height:40px; color:#FC6; font-weight:bold; font-size:15px; font-family:幼圆"><!--样式选择-->
+		<label><input type="radio" name="ChatStyle" value="0" onchange="SetTextArea_Size(this.value)" checked> 默认输入框 </label></br>
+		<label><input type="radio" name="ChatStyle" value="1" onchange="SetTextArea_Size(this.value)"> 超大输入框 </label></br>
+	</div>
+	<form name="frm" id="frm" style="position:relative; top:115px; left:60px; margin:0; padding:0">
+		<div style="height:35px;width:900px">
+			<div style="float:left;margin-left:8px;width:502px;height:40px;z-index:1"><textarea placeholder=" 未登录用户将会以 “游客” 昵称加入聊天！" type="text" name="txtChat" id="txtChat" style="position:relative;border-radius:5px;background-color:#FFDAB3;width:100%;height:22px;border:1px #000 solid;font-size:14px;resize:none;font-family:幼圆;" oninput="Monitor()" onpropertychange="Monitor()"></textarea></div>
+			<div style="float:left;margin-left:12px;width:250px;height:40px;z-index:2"><input id="btnSend" type="submit" value="发送(50000)" style="cursor:pointer;width:105px;height:28px;border-left:3px solid #85411C;border-right:3px solid #4E250C;border-top:3px solid #85411C;border-bottom:3px solid #4E250C;background:#8F431B;color:#FC6;font-weight:bold;font-size:14px;font-family:幼圆"> <input id="btnClear" onclick="ClearScreen()" type="button" value=" 清 屏 " style="cursor:pointer;width:76px;height:28px;border-left:3px solid #85411C;border-right:3px solid #4E250C;border-top:3px solid #85411C;border-bottom:3px solid #4E250C;background:#8F431B;color:#FC6;font-weight:bold;font-size:14px;font-family:幼圆"></div>
+		</div>
+	</form>
+
+</body>
+<script src="peerjs.min.js"></script>
+<script src="store.min.js"></script>
+<script src="Cfunction.js"></script>
+<script language=javascript>
+	var $ = (a) => document["getElementById"](a), SetLoad = () => { SetVisible($('dLoader')), SetHidden($("dbody"), $("dConnect")); }, SetReady = () => { SetHidden($('dLoader')), SetVisible($("dbody"), $("dConnect")); }; 
+	var DisconnectChat = (a) => { a && (a["close"](), OwnCommand["LogData"]("已主动断开与 PeerID: " + a["peer"] + " 的连接！")); }; 
+	var oCinfo, GetChat = (a) => { 
+		a["on"]("close", () => { SetReady(), OwnCommand["MakeNewChat"]("——系统——", "已断开与 PeerID: " + a["peer"] + " 的连接！", "#00F", true), OwnCommand["LogData"]("断开与 PeerID: " + a["peer"] + " 的连接，这可能是一方主动断开了连接。"); });
+		a["on"]("data", (Data) => { OwnCommand["GetCommand"](Data); });
+	}; 
+	var ConnectNew = () => {
+		let ConnectID = prompt("请输入需要连接到的 PeerID：", ""), CState = false; if (!oCinfo["StrReg"]["test"](ConnectID) || ConnectID == oCinfo["PeerId"]) return alert("请输入正确格式的 PeerID！");
+		DisconnectChat(oCinfo["Connection"]), SetLoad(), oCinfo["Connection"] = oCinfo["Peer"]["connect"](ConnectID); // 尝试连接
+		setTimeout(() => { if (!CState) SetReady(), OwnCommand["MakeNewChat"]("——系统——", "无法建立与 PeerID: " + ConnectID + " 的连接，连接超时！", "#00F", true), OwnCommand["LogData"]("无法建立与 PeerID: " + ConnectID + " 的连接，连接超时！"); }, 5000); // 五秒内未连接，连接超时！
+		oCinfo["Connection"]["on"]("error", (error) => { SetReady(), OwnCommand["MakeNewChat"]("——系统——", "连接出现问题: " + error, "#00F", true), OwnCommand["LogData"]("连接失败，原因: " + error); });
+		oCinfo["Connection"]["on"]("open", () => { CState = true, SetReady(), GetChat(oCinfo["Connection"]), OwnCommand["MakeNewChat"]("——系统——", "成功与 PeerID: " + oCinfo["Connection"]["peer"] + " 连接！", "#00F", true), OwnCommand["LogData"]("已建立与 PeerID: " + oCinfo["Connection"]["peer"] + " 的连接"); });
+	}; 
+	oCinfo = {
+		Peer: new Peer({ port: 443, secure: true, config: { "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }], "sdpSemantics": "unified-plan" } }), // 连接至服务器
+		Connection: null, PeerId: "", StrReg: /^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$/, 
+		UserName: GetOwnName(), JoinName: "未知", Debug: true, // 自己的名称 + 被连接的双方的名称
+	}; 
+	var OwnCommand = { // 只能主动执行的命令
+		LogData: (Data) => oCinfo["Debug"] && console["log"](Data), 
+		GetCommand: (Data) => { let Arr = Data["toString"]()["split"]("||"); oCommand[Arr[0]] && oCommand[Arr[0]](Arr); OwnCommand["LogData"](Data); },
+		DecodeStr: (Str, l = Infinity) => unescape(Str)["substr"](0, l)["replace"](/</g, "&lt;")["replace"](/>/g, "&gt;"), 
+		MakeNewChat: (Name = "", Val = "", Col = "#005", System = false) => { // 制造新消息
+			let ret = NewEle(0, 'div', 'white-space:pre-wrap;margin-top:5px;float:left;position:relative;width:100%;min-height:20px;line-height:17.5px;word-break:break-all;', {'innerHTML': '<span style="font-family:幼圆;color:#005">' + (new Date()).format("hh:mm:ss") + '</span> <span style="font-weight:bold;color:' + Col + '">' + Name + ':</span> ' + Val}, $("dbody"));
+			$("dbody")["scrollTop"] = 1e10; // 滚动到底部，待改
+			return ret;
+		}, 
+		SendChat: (ChatText) => { 
+			if (!oCinfo["Connection"]) return alert("未与任何人建立连接！请连接后再发送消息！");
+			let SendArr = ["Chat", escape(GetOwnName()), escape(ChatText)];
+			oCinfo["Connection"]["send"](SendArr["join"]("||")), oCommand["Chat"](SendArr);
+		}
+	};
+	var oCommand = { // 只能被动执行的命令
+		"Join": (Arr) => { oCinfo["JoinName"] = Arr[1], OwnCommand["LogData"]("已成功设置对方名称: " + Arr[1]); }, // 设置对方名称
+		"Chat": (Arr) => { let User = Arr[1], Chat = Arr[2]; OwnCommand["MakeNewChat"](OwnCommand["DecodeStr"](User || oCinfo["JoinName"], 100), OwnCommand["DecodeStr"](Chat, 75000)); }, // 接收信息
+	};
+	$("dReConnect")["onclick"] = () => window["location"] = window["location"]; // 刷新
+	oCinfo["Peer"]["on"]("open", (Id) => { oCinfo["PeerId"] = Id, $("dPeerID")["innerText"] = "PeerID: " + Id, $("dPeerID")["value"] = Id, SetReady(), $("dConnect")["onclick"] = ConnectNew, OwnCommand["MakeNewChat"]("——系统——", "成功连接至服务器，您的 PeerID: " + Id, "#00F", true), OwnCommand["LogData"]('PeerID: ' + Id); });
+	oCinfo["Peer"]["on"]("connection", (Connection) => { DisconnectChat(oCinfo["Connection"]), oCinfo["Connection"] = Connection, GetChat(oCinfo["Connection"]), OwnCommand["MakeNewChat"]("——系统——", "成功与 PeerID: " + oCinfo["Connection"]["peer"] + " 连接！", "#00F", true), OwnCommand["LogData"]("已建立与 PeerID: " + oCinfo["Connection"]["peer"] + " 的连接"); });
+</script>
+</html> 

@@ -1,2 +1,2 @@
-1.在 oP.Init 里计算 oP.FlagHeadStep 未什么要去取 floor (r.FlagHeadStep = Math.floor(140 / (a.FlagNum - 1))，这样会导致旗帜偏移，去除 floor 则能正常显示位置了 (r.FlagHeadStep = 140 / (a.FlagNum - 1)。
+1.在 oP.Init 里计算 oP.FlagHeadStep 为什么要去取 floor (r.FlagHeadStep = Math.floor(140 / (a.FlagNum - 1))，这样会导致旗帜偏移，去除 floor 则能正常显示位置了 (r.FlagHeadStep = 140 / (a.FlagNum - 1)。
 

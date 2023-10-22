@@ -341,3 +341,10 @@ button.jhp:focus{
 .ButtonTabR{margin-left:8px;width:81%}
 .dShowMsgTabTR2 div,.dShowMsgTabTR4 div{float:left}
 /* 提示框的样式 */
+
+
+/* 设置的UI */
+.dSetting {
+	background: url(new_skin/InterFace/TVhead_target.png) center no-repeat;
+	background-size: 100% 100%;
+}

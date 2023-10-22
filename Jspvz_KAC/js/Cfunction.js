@@ -22,6 +22,7 @@ var $User = function() {
 	};
 	e ? (document.execCommand("BackgroundImageCache", false, true), ShadowPNG = "images/interface/plantshadow8.gif") : ShadowPNG = "images/interface/plantshadow32.png";
 	return {
+		VersionName: "KAC", 
 		Browser: {
 			IE: c,
 			IE6: e,
@@ -69,7 +70,8 @@ oSym = {
 	DebugMode: true,
 	Init: function(b, a) {
 		let self = this;
-		self["Now"] = 0, self["Timer"] = null; // 重置时间
+		self["Stop"]();
+		self["Now"] = 0, self["Timer"] = null, self["RunningVer"] = Math.random(); // 重置时间
 		self["NowStep"] = 1, self["TimeStep"] = 10; // 重置速度
 		self["TQ"] = new LimitAVL(100), self["TQ"]["push"](new TimerObj({ T: 0, f: b, ar: a || [] }, "T")); // 创建优先队列
 		self["AddTaskQ"] = []; // 待加入的 TQ，防止死循环
@@ -82,11 +84,14 @@ oSym = {
 		this["AddTaskQ"]["length"] = 0, this["TQ"]["AVL"]["clear"](); // 清除优先队列
 	},
 	Start: function() {
+		var Ver = this["RunningVer"];
 		if (this["Timer"] == null) { 
 			this["Timer"] = Infinity, (function() { 
-				let a = oSym, b = a["TQ"], l, c, e, f = a["AddTaskQ"], D = a["SysTime"](); a["Now"] += a["NowStep"];
+				let a = oSym, b = a["TQ"], l, c, e, f = a["AddTaskQ"], D = a["SysTime"](); 
 
-				a["TQ"]["pushList"](f), f["length"] = 0; // 插入预备任务
+				if (Ver != a["RunningVer"]) return;
+
+				a["Now"] += a["NowStep"], a["TQ"]["pushList"](f), f["length"] = 0; // 插入预备任务
 
 				l = a["TQ"]["QueryLimit"](a["Now"], 1); // 筛选并删除
 
@@ -1018,7 +1023,7 @@ oZ = {
 		f,
 		a = e.length;
 		while (c < a && (f = e[c++]).AttackedLX <= b) {
-			if (f.PZ && f.HP && f.AttackedRX >= b) {
+			if (f.PZ && f.HP > 0 && f.AttackedRX >= b) {
 				return f
 			}
 		}
@@ -1038,7 +1043,7 @@ oZ = {
 		})).RefreshTime = k;
 		e = g.length;
 		while (d < e && (c = g[d++]).AttackedRX >= h) {
-			if (c.PZ && c.HP && c.AttackedLX <= h) {
+			if (c.PZ && c.HP > 0 && c.AttackedLX <= h) {
 				return c
 			}
 		}
@@ -1052,7 +1057,7 @@ oZ = {
 		h = l.length,
 		j;
 		while (g < h && (j = (c = l[g++]).AttackedLX) < d) {
-			c.PZ && c.HP && (j > e || c.AttackedRX > e) && (f[k++] = c)
+			c.PZ && c.HP > 0 && (j > e || c.AttackedRX > e) && (f[k++] = c)
 		}
 		return f
 	},
@@ -1068,7 +1073,7 @@ oZ = {
 		h = l.length,
 		j;
 		while (g < h && (j = (c = l[g++]).AttackedLX) < d) {
-			if (c.PZ && c.HP && (j > e || c.AttackedRX > e)) {
+			if (c.PZ && c.HP > 0 && (j > e || c.AttackedRX > e)) {
 				return c
 			}
 		}
@@ -1106,7 +1111,7 @@ oZ = {
 			s = oT.$L[r];
 			while (q--) {
 				a = j[q];
-				a.HP && a.PZ && a.ZX < 901 && oT["chkD" + a.WalkDirection](a, r, p, s); ! a.HP ? (j.splice(q, 1), f[0](a)) : f[a.ChkActs(a, r, j, q)](a)
+				a.HP > 0 && a.PZ && a.ZX < 901 && oT["chkD" + a.WalkDirection](a, r, p, s); a.HP <= 0 ? (j.splice(q, 1), f[0](a)) : f[a.ChkActs(a, r, j, q)](a)
 			}
 			l ? (l = d = 0, j.sort(function(u, t) {
 				return u.AttackedLX - t.AttackedLX
@@ -1914,7 +1919,7 @@ addCookie = function(b, d, e) {
 deleteCookie = function(a) {
 	document.cookie = a + "=0;"
 },
-WordUTF8 = '<div id="dLogo" style="position:absolute;width:900px;height:600px;z-index:1"><div id="LogoWord" style="position:absolute;color:#FF0;top:285px;width:100%;height:140px"><span style="position:absolute;width:135px;height:100%;left:400px;top:0;cursor:pointer" onclick="PlayAudio(\'gravebutton\');SetBlock($(\'dSurface\'),$(\'iSurfaceBackground\'));ShowNameDiv()"></span><div style="position:absolute;font-size:13px;left:610px;text-align:center;width:140px;top:110px;line-height:1.6;font-weight:bold"><span style="cursor:pointer"><span id="sTime" style="cursor:pointer">（制作组名单）</span></span></div></div><div style="position:absolute;width:155px;height:110px;left:600px;top:340px;cursor:pointer;z-index:300" onclick="SelectModal(\'System/Staff\');/*SetVisible($(\'dProcess\'))*/"></div><div id="dBalloonZombie"><img src="images/interface/balloon_zombie32.png"></div></div>',
+WordUTF8 = '<div id="dLogo" style="position:absolute;width:900px;height:600px;z-index:1"><div id="LogoWord" style="position:absolute;color:#FF0;top:285px;width:100%;height:140px"><span style="position:absolute;width:135px;height:100%;left:400px;top:0;cursor:pointer" onclick="PlayAudio(\'gravebutton\');SetBlock($(\'dSurface\'),$(\'iSurfaceBackground\'));ShowNameDiv()"></span><div style="position:absolute;font-size:13px;left:610px;text-align:center;width:140px;top:110px;line-height:1.6;font-weight:bold"><span style="cursor:pointer"><span id="sTime" style="cursor:pointer">（制作组名单）</span></span></div></div><div style="position:absolute;width:155px;height:110px;left:600px;top:340px;cursor:pointer;z-index:300" onclick="SelectModal(\'System/Staff\');/*SetVisible($(\'dProcess\'))*/"></div><div id="dBalloonZombie"><img src="images/interface/balloon_zombie32.png"></div><div id="dSetting" class="dSetting" style="position:absolute;width:60px;height:60px;left:10px;top:10px;cursor:pointer" onclick="SelectModal(\'System/Config\');"></div></div>',
 ShowNameDiv = function() {
 	oSym.Start(); (function(c) {
 		var b = c[0],
@@ -2148,27 +2153,22 @@ ClearChild = function() {
 },
 SetBlock = function() {
 	var a = arguments.length;
-	while (a--) {
-		arguments[a].style.display = "block"
-	}
+	while (a--)  if (arguments[a]?.style) arguments[a].style.display = "block"
+	
 },
 SetNone = function() {
 	var a = arguments.length;
-	while (a--) {
-		arguments[a].style.display = "none"
-	}
+	while (a--)  if (arguments[a]?.style) arguments[a].style.display = "none"
+	
 },
 SetHidden = function() {
 	var a = arguments.length;
-	while (a--) {
-		arguments[a].style.visibility = "hidden"
-	}
+	while (a--) if (arguments[a]?.style) arguments[a].style.visibility = "hidden"
+	
 },
 SetVisible = function() {
 	var a = arguments.length;
-	while (a--) {
-		arguments[a].style.visibility = "visible"
-	}
+	while (a--) if (arguments[a]?.style) arguments[a].style.visibility = "visible";
 },
 SetAlpha = function(c, b, a) {
 	c.style.opacity = a
