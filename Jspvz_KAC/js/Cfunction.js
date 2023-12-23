@@ -212,6 +212,7 @@ oS = {
 		d = oS.R + 1,
 		x = $("sFlagMeterTitleF"),
 		y = $("dFlagMeterTitle"),
+		z = $("dFlagMeter"), 
 		e = p.LoadImage,
 		h = p.CheckImg,
 		f = p.InitPn,
@@ -244,6 +245,7 @@ oS = {
 		}
 		p.PicNum = w += i.length;
 		r = i.length;
+		z.style["pointer-events"] = "auto";
 		y.setAttribute("title", "如果长时间没有加载完毕或者不想再等待预读可以尝试点击跳过预读直接进入游戏");
 		y.style.cursor = "pointer";
 		y.onclick = function() {
@@ -340,6 +342,7 @@ oS = {
 		c.style.cursor = "default";
 		SetHidden($("dFlagMeterContent"), dFlagMeter);
 		$("dFlagMeter").style.top = "545px";
+		$("dFlagMeter").style["pointer-events"] = "none";
 		$("sFlagMeterTitleF").innerHTML = $("dFlagMeterTitleB").innerHTML = f.LevelName;
 		$("imgFlagHead").style.left = "139px";
 		$("imgFlagMeterFull").style.clip = "rect(0,auto,auto,157px)";
@@ -1652,23 +1655,57 @@ StopBubble = function(a) {
 	window.event ? event.cancelBubble = true: a.stopPropagation()
 },
 GrowPlant = function(l, d, c, e, b) {
-	var j = oS.ChoseCard,
-	f = ArCard[j],
-	h = f.PName,
-	k = h.prototype,
-	i = k.coolTime,
-	a,
-	g = oGd.$LF[e];
-	k.CanGrow(l, e, b) && Trigger_Ctk_Plt(l, e, b, k) && (PlayAudio(g != 2 ? "plant" + Math.floor(1 + Math.random() * 2) : "plant_water"), !k.CardKind ? (new h).Birth(d, c, e, b, l) : asyncInnerHTML((a = new h).CustomBirth(e, b, 0, "auto"), function(n, m) {
-		EDPZ.appendChild(n), m.Birth();
-	}, a), !oS.Cheat_Mode && (innerText(ESSunNum, oS.SunNum -= k.SunNum), i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime))), oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), {
-		left: d - 30 + "px",
-		top: c - 30 + "px",
-		zIndex: 3 * e + 1,
-		visibility: "visible"
-	})]));
+	var j = oS.ChoseCard, f = ArCard[j], h = f.PName, k = h.prototype, i = k.coolTime, a, g = oGd.$LF[e], o = f.Kind, s = (k.name == "Plants");
+
+	if (k.CanGrow(l, e, b) && Trigger_Ctk_Plt(l, e, b, k)) {
+		PlayAudio(g != 2 ? "plant" + Math.floor(1 + Math.random() * 2) : "plant_water");
+
+		!k.CardKind ? (new h).Birth(d, c, e, b, l) : asyncInnerHTML((a = new h).CustomBirth(e, b, 0, "auto"), function(n, m) {
+			EDPZ.appendChild(n), m.Birth();
+		}, a);
+
+		if (o) delete ArCard[j], ClearChild($(j))
+		else !oS.Cheat_Mode && (innerText(ESSunNum, oS.SunNum -= k.SunNum), i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime))); 
+
+		oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), {
+			left: d - 30 + "px",
+			top: c - 30 + "px",
+			zIndex: 3 * e + 1,
+			visibility: "visible"
+		})]);
+	} 
 	CancelPlant()
 },
+
+//20231009种子雨（原创移植）
+AppearCard = function (h, f, e, a, t) { // x, y, 植物id, 移动卡槽类型, 消失时间（默认 15s）
+	var b, d, g = "dCard" + Math.random(), c = "opacity:1;width:100px;height:120px;cursor:pointer;clip:rect(auto,auto,60px,auto);left:" + h + "px;top:-1000", t = t || 1500;
+
+	if (a) d = 0, oSym.addTask(1, MoveDropCard, [g, f, t]); // 从天而降，反之抛物线掉落
+	else d = f - 15 - 20, c += ";top:" + d + "px", oSym.addTask(1, DisappearCard, [g, t]), oSym.addTask(1,function(q,p,n,j,l,k,m,i){if(ArCard[q]&&$(q)){SetStyle($(q),{left:(p=p+j*k)+"px",top:(n=n+Number(l[0]))+"px"});l.shift();--m;m>0&&((l.length==0)&&(l=[8,16,24,32]),oSym.addTask(i,arguments.callee,[q,p,n,j,l,k,m,++i]))}},[g,h,d,Math.floor(Math.random()*4),[-32,-24,-16,-8],[-1,1][Math.floor(Math.random()*2)],8,2]); // 开始记时，确定抛物线，与阳光部分相似故压缩
+
+	ArCard[g] = { DID: g, PName: e, PixelTop: 600, CDReady: 1, SunReady: 1, top: d, HasChosen: false, Kind: 1 }; // 生成卡片数据，是否被点击过
+	NewImg(g, e.prototype.PicArr[e.prototype.CardGif], c, $("dCardList"), { // 生成卡片 ele
+		onclick: function (g) { 
+			var self = this, style = self.style, id = self.id; ClearChild($("MovePlant"), $("MovePlantAlpha")), CancelPlant(), style && (style.opacity = 0.5), ChosePlant(g, id), ArCard[id] && (ArCard[id].HasChosen = true);
+		} 
+	});
+}, MoveDropCard = function (c, b, t) { // 掉落目标
+	var a = ArCard[c], ele = $(c); a && ele && ((!a.HasChosen && a.top < b - 52) ? (ele.style.top = (a.top += 2) + "px", oSym.addTask(5, MoveDropCard, [c, b, t])) : DisappearCard(c, t));
+}, DisappearCard = function (d, r) {
+	var q = 5, e = $(d), f = function (t) {
+		switch (true) {
+			case !ArCard[d] || !e: return; // 卡片已经消失，不做处理
+			case oS.Chose == 1 && oS.ChoseCard == d: break; // 选中
+			case t > 500: e.style.opacity = 1; break; // 未到闪烁时间
+			case t > 0: e.style.opacity = [1, 0.5][Math.ceil(t / 50) % 2]; break; // 闪烁
+			default: delete ArCard[d], ClearChild(e); return;
+		}
+		e = $(d), oSym.addTask(q, arguments.callee, [t - q]);
+	}; f(r);
+},
+
+
 AutoProduceSun = function(a) {
 	AppearSun(GetX(Math.floor(1 + Math.random() * oS.C)), GetY(Math.floor(1 + Math.random() * oS.R)), a, 1);
 	oSym.addTask(Math.floor(9 + Math.random() * 3) * 100, AutoProduceSun, [a])

@@ -86,6 +86,9 @@ oSym = {
 	Start: function() {
 		var Ver = this["RunningVer"];
 		if (this["Timer"] == null) { 
+
+			oEf.PlayAllAnimate(); // 播放所有动画
+
 			this["Timer"] = Infinity, (function() { 
 				let a = oSym, b = a["TQ"], l, c, e, f = a["AddTaskQ"], D = a["SysTime"](); 
 
@@ -105,6 +108,7 @@ oSym = {
 		}
 	},
 	Stop: function() {
+		oEf.PauseAllAnimate(); // 暂停动画
 		clearTimeout(oSym["Timer"]), oSym["Timer"] = null;
 	},
 	addTask: function(b, c, a) {
@@ -220,6 +224,7 @@ oS = {
 		d = oS.R + 1,
 		x = $("sFlagMeterTitleF"),
 		y = $("dFlagMeterTitle"),
+		z = $("dFlagMeter"), 
 		e = p.LoadImage,
 		h = p.CheckImg,
 		f = p.InitPn,
@@ -252,6 +257,7 @@ oS = {
 		}
 		p.PicNum = w += i.length;
 		r = i.length;
+		z.style["pointer-events"] = "auto";
 		y.setAttribute("title", "如果长时间没有加载完毕或者不想再等待预读可以尝试点击跳过预读直接进入游戏");
 		y.style.cursor = "pointer";
 		y.onclick = function() {
@@ -348,6 +354,7 @@ oS = {
 		c.style.cursor = "default";
 		SetHidden($("dFlagMeterContent"), dFlagMeter);
 		$("dFlagMeter").style.top = "545px";
+		$("dFlagMeter").style["pointer-events"] = "none"; 
 		$("sFlagMeterTitleF").innerHTML = $("dFlagMeterTitleB").innerHTML = f.LevelName;
 		$("imgFlagHead").style.left = "139px";
 		$("imgFlagMeterFull").style.clip = "rect(0,auto,auto,157px)";
@@ -1008,17 +1015,19 @@ oGd = {
 		},
 		EDAll)
 	},
-	MoveFogLeft: function(a) { (function(c, d, b, e) {
-			d -= 50;
-			d > b ? (c.style.left = d + "px", oSym.addTask(5, arguments.callee, [c, d, b, e])) : (c.style.left = b + "px", e && e())
-		})($("dFog"), 900, GetX(oS.C - oS.HaveFog) - 30, a)
+	MoveFogLeft: function(a) { 
+		oEf.Animate($("dFog"), {
+			"left": (GetX(oS.C - oS.HaveFog) - 30) + "px"
+		}, 1 + oS.HaveFog * 0.1, 'cubic-bezier(0.0, 0.0, 0.2, 1)', () => {
+			a && a();
+		});
 	},
-	MoveFogRight: function() {
-		//if (arguments.callee && arguments.callee.caller.caller == null) {
-		//	return
-		//} 
-		(function(a, b) { (b += 50) < 901 ? (a.style.left = b + "px", oSym.addTask(5, arguments.callee, [a, b])) : a.style.left = "900px"
-		})($("dFog"), GetX(oS.C - oS.HaveFog) - 3)
+	MoveFogRight: function(a) {
+		oEf.Animate($("dFog"), {
+			"left": "900px"
+		}, 0.4 + oS.HaveFog * 0.025, 'cubic-bezier(0.4, 0.0, 0.6, 1)', () => {
+			a && a();
+		});
 	},
 	GatherFog: function(e, s, y, u, z) {
 		var d = e - y,
@@ -1152,7 +1161,7 @@ oZ = {
 		Pos1, Pos2: { R: R, X: X }
 		Weight: 每行的权重，不填默认平均
 	*/
-	getFirstZombie: function(Pos1, Pos2, Weight = [], Altitude = 1) {
+	getFirstZombie: function(Pos1, Pos2, Weight = [], Altitude = 1, CtkFunc = () => true) {
 		let {R: R1, X: X1} = Pos1, {R: R2, X: X2} = Pos2;
 		let dR = R1 - R2, dX = X1 - X2, RNum = Math.abs(dR) + 1, dSum = 0, len = Weight.length, Lst = 0, ret;
 		if (len != RNum) { // 处理未完善的权值
@@ -1168,7 +1177,7 @@ oZ = {
 		dR = dR < 0? 1: -1; // 化简成 -1 和 1 的形式
 		for (let i = 0, R = R1; dR * R <= dR * R2; R += dR, ++i) {
 			ret = oZ.getRangeZ(X1 + Lst * dX, X1 + (Lst + Weight[i]) * dX, R, Altitude), Lst += Weight[i];
-			if (ret) return ret;
+			if (ret && CtkFunc(ret)) return ret;
 		}
 		return null;
 	}, 
@@ -1762,23 +1771,57 @@ StopBubble = function(a) {
 	window.event ? event.cancelBubble = true: a.stopPropagation()
 },
 GrowPlant = function(l, d, c, e, b) {
-	var j = oS.ChoseCard,
-	f = ArCard[j],
-	h = f.PName,
-	k = h.prototype,
-	i = k.coolTime,
-	a,
-	g = oGd.$LF[e];
-	k.CanGrow(l, e, b) && Trigger_Ctk_Plt(l, e, b, k) && (PlayAudio(g != 2 ? "plant" + Math.floor(1 + Math.random() * 2) : "plant_water"), !k.CardKind ? (new h).Birth(d, c, e, b, l) : asyncInnerHTML((a = new h).CustomBirth(e, b, 0, "auto"), function(n, m) {
-		EDPZ.appendChild(n), m.Birth();
-	}, a), !oS.Cheat_Mode && (innerText(ESSunNum, oS.SunNum -= k.SunNum), i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime))), oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), {
-		left: d - 30 + "px",
-		top: c - 30 + "px",
-		zIndex: 3 * e + 1,
-		visibility: "visible"
-	})]));
+	var j = oS.ChoseCard, f = ArCard[j], h = f.PName, k = h.prototype, i = k.coolTime, a, g = oGd.$LF[e], o = f.Kind, s = (k.name == "Plants");
+
+	if (k.CanGrow(l, e, b) && Trigger_Ctk_Plt(l, e, b, k)) {
+		PlayAudio(g != 2 ? "plant" + Math.floor(1 + Math.random() * 2) : "plant_water");
+
+		!k.CardKind ? (new h).Birth(d, c, e, b, l) : asyncInnerHTML((a = new h).CustomBirth(e, b, 0, "auto"), function(n, m) {
+			EDPZ.appendChild(n), m.Birth();
+		}, a);
+
+		if (o) delete ArCard[j], ClearChild($(j))
+		else !oS.Cheat_Mode && (innerText(ESSunNum, oS.SunNum -= k.SunNum), i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime))); 
+
+		oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), {
+			left: d - 30 + "px",
+			top: c - 30 + "px",
+			zIndex: 3 * e + 1,
+			visibility: "visible"
+		})]);
+	} 
 	CancelPlant()
 },
+
+//20231009种子雨（原创移植）
+AppearCard = function (h, f, e, a, t) { // x, y, 植物id, 移动卡槽类型, 消失时间（默认 15s）
+	var b, d, g = "dCard" + Math.random(), c = "opacity:1;width:100px;height:120px;cursor:pointer;clip:rect(auto,auto,60px,auto);left:" + h + "px;top:-1000", t = t || 1500;
+
+	if (a) d = 0, oSym.addTask(1, MoveDropCard, [g, f, t]); // 从天而降，反之抛物线掉落
+	else d = f - 15 - 20, c += ";top:" + d + "px", oSym.addTask(1, DisappearCard, [g, t]), oSym.addTask(1,function(q,p,n,j,l,k,m,i){if(ArCard[q]&&$(q)){SetStyle($(q),{left:(p=p+j*k)+"px",top:(n=n+Number(l[0]))+"px"});l.shift();--m;m>0&&((l.length==0)&&(l=[8,16,24,32]),oSym.addTask(i,arguments.callee,[q,p,n,j,l,k,m,++i]))}},[g,h,d,Math.floor(Math.random()*4),[-32,-24,-16,-8],[-1,1][Math.floor(Math.random()*2)],8,2]); // 开始记时，确定抛物线，与阳光部分相似故压缩
+
+	ArCard[g] = { DID: g, PName: e, PixelTop: 600, CDReady: 1, SunReady: 1, top: d, HasChosen: false, Kind: 1 }; // 生成卡片数据，是否被点击过
+	NewImg(g, e.prototype.PicArr[e.prototype.CardGif], c, $("dCardList"), { // 生成卡片 ele
+		onclick: function (g) { 
+			var self = this, style = self.style, id = self.id; ClearChild($("MovePlant"), $("MovePlantAlpha")), CancelPlant(), style && (style.opacity = 0.5), ChosePlant(g, id), ArCard[id] && (ArCard[id].HasChosen = true);
+		} 
+	});
+}, MoveDropCard = function (c, b, t) { // 掉落目标
+	var a = ArCard[c], ele = $(c); a && ele && ((!a.HasChosen && a.top < b - 52) ? (ele.style.top = (a.top += 2) + "px", oSym.addTask(5, MoveDropCard, [c, b, t])) : DisappearCard(c, t));
+}, DisappearCard = function (d, r) {
+	var q = 5, e = $(d), f = function (t) {
+		switch (true) {
+			case !ArCard[d] || !e: return; // 卡片已经消失，不做处理
+			case oS.Chose == 1 && oS.ChoseCard == d: break; // 选中
+			case t > 500: e.style.opacity = 1; break; // 未到闪烁时间
+			case t > 0: e.style.opacity = [1, 0.5][Math.ceil(t / 50) % 2]; break; // 闪烁
+			default: delete ArCard[d], ClearChild(e); return;
+		}
+		e = $(d), oSym.addTask(q, arguments.callee, [t - q]);
+	}; f(r);
+},
+
+
 AutoProduceSun = function(a) {
 	AppearSun(GetX(Math.floor(1 + Math.random() * oS.C)), GetY(Math.floor(1 + Math.random() * oS.R)), a, 1);
 	oSym.addTask(Math.floor(9 + Math.random() * 3) * 100, AutoProduceSun, [a])
@@ -2030,8 +2073,25 @@ deleteCookie = function(a) {
 	document.cookie = a + "=0;"
 },
 WordUTF8 = '<div id="dLogo" style="position:absolute;width:900px;height:600px;z-index:1"><div id="LogoWord" style="position:absolute;color:#FF0;top:285px;width:100%;height:140px"><span style="position:absolute;width:135px;height:100%;left:400px;top:0;cursor:pointer" onclick="PlayAudio(\'gravebutton\');SetBlock($(\'dSurface\'),$(\'iSurfaceBackground\'));ShowNameDiv()"></span><div style="position:absolute;font-size:13px;left:610px;text-align:center;width:140px;top:110px;line-height:1.6;font-weight:bold"><span style="cursor:pointer"><span id="sTime" style="cursor:pointer">（制作组名单）</span></span></div></div><div style="position:absolute;width:155px;height:110px;left:600px;top:340px;cursor:pointer;z-index:300" onclick="SelectModal(\'System/Staff\');/*SetVisible($(\'dProcess\'))*/"></div><div id="dBalloonZombie"><img src="images/interface/balloon_zombie32.png"></div><div id="dSetting" class="dSetting" style="position:absolute;width:60px;height:60px;left:10px;top:10px;cursor:pointer" onclick="SelectModal(\'System/Config\');"></div></div>',
-ShowNameDiv = function() {
-	oSym.Start(); (function(c) {
+ShowNameDiv = function () {
+	oSym.Start();
+
+	$("dNameDiv0").style.top = "-260px", $("dNameDiv1").style.top = "96px", $("dNameDiv2").style.top = "136px";
+	oSym.addTask(0, async () => {
+	/*
+		$("dSurface").style.top = "-600px";
+		oEf.AnimatePromise($("dSurface"), { top: "0px" }, 0.5, "ease-in-out");
+		await (new Promise((Resolve) => setTimeout(Resolve, 0.3 * 1000)));
+	*/
+		await oEf.AnimatePromise($("dNameDiv0"), { top: "-94px" }, 0.15, "ease-in");
+		oEf.AnimatePromise($("dNameDiv0"), { top: "-6px" }, 0.1), oEf.AnimatePromise($("dNameDiv1"), { top: "127px" }, 0.1), await oEf.AnimatePromise($("dNameDiv2"), { top: "176px" }, 0.1);
+		oEf.AnimatePromise($("dNameDiv0"), { top: "-8px" }, 0.17), oEf.AnimatePromise($("dNameDiv1"), { top: "134px" }, 0.17), await oEf.AnimatePromise($("dNameDiv2"), { top: "188px" }, 0.17);
+		oEf.AnimatePromise($("dNameDiv1"), { top: "130px" }, 0.17), await oEf.AnimatePromise($("dNameDiv2"), { top: "179px" }, 0.17);
+		oEf.AnimatePromise($("dNameDiv1"), { top: "136px" }, 0.17), await oEf.AnimatePromise($("dNameDiv2"), { top: "189px" }, 0.17);
+		oEf.AnimatePromise($("dNameDiv1"), { top: "134px" }, 0.1), await oEf.AnimatePromise($("dNameDiv2"), { top: "187px" }, 0.1);
+	}, []);
+/*
+	(function(c) {
 		var b = c[0],
 		d = 3;
 		c.shift();
@@ -2040,6 +2100,7 @@ ShowNameDiv = function() {
 		}
 		c.length && oSym.addTask(b[3], arguments.callee, [c])
 	})([[ - 260, 96, 136, 10], [ - 94, 96, 136, 10], [ - 6, 127, 176, 10], [ - 8, 134, 188, 17], [ - 8, 130, 179, 17], [ - 8, 136, 189, 17], [ - 8, 134, 187, 10]])
+*/
 },
 GotoAuthorWebsite = function(b) {
 	PlayAudio("tap");

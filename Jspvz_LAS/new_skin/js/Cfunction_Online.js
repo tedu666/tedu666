@@ -1,8 +1,8 @@
 //修改必究
 var OL_PassWord = "", OL_URL = "about:blank", IS_Get = false; //在线版获取列表网址
-var __NowVer__ = 20231001; // 十月一更新版本号
+var __NowVer__ = 20231225; // 一月一更新版本号
 
-let _AJAX_ = (async function(URL, KIND = "GET", BODY = "", FUNC = (() => {})){await fetch(URL + "?" + Math.random(), {method: KIND, body: BODY}).then(res => res.text()).then(res => {FUNC(res);}).catch(why => {console.error(why)});});
+let _AJAX_ = (async function(URL, KIND = "GET", BODY = "", FUNC = (() => {})){await fetch(URL + "?" + Math.random(), {method: KIND, body: KIND == "GET"? null: BODY}).then(res => res.text()).then(res => {FUNC(res);}).catch(why => {console.error(why)});});
 let __Ctk_User_PassWord_ = async function(){
 	window["OL_PassWord"] = Store.get("OL_PassWord");
 	while(!window["OL_PassWord"]) Store.set("OL_PassWord", window["OL_PassWord"] = prompt("请输入在线版密码"));
@@ -28,9 +28,14 @@ let __GetUrl__ = (async function(){
 	let NowTime = (new Date()).getTime(), w;
 	if (NowTime - Store.get("__JSPVZ_KAC_Version_Check_Time__") < 1000 * 60 * 60 * 24 * 1) return; //一天
 	Store.set("__JSPVZ_KAC_Version_Check_Time__", NowTime);
-	await _AJAX_("https://tedu666.rth1.app/php/Get_New_Ver.php", "POST", "", function(f){
-		if (Number(f) > Number(__NowVer__)) w = confirm("检测到可能有新版本，是否跳转至下载链接？");
-		if (w) window["open"]("https://www.luogu.com.cn/paste/1rhbg5ok");
+	await _AJAX_("https://tedu666.rth1.app/php/Get_New_Ver.php?ArgMode=JSON&", "POST", "", function(f){
+		let DJson = JSON.parse(f), Text = DJson.Text, Func = DJson.Func;
+
+		if (!Text || Text == "") Text = "检测到可能有新版本，是否跳转至下载链接？";
+		if (!Func || Func == "") Func = 'window["open"]("https://www.luogu.com.cn/paste/1rhbg5ok");';
+
+		if (Number(DJson.Ver) > Number(__NowVer__)) w = confirm(Text);
+		if (w) eval(Func);
 	});
 
 	await _AJAX_("https://tedu666.rth1.app/php/Get_Notice.php", "POST", "", function(f){ // 可能会有的公告、补丁

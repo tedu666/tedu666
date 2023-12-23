@@ -98,8 +98,11 @@
 		// if (ret >= 1 && ret <= LevelStore["MaxPlay"]) NowLevel = ret;
 	}
 
+
 // ——关卡区——
-	$SEql(NowLevel, { // 每个阶段函数
+	$SEql(NowLevel, { // 每个阶段对应不同函数
+
+		// 第一部分 什伍连坐
 		1: () => {
 			oS.Init($FJ(oSys, {
 				PName: [oPeashooter, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCattail, oCabbage, oMelonPult],
@@ -161,12 +164,11 @@
 			}));
 		}, 
 
+
 		// 第二部分 领地争霸
-
 		/*
-			目前思路: 为每个格子创建霉菌图
+			设计思路: 为每个格子创建霉菌图
 			通过改变霉菌图的隐藏情况来处理其显示问题，随后就是僵尸和植物的领地占领问题，对于道具直接占用你一个卡槽，也就是玩家必须9槽通关。
-
 		*/
 		2: () => { 
 			let oLandTool = InheritO(oFlowerPot, {
@@ -185,7 +187,6 @@
 					});
 				} 
 			});
-
 
 			oS.Init($FJ(oSys, {
 				PName: [oLandTool, oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCattail, oCabbage, oMelonPult], 
@@ -318,10 +319,111 @@
 				oLandTool: oLandTool
 			}));
 		}, 
+
+
+
+		// 第三部分 铁人得智 铁人夺冠
+		/*
+			EX10-3 设计概念: 
+				关键词: 砸罐子、耐久赛、超长赛、僵尸按规定死亡获得一定阳光
+				玩法: 砸罐子，共100轮，每轮需要以特定方式杀死僵尸获得阳光，收集 1000 阳光通关
+	
+				// 第一小节: 策略（固定）
+				第一关: 6 ~ 9列僵尸罐子: { 全普僵 } + 植物罐子透视: { 樱桃炸弹 * 2 }
+				第二关: 6 ~ 9列僵尸罐子: { 全普僵 } + 植物罐子透视: { 火爆辣椒 + 樱桃炸弹 + 大蒜 * 3 }
+				第三关: 6 ~ 9列僵尸罐子: { 全普僵 } + 植物罐子透视: { 土豆雷 + 地刺 * 2 + 南瓜头 * 3 + 大蒜 * 3 }
+				第四关: 6 ~ 9列僵尸罐子: { 全气球 + 一撑杆 } + 植物罐子透视: { 三叶草 + 魅惑菇 }
+				第五关: 5 ~ 7列僵尸罐子: { 全小丑 } + 植物罐子透视: { 樱桃炸弹 * 2 + 大嘴花 * 2 } + 场地植物: { 脑子: 3_6, 4_6 + 路灯花: 2_4, 5_4, 2_8, 5_8 }
+				
+				// 第二小节: 加入攻击性植物（固定）
+				第六关: 6 ~ 9列僵尸罐子: { 全普僵 } + 植物罐子透视: { 三线射手 * 2 }
+				第七关: 6 ~ 9列僵尸罐子: { 全普僵 } + 植物罐子透视: { 大蒜 * 2 + 三线射手 + 双发射手 }
+				第八关: 7 ~ 9列僵尸罐子: { 普僵: 1行, 3行, 4行, 6行 + 铁桶: 2_9, 5_9 } + 植物罐子透视: { 西瓜 * 2 }
+				第九关: 6 ~ 9列僵尸罐子: { 普僵: 2, 5 + 路障: 1, 3, 4, 6 } + 植物罐子透视: { 大喷菇 * 2 + 曾哥 * 2 }
+				第十关: 6 ~ 9列僵尸罐子: { 路障: 1, 3, 4, 6 + 路障: 2_5, 5_5 + 撑杆: 2_6, 5_6 } + 植物罐子透视: { 大喷菇 * 2 + 曾哥 * 2 }
+
+				// 第三小节: 随机排列
+				第十一关: 6 ~ 9列, 普通罐子: { 普僵 * 2 + 路障 * 2 + 小丑 * 1 + 反向双发 * 5 + 火炬树桩 * 3 + 高坚果 * 3 + 倭瓜 * 3 } + 植物罐子: { 路灯花 * 2 } + 僵尸罐子: { 铁桶 * 3 }
+				第十二关: 6 ~ 9列, 普通罐子: { 小丑 * 2 + 铁桶 * 1 + 路障 * 3 + 普僵 * 5 + 反向双发 * 6 + 坚果 * 1 } + 植物罐子: { 大嘴花 * 2 + 土豆地雷 * 1 } + 僵尸罐子: { 橄榄球 * 2 + 舞王 * 1 }
+				第十三关: 3 ~ 9列, 普通罐子: { 小丑 * 12 + 铁桶 * 3 + 普僵 * 2 + 路障 * 3 + 坚果 * 4 + 大嘴花 * 6 + 地刺 * 3 + 杨桃 * 2 + 胆小 * 2 } + 植物罐子: { 寒冰蘑 * 2 } + 僵尸罐子: { 舞王 * 3 }
+				第十四关: 3 ~ 9列, 普通罐子: {  } + 植物罐子: {  } + 僵尸罐子: {  }
+				第十五关: 2 ~ 9列, 普通罐子: {  } + 植物罐子: {  } + 僵尸罐子: {  }
+
+
+				// 第四小节: 迷雾砸罐（盲砸）
+
+				4 * 6 = 24 罐子
+
+			当局者迷，旁观者清。 ——创作者注
+		*/
 		3: () => {
+			oS.Init($FJ(oSys, {
+				PName: [oPeashooter, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCattail, oCabbage, oMelonPult],
+				Block_Level_Task: "<a style=\"font-size:18px;line-height:2.25;\">阶段目标: 1.场上植物不得超过 7 种<br>2.每行不得超过 6 棵植物<br>2.每列与每条斜线不得超过 5 棵植物<br>失败将从当前阶段重新开始<br><br></a>",
+				LevelName: "EX-10 勇闯者 - 铁人得智", SelectCardList: [], DefLoad2: () => { for (let i of oS.SelectCardList) SelectCard(i, 1); },
+				DefStartLoad: () => { },
+				LF: [0, 1, 1, 2, 2, 1, 1], RefuseStart: true, Cheat_Mode: false,
+				GroundType: 0, SunNum: 4000, LargeWaveFlag: { 15: $("imgFlag1") },
+				Summon_Start_Func: function() {
+					oS.Cheat_Mode = true; // 无冷却
+					NewEle("DivTeach", "div", "pointer-events:none;line-height:40px;", {innerHTML: "先种植植物，准备好后点击右上角开始按钮开始战斗！"}, EDMove);
+					oSym.addTask(500, function() {ClearChild($("DivTeach"));}, []);
+					// 开始战斗按钮
+					NewEle("Div_Start", "div", "display:none;z-index:205;top:50px;left:735px;position:absolute;width:157.5px;height:35px;background:#000000BB;border-radius:12.5px;opacity:1;cursor:pointer;", {onclick: function(){ SetNone($("Div_Start")), oP.AddZombiesFlag(), SetVisible($("dFlagMeterContent")), StopMusic(), PlayMusic(oS.LoadMusic = "True_Admin"), oS.Cheat_Mode = false; }}, EDMove);
+					NewEle("dTitle_Start", "span", "white-space:pre;display:block;z-index:127;position:absolute;left:12.5px;top:6px;font-size:20px;font-weight:500;font-family:Regular,Briannetod,微软雅黑,Verdana,Tahoma;color:#FFF;pointer-events:none;opacity:1;", {innerText: "———开始战斗———"}, $("Div_Start"));
+
+					SetBlock($("Div_TimeTask"), $("Div_Start")); // 提示栏、初始数据
+					(function(){ // 本关数据中枢
+						let A = GameLevelData["RL_Num"], B = GameLevelData["CL_Num"], C = GameLevelData["WL_Num"], D = GameLevelData["MaxNum"], E = GameLevelData["KindNum"];
+						$("dTitle_Task").innerText = "Kind: " + E + "    Row: " + A + "    Column: " + B + "    Diagonal:" + C + "    Max:" + D;
+						if (A > 6 || B > 5 || E > 7 || C > 5) return GameOver(); // 判断失败
+						oSym.addTask(10, arguments.callee, []);
+					})();
+				},
+				NormalFlagZombieTask: 0, BigFlagZombieTask: 0
+			}), $FJ(oPlt, {
+				FlagMaxWaitTime: 990, FlagZombieWaitTime: 90,
+				AZ: [[oZombie, 1, 1], [oZombie2, 1, 1], [oZombie3, 1, 1], [oPoleVaultingZombie, 2, 1], [oConeheadZombie, 2, 1], [oBucketheadZombie, 2, 1], [oNewspaperZombie, 2, 2], [oScreenDoorZombie, 2, 3], [oFootballZombie, 2, 5, [1, 1, 1, 3, 3, 3, 5, 5, 6, 9, 9, 10, 10, 15, 15, 15]], [oDancingZombie, 1, 6, [6, 10, 15]], [oDuckyTubeZombie1, 2, 1], [oDuckyTubeZombie2, 1, 1], [oDuckyTubeZombie3, 1, 1], [oDolphinRiderZombie, 1, 7, [3]], [oSnorkelZombie, 1, 5, [5]], [oZomboni, 1, 10, [1, 4, 5, 10, 15]], [oJackinTheBoxZombie, 1, 8, [1, 2, 3, 4, 5, 6, 7]], [oBalloonZombie, 3, 5, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]],
+				FlagNum: 15, FlagToSumNum: {
+/*
+					a1: [    1,  3,  5,   7,   9,  10,  13,  14],
+					a2: [0, 20, 40, 60, 100, 130, 170, 200, 312]
+*/
+					a1: [    1,  3,  5,  7,   9,  10,  13,  14],
+					a2: [0, 20, 40, 50, 70, 110, 150, 180, 270]
+				},
+				FlagToMonitor: {
+					14: [ShowFinalWave, 0]
+				},
+				FlagToEnd: () => { Change_Level(0); }
+			}), $FJ(oWin, {
+				GameLevelData: { "RL_Num": 0, "CL_Num": 0, "WL_Num": 0, "MaxNum": 0, "KindNum": 0 },
+				Change_Plt: () => {
+					let A = 0, B = 0, C = 0, D = 0, E = 0, F = {};
+					let RL_Num = Array(20)["fill"](0), CL_Num = Array(20)["fill"](0), WL_Num = Array(20)["fill"](0), WR_Num = Array(30)["fill"](0);
+					for (let _ in $P) { let i = $P[_], R = i.R, C = i.C; if (C < 1 || C > oS.C || R < 1 || R > oS.R) continue; F[i.EName] = true, ++RL_Num[R], ++CL_Num[C], ++WL_Num[C - R + 10], ++WR_Num[oS.C - oS.R - C - R + 15]; }
+					for (let i of RL_Num) A = Math.max(A, i); for (let i of CL_Num) B = Math.max(B, i);
+					for (let i of WL_Num) C = Math.max(C, i); for (let i of WR_Num) D = Math.max(D, i);
+					E = Math.max(A, B);
+					GameLevelData["RL_Num"] = A, GameLevelData["CL_Num"] = B, GameLevelData["WL_Num"] = Math.max(C, D), GameLevelData["MaxNum"] = E, GameLevelData["KindNum"] = Object["keys"](F)["length"];
+				},
+				Trigger_Plants_Birth: () => Change_Plt(),
+				Trigger_Plants_Die: () => Change_Plt(),
+				GrowPlant: function(l, d, c, e, b) {
+					var j = oS.ChoseCard, f = ArCard[j], h = f.PName, k = h.prototype, i = k.coolTime, a, g = oGd.$LF[e];
+					k.CanGrow(l, e, b) && Trigger_Ctk_Plt(l, e, b, k) && (PlayAudio(g != 2 ? "plant" + Math.floor(1 + Math.random() * 2) : "plant_water"), !k.CardKind ? (new h).Birth(d, c, e, b, l, oS.Cheat_Mode) : asyncInnerHTML((a = new h).CustomBirth(e, b, 0, "auto"), function(n, m) { EDPZ.appendChild(n), m.Birth(); }, a), innerText(ESSunNum, oS.SunNum -= k.SunNum), !oS.Cheat_Mode && i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime)), oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), { left: d - 30 + "px", top: c - 30 + "px", zIndex: 3 * e + 1, visibility: "visible" })]));
+					CancelPlant();
+				}
+			}));
+
+/*
 			alert("恭喜您通过了本关的第一、第二部分！\n未来会制作第三部分，所以游戏已经保存了您的进度啦！\n未来直接进入本关选择第三部分即可！\n感谢您的支持！");
 			oS.Init({ LvlClearFunc: () => {delete oS.NowLevel; delete oS.Plant_Ground;} }, {}, {});
 			SelectModal(__Normal_Start_Room__);
+*/
+		}, 
+		4: () => { // 原本的僵尸半场可能会推迟到第四部分
+
 		}, 
 		"ChooseLevel": () => {
 			oS.Init($FJ(oSys, {

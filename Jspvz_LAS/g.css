@@ -217,7 +217,7 @@ dd.yellow{color:#FF0}
 .Almanac_IndexBack{background:url(images/interface/Almanac_ZombieBack.jpg) no-repeat;width:900px;height:600px;background-size:100% 100%}
 .Almanac_PlantBack{background:url(images/interface/Almanac_PlantBack.jpg) no-repeat;width:900px;height:600px;background-size:100% 100%}
 .Almanac_ZombieBack{background:url(images/interface/Almanac_ZombieBack.jpg) no-repeat;width:900px;height:600px;background-size:100% 100%}
-.Challenge_Background{background:url(images/interface/Challenge_Background.jpg) no-repeat;width:800px;height:600px}
+.Challenge_Background{background:url(images/interface/Challenge_Background.jpg) no-repeat;width:900px;height:600px;background-size:100% 100%}
 
 .Sunflower_trophy{position:absolute;left:15px;top:310px;width:157px;height:269px;overflow:hidden;cursor:pointer}
 .Sunflower_trophy img{position:absolute;left:-157px;*filter:glow(color=#ffffff ,strength=8)}
@@ -268,7 +268,7 @@ dd.yellow{color:#FF0}
 
 
 
-#dAdvSmallContainer{padding-left:50px}
+#dAdvSmallContainer{padding-left:75px;width:725px}
 #dAdvSmallContainer img{position:absolute;}
 #dAdvSmallContainer .lvl{font-size:16px;font-weight:bold;font-family:黑体;float:left;cursor:pointer;margin-left:40px}
 #dAdvSmallContainer .lvl2{position:relative;float:left;width:500px;line-height:35px;padding-top:15px}

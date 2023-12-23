@@ -205,4 +205,7 @@ oFunctionBullet = InheritO(oNormalBullet, { // 函数子弹
 		self["ImgLeftMove"] = self["AbsLeftMove"];
 		self["LiveTime"] = 0;
 	}
-})
+}), 
+oThrownBullet = InheritO(oNormalBullet, { // 适用于单目标打击的投手子弹，速度会改变图片旋转
+
+});

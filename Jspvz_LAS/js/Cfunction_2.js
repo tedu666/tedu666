@@ -263,9 +263,9 @@ var Mulberry32 = function(string) {
 var oLocalVar = { // 处理所有关卡的变量的
 	StoreName: "__JSPVZ_KAC_AllLevel_Info", LevelVars: {}, 
 	GetObj: function (Name = oS.LvlEName) {
-		let self = this, Var, Obj;
-		self.SaveVar(), Var = Store.get(self.StoreName) ?? {}, Obj = Var[Name] ?? {}; // 先保存防止多次获取
-		self.LevelVars[Name] = Obj; return Obj;
+		let self = this, UName = TravelInfo.UserName, Var, Obj; // 单独把每个玩家数据隔离开来
+		self.SaveVar(), Var = Store.get(self.StoreName) ?? {}, PlayerOwn = Var[UName] ?? {}, Obj = PlayerOwn[Name] ?? {}; // 先保存防止多次获取
+		self.LevelVars[UName] ??= {}, self.LevelVars[UName][Name] = Obj; return Obj;
 	}, 
 	SaveVar: function () {
 		let self = this, Name = self.StoreName, Var = self.LevelVars;
