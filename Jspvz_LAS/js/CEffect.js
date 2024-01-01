@@ -42,6 +42,7 @@ let oEf = {
 		self["PlayingAnimate"][AnimateID] = Animate; // 设置占位
 
 		Animate.onfinish = () => {
+			if (Array.isArray(Style)) Style = Style[Style.length - 1];
 			Animate.onfinish = null;
 			delete self["PlayingAnimate"][AnimateID]; // 删除占位
 			if (Ver === self["NowVersion"]) {

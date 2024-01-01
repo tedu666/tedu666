@@ -357,6 +357,27 @@ var oHugeNutBowling_pro = InheritO(oHugeNutBowling, {
 
 var oFlowerVase_New = InheritO(oFlowerVase, {
 	PicArr: ["new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png"],
+
+	/*
+		函数介绍: 直接在 (R, C) 位置根据你的信息生成一个罐子，此属性会创建一个新的罐子
+		使用说明: 
+			SetR: 行, SetC: 列
+			VaseColor: 罐子颜色 0普通 1绿色 2僵尸
+			VaseValue: 花瓶内容信息，格式 { "Type": "Plants | Zombie | SunNum", "Value": oSunFlower | oZombie | 300, }	
+			SpecialFunc: 生成前调用的函数（可选）	
+		执行成功后会返回该花瓶的信息。
+	*/
+	SpecialBirth: function (SetR, SetC, VaseColor, VaseValue, SpecialFunc) {
+		var Obj = new oFlowerVase_New;
+
+		Obj.PotSize = VaseColor, Obj.VaseValue = VaseValue; // 基本信息
+
+		if (SpecialFunc) SpecialFunc(Obj); // 让调用者自己操作花瓶信息
+
+		Obj.Birth(GetX(SetC), GetY(SetR), SetR, SetC, [], null);
+
+		return Obj;
+	}, 
 });
 
 var oBrains_New = InheritO(oBrains, {

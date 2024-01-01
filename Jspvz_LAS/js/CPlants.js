@@ -2113,16 +2113,14 @@ oPlantern = InheritO(CPlants, {
 		b = c.C;
 		oGd.$Plantern[a + "_" + b] = c.id;
 		NewImg("", "images/Plants/Plantern/light.gif", "filter:alpha(opacity=30);opacity:.3;left:0;top:0;z-index:" + c.zIndex, $(c.id));
-		oS.HaveFog && oGd.GatherFog(a, b, 2, 3, 0)
-		window["CekoPlantern"] && (CekoPlantern(a, b));
+		oS.HaveFog && oGd.GatherFog(a, b, 2, 3, 0), oFlowerVase.prototype.FreshXRay(); // 刷新场地上花瓶 XRAY
 	},
 	InitTrigger: function() {},
 	PrivateDie: function(c) {
 		var a = c.R,
 		b = c.C;
 		delete oGd.$Plantern[a + "_" + b];
-		oS.HaveFog && oGd.GatherFog(a, b, 2, 3, 1)
-		window["CekoPlantern"] && (CekoPlantern(a, b));
+		oS.HaveFog && oGd.GatherFog(a, b, 2, 3, 1), oFlowerVase.prototype.FreshXRay(); // 刷新场地上花瓶 XRAY
 	},
 	GetDY: function(b, c, a) {
 		return a[0] ? 70 : 74
