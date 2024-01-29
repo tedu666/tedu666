@@ -1,8 +1,8 @@
 oS.Init({
 	PName: [oGatlingPea_Pro, oTorchwood_Pro, oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oSquash, oThreepeater, oJalapeno, oSpikeweed, oTallNut, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock],
 	ZName: [oBackupDancer, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oJackinTheBoxZombie],
-	PicArr: ["new_skin/InterFace/background_new_1.png"],
-	backgroundImage: "new_skin/InterFace/background_new_1.png",
+	PicArr: ["new_skin/Images/InterFace/background_new_1.png"],
+	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-5 捍卫者",
 	LvlEName: "EX_Protect_Brain_5",
 	StartGameMusic: "Glorious_Morning",/*"nice_graveyard"*/
@@ -84,7 +84,7 @@ oS.Init({
 	},
 	FlagToEnd: function() {
 		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDMove);
-		NewImg("imgSF", "new_skin/images/Card/Cabbage.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCabbage, 0);}});
+		NewImg("imgSF", "new_skin/images/Card/Cabbage.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCabbage_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
 		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);

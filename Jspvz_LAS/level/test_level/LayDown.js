@@ -2,11 +2,11 @@
 	let Normal_Zombie_Wave = [3, 5, 10, 15, 20, 25, 30, 35, 40]; // 默认僵尸出现的波 
 
 	oS.Init({
-		PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oTorchwood_Pro, oGatlingPea_Pro, oGloomShroom, oTwinSunflower, oCabbage, oMelonPult],
+		PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oTorchwood_Pro, oGatlingPea_Pro, oGloomShroom, oTwinSunflower, oCabbage_Pro, oMelonPult_Pro],
 		ZName: [oBackupDancer, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oDuckyTubeZombie1, oDuckyTubeZombie2, oDuckyTubeZombie3, oDolphinRiderZombie, oSnorkelZombie, oZomboni, oJackinTheBoxZombie, oBalloonZombie],
-		StageCard_1: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oCabbage],
+		StageCard_1: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oCabbage_Pro],
 		StageCard_2: [oSunFlower, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom],
-		StageCard_3: [oCherryBomb, oDoomShroom, oSunFlower, oRepeater, oFumeShroom, oGloomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oTwinSunflower, oMelonPult],
+		StageCard_3: [oCherryBomb, oDoomShroom, oSunFlower, oRepeater, oFumeShroom, oGloomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oTwinSunflower, oMelonPult_Pro],
 		StageCard_4: [oCherryBomb, oSunFlower, oRepeater, oFumeShroom, oSpikeweed, oGatlingPea_Pro, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oTorchwood_Pro],
 		StageZCard_1: [oZombie, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie],
 		StageZCard_2: [oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie],

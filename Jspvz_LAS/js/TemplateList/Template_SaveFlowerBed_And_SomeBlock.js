@@ -1,6 +1,6 @@
 //let ___Template__New_$Flower___ = function(){return {}};
 let ___Template__Summon_Flower___ = function(r, c){
-	let Img = "new_skin/InterFace/FlowerLine2.png", height = 81, width = 38;
+	let Img = "new_skin/Images/InterFace/FlowerLine2.png", height = 81, width = 38;
 	let id = "dFlower_" + Math.random(), rc = r + "_" + c;
 	let left = GetX(c), hei = GetY(r) - GetY(r - 1), top = GetY(r) - height - (hei - height);
 	NewImg(id, Img, "top:" + top + "px;left:" + left + "px;width:" + width + ";height:" + hei, EDMove);
@@ -28,7 +28,7 @@ let ___Template__Start_Ctk_Flower___ = function(){
 
 
 let ___Template__Summon_Dangerous_Block___ = function(r, c){
-	let Img = "new_skin/InterFace/Protect.png", height = 77, width = 74;
+	let Img = "new_skin/Images/InterFace/Protect.png", height = 77, width = 74;
 	let id = "dDangerous_" + Math.random(), rc = r + "_" + c;
 
 	let ys = GetY1Y2(r), y1 = ys[0], y2 = Math.min(ys[1], 580), xs = GetX1X2(c), x1 = xs[0], x2 = xs[1];

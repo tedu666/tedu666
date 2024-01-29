@@ -122,7 +122,7 @@
 			NewEle("btnClick3", "span", "cursor:pointer;position:absolute;left:670px;height:40px;width:60px;text-align:center;line-height:40px;font-family: 幼圆; font-size: 14px;color:#FFF;border:1px solid #888;background:#000", 0, a);
 			NewEle("btnClick4", "span", "cursor:pointer;position:absolute;left:740px;height:40px;width:140px;text-align:center;line-height:40px;font-family: 幼圆; font-size: 14px;color:#FFF;border:1px solid #888;background:#000", 0, a);
 			innerText($("spanT"), "测试一下CPU和浏览器是否强劲？打开任务管理器，点击开始吧！");
-			innerText($("btnClick1"), "10"), innerText($("btnClick2"), "100"), innerText($("btnClick3"), "500"), innerText($("btnClick4"), "翠花,上5000个!!");
+			innerText($("btnClick1"), "10"), innerText($("btnClick2"), "100"), innerText($("btnClick3"), "500"), innerText($("btnClick4"), "翠花,上114514个!!");
 			oP.Monitor({
 				ar: [0],
 				f: function() {
@@ -148,33 +148,21 @@
 						oP.FlagToSumNum.a2 = [500], ClearChild($("DivTeach")), b()
 					};
 					$("btnClick4").onclick = function() {
-						oP.FlagToSumNum.a2 = [5000], ClearChild($("DivTeach")), b()
+						oP.FlagToSumNum.a2 = [114514], ClearChild($("DivTeach")), b()
 					}; 
 					(c.IE9 || !c.IE) && (oS.LvlClearFunc = function() {
 						oP.SelectFlagZombie = oP.OldSelectFlagZombie
 					},
 					oP.OldSelectFlagZombie = oP.SelectFlagZombie, oP.SelectFlagZombie = function(h) {
-						var i = oP,
-						g = [],
-						f = 1,
-						j = i.ArZ,
-						m = [],
-						k = [],
-						e = 30,
-						d = EDPZ.cloneNode(true);
+						var i = oP, g = [], f = 1, j = i.ArZ, m = [], k = [], e = 30, d = EDPZ.cloneNode(true);
 						oS.LargeWaveFlag[i.FlagZombies].style.top = "5px"; --h;
 						k[0] = (m[0] = (new oFlagZombie)).prepareBirth(0);
-						while (h--) {
-							k[f] = (m[f++] = new oZombie).prepareBirth(e);
-							e += 5
-						}
-						i.NumZombies += f;
-						d.innerHTML = EDPZ.innerHTML + k.join("");
+						while (h--) k[f] = (m[f++] = new oZombie).prepareBirth(e), e += 5;
+						i.NumZombies += f, d.innerHTML = EDPZ.innerHTML + k.join("");
 						EDAll.replaceChild(d, EDPZ);
 						EDPZ = d;
-						while (f--) {
-							m[f].Birth()
-						}
+						while (f--) m[f].Birth()
+						oBu.ReBindingCanvas();
 					})
 				}
 			})

@@ -67,27 +67,14 @@ oS.Init({
 					oP.SelectFlagZombie = oP.OldSelectFlagZombie
 				},
 				oP.OldSelectFlagZombie = oP.SelectFlagZombie, oP.SelectFlagZombie = function(h) {
-					var i = oP,
-					g = [],
-					f = 1,
-					j = i.ArZ,
-					m = [],
-					k = [],
-					e = 30,
-					d = EDPZ.cloneNode(true);
+					var i = oP, g = [], f = 1, j = i.ArZ, m = [], k = [], e = 30, d = EDPZ.cloneNode(true);
 					oS.LargeWaveFlag[i.FlagZombies].style.top = "5px"; --h;
 					k[0] = (m[0] = (new oFlagZombie)).prepareBirth(0);
-					while (h--) {
-						k[f] = (m[f++] = new oZombie).prepareBirth(e);
-						e += 5
-					}
-					i.NumZombies += f;
-					d.innerHTML = EDPZ.innerHTML + k.join("");
-					EDAll.replaceChild(d, EDPZ);
-					EDPZ = d;
-					while (f--) {
-						m[f].Birth()
-					}
+					while (h--) k[f] = (m[f++] = new oZombie).prepareBirth(e), e += 5;
+					i.NumZombies += f, d.innerHTML = EDPZ.innerHTML + k.join("");
+					EDAll.replaceChild(d, EDPZ), EDPZ = d;
+					while (f--) m[f].Birth();
+					oBu.ReBindingCanvas();
 				})
 			}
 		})

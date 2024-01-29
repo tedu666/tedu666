@@ -1,8 +1,8 @@
 oS.Init({
-	PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCabbage, oMelonPult],
+	PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCabbage_Pro, oMelonPult_Pro],
 	ZName: [oBackupDancer, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oDuckyTubeZombie1, oDuckyTubeZombie2, oDuckyTubeZombie3, oDolphinRiderZombie, oSnorkelZombie, oZomboni, oJackinTheBoxZombie, oBalloonZombie, oImp],
-	PicArr: ["new_skin/InterFace/background_new_3.png"],
-	backgroundImage: "new_skin/InterFace/background_new_3.png",
+	PicArr: ["new_skin/Images/InterFace/background_new_3.png"],
+	backgroundImage: "new_skin/Images/InterFace/background_new_3.png",
 	LevelName: "EX-9 珍惜者",
 	LvlEName: "EX_New_Pool_9",
 	StartGameMusic: "nice_graveyard",
@@ -153,7 +153,7 @@ oS.Init({
 	},
 	Show_Ban_Block: function(r, c){
 		return false; // 暂不使用
-		let Img = "new_skin/InterFace/Ban.png", height = 77, width = 74;
+		let Img = "new_skin/Images/InterFace/Ban.png", height = 77, width = 74;
 		let id = "dBan_" + Math.random(), rc = r + "_" + c;
 		let wid = Math.max(GetX(c) - GetX(c - 1), width + 10), hei = (GetY(r) - GetY(r - 1)) - 15;
 		let left = GetX(c) - width / 2 - (wid - width), top = GetY(r) - height - (hei - height);

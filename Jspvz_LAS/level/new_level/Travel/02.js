@@ -2,8 +2,8 @@
 oS.Init({
 	PName: [oSunFlower, oSunFlower, oSquash, oScaredyShroom, oGatlingPea_Pro, oTorchwood_Pro, oWallNut, oTallNut, oPuffShroom],
 	ZName: [oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oBucketheadZombie ,oFootballZombie, oZomboni, oJackinTheBoxZombie, oDancingZombie, oBackupDancer],
-	PicArr: ["new_skin/InterFace/background_new_1.png"],
-	backgroundImage: "new_skin/InterFace/background_new_1.png",
+	PicArr: ["new_skin/Images/InterFace/background_new_1.png"],
+	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-2 护花者",
 	LvlEName: "EX_Save_Flower_2",
 	StartGameMusic: "nice_graveyard",

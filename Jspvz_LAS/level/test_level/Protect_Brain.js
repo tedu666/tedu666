@@ -1,8 +1,8 @@
 oS.Init({
 	PName: [oPeashooter,  oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oSquash, oThreepeater, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oCactus, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGatlingPea, oGloomShroom, oSpikerock],
 	ZName: [oBackupDancer, oImp, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oZomboni, oJackinTheBoxZombie, oBalloonZombie, oSmallZombie, oSmallConeheadZombie, oSmallFootballZombie],
-	PicArr: ["images/Zombies/Zombie/1.gif", "new_skin/background/background_TF.jpg", "new_skin/background/background2_TF.jpg", "images/interface/background1unsodded2.jpg"],
-	backgroundImage: "new_skin/background/background_TF.jpg",
+	PicArr: ["images/Zombies/Zombie/1.gif", "new_skin/Images/background/background_TF.jpg", "new_skin/Images/background/background2_TF.jpg", "images/interface/background1unsodded2.jpg"],
+	backgroundImage: "new_skin/Images/background/background_TF.jpg",
 	CanSelectCard: 1,
 	DKind: 1,
 	LevelName: "超乎寻常的战役",
@@ -91,7 +91,7 @@ oS.Init({
 	},
 	LoadAccess: function(start_game){
 		//load new bg
-		NewImg("BackGround_TF_night", "new_skin/background/background2_TF.jpg", "opacity:0;left:-115", EDAll);
+		NewImg("BackGround_TF_night", "new_skin/Images/background/background2_TF.jpg", "opacity:0;left:-115", EDAll);
 		NewImg("BackGround_Unsodded", "images/interface/background1unsodded2.jpg", "opacity:0;left:-115", EDAll);
 		NewEle("White_box", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:-255", 0, EDAll);
 		NewEle("Black_box", "div", "position:absolute;width:900px;height:600px;background:#000;filter:alpha(opacity=0);opacity:0;z-index:-255", 0, EDAll);

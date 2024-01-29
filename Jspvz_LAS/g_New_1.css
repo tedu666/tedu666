@@ -2,7 +2,7 @@
 @font-face {font-family: 'RanTian';src: url('font/HYBiRanTianTianQuanW.ttf');}
 
 #dTravelSmallContainer{display:none}
-.Travel_Background{background:url(new_skin/InterFace/Travel_Background.png) no-repeat;width:900px;height:600px;background-size:100% 100%}
+.Travel_Background{background:url(new_skin/Images/InterFace/Travel_Background.png) no-repeat;width:900px;height:600px;background-size:100% 100%}
 .Travel_Title{position:relative; text-align:center; line-height:95px; height:95px; width:100%; font-size:30px; font-weight:bold; font-family:Regular; color:#FFF; -webkit-text-stroke:1px rgb(0,0,0);}
 
 
@@ -10,11 +10,11 @@
 	cursor:pointer;
 	width:20%;
 	text-align:center;
-	background:url(new_skin/InterFace/Challenge_Window.png) no-repeat calc(50% + 2px);
+	background:url(new_skin/Images/InterFace/Challenge_Window.png) no-repeat calc(50% + 2px);
 	padding-top:18px;
 	word-break: break-all;
 }
-#dTravel0 td:hover{background:url(new_skin/InterFace/Challenge_Window_Highlight.png) no-repeat calc(50% + 2px);}
+#dTravel0 td:hover{background:url(new_skin/Images/InterFace/Challenge_Window_Highlight.png) no-repeat calc(50% + 2px);}
 #dTravel0 td:active{transform:translateX(1px) translateY(1px);}
 #dTravel0 .list{
 	margin-top:7.5px;height:30px;word-break:break-all;
@@ -34,10 +34,10 @@
 	cursor:pointer;
 	width:150px;
 	height:35px;
-	background:url(new_skin/InterFace/options_backtogamebutton0.png) no-repeat;
+	background:url(new_skin/Images/InterFace/options_backtogamebutton0.png) no-repeat;
 	background-size:100% 100%;
 }
-#dTravel0 .button_close:hover{background:url(new_skin/InterFace/options_backtogamebutton1.png) no-repeat; background-size:100% 100%;}
+#dTravel0 .button_close:hover{background:url(new_skin/Images/InterFace/options_backtogamebutton1.png) no-repeat; background-size:100% 100%;}
 #dTravel0 .button_close:active{transform:translateX(1px) translateY(1px);}
 
 

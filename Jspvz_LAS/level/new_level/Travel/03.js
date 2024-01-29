@@ -1,8 +1,8 @@
 oS.Init({
 	PName: [oGatlingPea_Pro, oTorchwood_Pro, oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oSquash, oThreepeater, oJalapeno, oSpikeweed, oTallNut, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock],
 	ZName: [oBackupDancer, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oDuckyTubeZombie1, oDuckyTubeZombie2, oDuckyTubeZombie3, oDolphinRiderZombie, oSnorkelZombie, oZomboni, oJackinTheBoxZombie, oBalloonZombie],
-	PicArr: ["new_skin/InterFace/background_new_1.png"],
-	backgroundImage: "new_skin/InterFace/background_new_1.png",
+	PicArr: ["new_skin/Images/InterFace/background_new_1.png"],
+	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-3 寻路者",
 	LvlEName: "EX_Protect_Brain_3",
 	StartGameMusic: "Glorious_Morning",/*"nice_graveyard"*/

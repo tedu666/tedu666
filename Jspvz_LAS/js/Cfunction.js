@@ -764,11 +764,11 @@ oP = {
 		}) : r.MonPrgs = function() {}; (!a || !a.FlagToEnd) && (r.FlagToEnd = function() {
 			NewImg("imgSF", "images/interface/trophy.png", "left:417px;top:233px;z-index:256", EDAll, {
 				onclick: function() {
-					PlayAudio("winmusic");
 					SelectModal(__Normal_Start_Room__);
 					HiddenOptions();
 					SetBlock($("dSurface"), $("iSurfaceBackground"));
-					ShowNameDiv()
+					PlayAudio("winmusic");
+					ShowNameDiv();
 				}
 			})
 		})
@@ -937,14 +937,8 @@ oP = {
 		f)
 	},
 	FlagPrgs: function() {
-		if(oP.DefFlagPrgs) {oP.DefFlagPrgs(); return;};
-
-		var f = oP,
-		c = f.FlagZombies,
-		e = f.FlagToSumNum,
-		a = 139 - c * f.FlagHeadStep,
-		d = $SSml(c, e.a1, e.a2),
-		b;
+		if (oP.DefFlagPrgs) return oP.DefFlagPrgs();
+		var f = oP, c = f.FlagZombies, e = f.FlagToSumNum, a = 139 - c * f.FlagHeadStep, d = $SSml(c, e.a1, e.a2), b;
 		f.FlagNum > (c = ++f.FlagZombies) ? ($("imgFlagHead").style.left = a + "px", $("imgFlagMeterFull").style.clip = "rect(0,157px,21px," + (a + 11) + "px)", (b = $SEql(c, f.FlagToMonitor)) && oSym.addTask(oP.FlagMaxWaitTime - 300,
 		function(g) { ! g[1] && (g[0](), g[1] = 1)
 		}, [b]), oSym.addTask(oP.FlagMaxWaitTime, function(g) {
@@ -1134,21 +1128,21 @@ oZ = {
 		}
 		return f
 	},
-	getRangeLeftZ: function(e, d, b, Altitude = 1) {
+	getRangeLeftZ: function(e, d, b, Altitude = 1, CtkFunc = () => true) {
 		if (b < 1 || b > oS.R) return
 		var g = 0, l = this.$[b], f = [], k = 0, c, h = l.length, j;
 		while (g < h && (j = (c = l[g++]).AttackedLX) < d) {
-			if (c.PZ && c.HP > 0 && (j > e || c.AttackedRX > e)) return c;
+			if (c.PZ && c.HP > 0 && (j > e || c.AttackedRX > e) && c.Altitude == Altitude && CtkFunc(c)) return c;
 		}
 		return null;
 	},
-	getRangeRightZ: function(LX, RX, R, Altitude = 1) { // 获取区间范围内最右边的僵尸
+	getRangeRightZ: function(LX, RX, R, Altitude = 1, CtkFunc = () => true) { // 获取区间范围内最右边的僵尸
 		if (R < 1 || R > oS.R) return null;
 		let Arr = this.$[R], len = Arr.length, O, AttackedLX, AttackedRX;
 		for (let l = len - 1; l >= 0; --l) {
 			O = Arr[l], AttackedLX = O.AttackedLX, AttackedRX = O.AttackedRX; // 解包
 			if (AttackedRX < LX) break; // 边界条件
-			if (AttackedLX < RX && O.HP > 0 && O.Altitude == Altitude) return O; // 返回
+			if (AttackedLX < RX && O.HP > 0 && O.Altitude == Altitude && CtkFunc(O)) return O; // 返回
 		}
 		return null;
 	}, 
@@ -1484,7 +1478,7 @@ InitPCard = function() {
 InitHandBookPCard = function() {
 	PlayAudio("gravebutton");
 	var d = "",
-	g, f, e = [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGatlingPea, oGloomShroom, oTwinSunflower, oSpikerock, oCabbage, oMelonPult, oCattail],
+	g, f, e = [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oCabbage, oFlowerPot, oCoffeeBean, oGarlic, oMelonPult, oGatlingPea, oTwinSunflower, oGloomShroom, oSpikerock, oCabbage_Pro, oMelonPult_Pro, oCattail],
 	a = e.length,
 	b = 0,
 	c;
@@ -1505,7 +1499,7 @@ InitHandBookPCard = function() {
 InitHandBookZCard = function() {
 	PlayAudio("gravebutton");
 	var d = "",
-	g, f, e = [oZombie, oFlagZombie, oConeheadZombie, oPoleVaultingZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oBackupDancer, oDuckyTubeZombie1, oSnorkelZombie, oZomboni, oDolphinRiderZombie, oImp, oJackinTheBoxZombie, oBalloonZombie],
+	g, f, e = [oZombie, oFlagZombie, oConeheadZombie, oPoleVaultingZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oBackupDancer, oDuckyTubeZombie1, oSnorkelZombie, oZomboni, oDolphinRiderZombie, oJackinTheBoxZombie, oBalloonZombie, oImp],
 	a = e.length,
 	b = 0,
 	c;

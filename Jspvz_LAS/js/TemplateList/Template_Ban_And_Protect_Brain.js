@@ -1,5 +1,5 @@
 let ___Template__Summon_Ban_Block___ = function(r, c){
-	let Img = "new_skin/InterFace/Ban.png", height = 77, width = 74;
+	let Img = "new_skin/Images/InterFace/Ban.png", height = 77, width = 74;
 	let id = "dBan_" + Math.random(), rc = r + "_" + c;
 
 	let wid = Math.max(GetX(c) - GetX(c - 1), width + 10), hei = (GetY(r) - GetY(r - 1)) - 15;

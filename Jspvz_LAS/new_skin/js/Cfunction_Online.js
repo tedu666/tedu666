@@ -1,6 +1,6 @@
 //修改必究
 var OL_PassWord = "", OL_URL = "about:blank", IS_Get = false; //在线版获取列表网址
-var __NowVer__ = 20240101; // 一月一更新版本号
+var __NowVer__ = 20240128; // 一月二八更新版本号
 
 let _AJAX_ = (async function(URL, KIND = "GET", BODY = "", FUNC = (() => {})){await fetch(URL + "?" + Math.random(), {method: KIND, body: KIND == "GET"? null: BODY}).then(res => res.text()).then(res => {FUNC(res);}).catch(why => {console.error(why)});});
 let __Ctk_User_PassWord_ = async function(){

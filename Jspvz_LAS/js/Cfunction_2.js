@@ -227,6 +227,7 @@ var GameLogout = function() {
 
 	d = _Init_User_Data_Obj_(), d.UserName = Name;
 	Store.set("__JSPVZ_KAC_UserData__Name_" + Name + "__", d), Store.set("__JSPVZ_KAC_UserEXMode_Info", d);
+	oLocalVar["LevelVars"][Name] = {}, oLocalVar.SaveVar();
 
 	TravelInfo = d, SetUserData(Name, TravelInfo.AdvTravel);
 	Set_Next_Page_EXModeList(0, 1);

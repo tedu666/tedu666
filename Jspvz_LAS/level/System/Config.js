@@ -1,11 +1,11 @@
 // 选项 SelectModal("System/Config")
 oS.Init({
-	PicArr: ["new_skin/InterFace/Travel_Background.png"],
-	backgroundImage: "new_skin/InterFace/Travel_Background.png",
+	PicArr: ["new_skin/Images/InterFace/Travel_Background.png"],
+	backgroundImage: "new_skin/Images/InterFace/Travel_Background.png",
 	// LoadMusic: "pure_snows", StartGameMusic: "pure_snows",
 	LoadAccess: function() {
 		let Staff = oS["Staff_HTML"]["join"]("");
-		$("tGround")["style"] = "background:url(new_skin/InterFace/Travel_Background.png) no-repeat;left:0px;top:-100px;width:900px;height:730px;background-size:100% 100%;visibility:visible;", SetVisible($("dMenu")); // 背景图片、暂停按钮
+		$("tGround")["style"] = "background:url(new_skin/Images/InterFace/Travel_Background.png) no-repeat;left:0px;top:-100px;width:900px;height:730px;background-size:100% 100%;visibility:visible;", SetVisible($("dMenu")); // 背景图片、暂停按钮
 		NewEle("dStaff_Block", "div", "visibility:visible;height:100%;width:100%;z-index:100;display:block;overflow:auto;white-space:pre;", {"className": "WindowFrame Hidden_Container Not_Chose"}, EDAll); // pointer-events:none;
 		NewEle("dStaff_HTML", "div", "line-height:1;text-align:center;color:#FFFFFF;font-size:15px;font-family:RanTian,Regular,Briannetod,微软雅黑,Verdana,Tahoma;-webkit-text-stroke-width:0px;-webkit-text-stroke-color:#000000;word-break:break-all;white-space:pre;tab-size:1;", {"innerHTML": Staff}, $("dStaff_Block"));
 		InitOnclick(), AllAudioStop(), PlayMusic(oS.LoadMusic = "pure_snows");
