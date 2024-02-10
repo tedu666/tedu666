@@ -109,7 +109,7 @@ oS.Init({
 		let dConfirmAccept = NewEle("dConfirmAccept", "input", "position:absolute;left:300px;top:210px;color:#00FF00;width:100px;", {}, dConfirm, { class: "ButtonStyle", value: "确认", type: "button" });
 		let dConfirmCancel = NewEle("dConfirmCancel", "input", "position:absolute;left:425px;top:210px;color:#FF0000;width:100px;", {}, dConfirm, { class: "ButtonStyle", value: "取消", type: "button" });
 		if (Value === "") SetHidden(dConfirmInput);
-		dConfirmAccept["onclick"] = () => { if (dConfirmInput["value"] == Value) ClearChild(dConfirm, DivA), CallBack(true); };
-		dConfirmCancel["onclick"] = () => { ClearChild(dConfirm, DivA), CallBack(false); };
+		dConfirmAccept["onclick"] = dConfirmAccept["click"] = () => { if (dConfirmInput["value"] == Value) ClearChild(dConfirm, DivA), CallBack(true); };
+		dConfirmCancel["onclick"] = dConfirmCancel["click"] = () => { ClearChild(dConfirm, DivA), CallBack(false); };
 	}
 });

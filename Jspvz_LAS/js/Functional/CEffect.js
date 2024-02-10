@@ -80,6 +80,7 @@ let oPTGif = class {
 	*/
 	Setting = { URL: "", Width: 32, Height: 32, MoveLeft: 0, MoveTop: 0, FrameNum: 60, FPS: [{ End: Infinity, FPS: 60 }], Loop: { Delay: [0], EndDelay: [0], LoopTime: Infinity, LoopEnd: "Tail" }, }; // 默认配置
 	ImgEle = null; Canvas = { Ele: null, Ctx: null }; // 图片元素
+	FrameMode = "Object"; // 获取帧的模式 "Object" | "Canvas" 
 	LoopData = { // 内部变量，请勿更改
 		LoopEnter: [], // 记录进入第 N 次循环所用的时间，如果是无限循环最后一个元素一定是 Inf
 		SumFPSArr: [], FPSSum: null, DT: null, ET: null, // 单次帧所用总时间、常规开始等待时间、常规结束等待时间
@@ -128,7 +129,7 @@ let oPTGif = class {
 			if (Loop["LoopTime"] == Infinity) self["LoopData"]["LoopEnter"]["push"](Infinity);
 		};
 	};
-	GetFrame (Tick) { // 获取第 Tick 帧的画面，返回的是 Canvas
+	GetFrame (Tick, FrameMode) { // 获取第 Tick 帧的画面，返回的是 Canvas
 		let self = this, Wid = self["Setting"]["Width"], Hei = self["Setting"]["Height"]; 
 
 		switch (Tick) {
@@ -137,10 +138,15 @@ let oPTGif = class {
 			default: if (isNaN(Tick)) return null; // 错误的值
 		}
 
-		self["Canvas"]["Ctx"]["clearRect"](0, 0, Wid, Hei); // 清理画布
 		Tick = Math["max"](Math["min"](Tick, self["Setting"]["FrameNum"]), 1); // 取临界值
-		self["Canvas"]["Ctx"]["drawImage"](self["ImgEle"], (Tick - 1) * Wid, 0, Wid, Hei, 0, 0, Wid, Hei);
-		return self["Canvas"]["Ele"];
+
+		if (FrameMode ?? self["FrameMode"] == "Object") {
+			return { "Mode": "Object", "Ele": self["ImgEle"], "LeftPos": (Tick - 1) * Wid, "TopPos": 0, "Height": Hei, "Width": Wid };
+		} else {
+			self["Canvas"]["Ctx"]["clearRect"](0, 0, Wid, Hei); // 清理画布
+			self["Canvas"]["Ctx"]["drawImage"](self["ImgEle"], (Tick - 1) * Wid, 0, Wid, Hei, 0, 0, Wid, Hei);
+			return self["Canvas"]["Ele"];
+		}
 	}; 
 	GetImages (Time) { // 单位: 秒，用于获取 GIF 播放 Time 秒后显示的是哪个图片画面，返回瞬时性的 Canvas
 		let self = this, Range, FPSRange, Index, { LoopEnter, SumFPSArr, FPSSum, DT, ET } = self["LoopData"];
@@ -190,11 +196,17 @@ let oPTGif = class {
 
 	    Ctx["save"](); // 保存当前画布状态
 
-	    Ctx["translate"](X + Img["width"] * 0.5 - MoveX, Y + Img["height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
-	    Ctx["scale"](Horizontal, Vertical); // 调整缩放
-	    Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
-
-	    Ctx["drawImage"](Img, - Img["width"] * 0.5, - Img["height"] * 0.5, Img["width"], Img["height"]); // 将图像绘制到画布上
+	    if (Img["Mode"] == "Object") { // 对象模式
+		    Ctx["translate"](X + Img["Width"] * 0.5 - MoveX, Y + Img["Height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
+		    Ctx["scale"](Horizontal, Vertical); // 调整缩放
+		    Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
+	    	Ctx["drawImage"](Img["Ele"], Img["LeftPos"], Img["TopPos"], Img["Width"], Img["Height"], - Img["Width"] * 0.5, - Img["Height"] * 0.5, Img["Width"], Img["Height"]); // 将图像绘制到画布上
+		} else { // 画板或其他剩余模式
+		    Ctx["translate"](X + Img["width"] * 0.5 - MoveX, Y + Img["height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
+		    Ctx["scale"](Horizontal, Vertical); // 调整缩放
+		    Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
+	    	Ctx["drawImage"](Img, - Img["width"] * 0.5, - Img["height"] * 0.5, Img["width"], Img["height"]); // 将图像绘制到画布上
+		}
 
 	    Ctx["restore"](); // 恢复画布状态
 	};

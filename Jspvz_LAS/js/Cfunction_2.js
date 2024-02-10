@@ -266,10 +266,26 @@ var oLocalVar = { // 处理所有关卡的变量的
 	GetObj: function (Name = oS.LvlEName) {
 		let self = this, UName = TravelInfo.UserName, Var, Obj; // 单独把每个玩家数据隔离开来
 		self.SaveVar(), Var = Store.get(self.StoreName) ?? {}, PlayerOwn = Var[UName] ?? {}, Obj = PlayerOwn[Name] ?? {}; // 先保存防止多次获取
-		self.LevelVars[UName] ??= {}, self.LevelVars[UName][Name] = Obj; return Obj;
+		self.LevelVars[UName] ??= {}, self.LevelVars[UName][Name] ??= {};
+		for (let Did in self.LevelVars[UName][Name]) delete self.LevelVars[UName][Name][Did];
+		for (let Did in Obj) self.LevelVars[UName][Name][Did] = Obj[Did]; 
+		return self.LevelVars[UName][Name];
 	}, 
 	SaveVar: function () {
 		let self = this, Name = self.StoreName, Var = self.LevelVars;
 		Store.set(Name, Object.assign(Store.get(Name) ?? {}, Var));
 	}
-}
+};
+
+
+var Unlock_TRLevel = async () => { // 一键解锁所有拓展关关卡
+	let Result = await __AddConfirmPromise("输入 “EXUnlock” 确认解锁", "EXUnlock", $("dSurfaceBack"));
+	if (!Result) return; // 如果不确认，则返回
+
+	for (let Lvl = 1; Lvl <= 10; ++Lvl) Win_Travel(Lvl, Lvl + 1); // 解锁关卡到最新关
+
+	let Ex10Data = oLocalVar.GetObj("EX_End_Pool_10"); // 获取 EX10 数据并解锁
+	Ex10Data["MaxPlay"] = 3, Ex10Data["MaxVaseLvl"] = "10000000", Ex10Data["NowVaseLvl"] = "01";
+
+	oLocalVar["SaveVar"]() // 保存
+};

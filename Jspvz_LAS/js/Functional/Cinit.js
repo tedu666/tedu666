@@ -46,6 +46,7 @@ var oEffect = NewF( //画布效果，effect
 		Clear_Canvas: function () { this["Ctx"] && this["Ctx"]["clearRect"](0, 0, this["Canvas"]["width"], this["Canvas"]["height"]); }, // 清除画布内容
 		ReBinding: function () { // 重新绑定元素
 			let self = this, Did = self["Did"];
+			if (!Did) return;
 			self["Canvas"] = $(Did["Canvas"]);
 			self["Dev"] = $(Did["Dev"]);
 			self["Ctx"] = self["Canvas"]["getContext"]('2d');

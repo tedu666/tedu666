@@ -12,7 +12,7 @@ var oBu = {
 	}, 
 	Get_ID: function () { return "_" + Math["random"](); }, 
 	Del: function (Did) { let self = this; self["DList"]["push"](Did); }, 
-	Add: function (Obj) { let self = this; self["BList"][Obj["ID"]] = Obj; }, 
+	Add: function (Obj) { let self = this; self["BList"][Obj["ID"]] = Obj; oGT.OnTrigger("BulletBirth", Obj) }, 
 	ReBindingCanvas: function () { // 重新把所有的画布绑定 
 		let self = this, CanvasList = self["CanvasList"]; 
 		for (let Q in CanvasList) CanvasList[Q]["ReBinding"](); 
@@ -99,14 +99,14 @@ var CBullets = NewO({
 		self["EleURL"] = self["PicArr"][self["NormalGif"]]; // 设置图片地址
 		self["Ele"] = NewImg(ID, self["PicArr"][self["NormalGif"]], "left:" + self["ImgPos"][0] + "px; top:" + self["ImgPos"][1] + "px; z-index:" + self["zIndex"] + "; will-change:transform;", (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置图片
 		self["Shadow"] = NewEle(ID + "_Shadow", "div", "z-index:1; opacity:0.5; background-size:29px; background-repeat:no-repeat; width:29px; top:" + (self["Pos"][2] + 30) + "px; left:" + self["Pos"][0] + "px; will-change:transform;", { className: "Shadow" }, (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置影子
-		Object["assign"](self, Assign), self["DataAdjust"](), oBu["Add"](self), self["PrivateBirth"](self), self["ImageAdjust"](0); // 自定义
+		Object["assign"](self, Assign), self["DataAdjust"](), self["PrivateBirth"](self), self["ImageAdjust"](0), oBu["Add"](self); // 自定义
 		return self; // 返回
 	}, 
 }), 
 oPeaBullet = InheritO(CBullets, {
 	EName: "oPeaBullet", 
 	PicArr: ["images/Plants/PeaBulletHit.gif", "images/Plants/PB-10.gif", "images/Plants/PB00.gif", "images/Plants/PB10.gif"], NormalGif: 2, SplashGif: 0,
-	Speed: [0, 0, 0], Weight: [0, 0.01, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
+	Speed: [0, 0, 0], Weight: [0, 0.1, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
 	PeaProperty: 0, Width: 56, Height: 34, HalfWid: null, HalfHei: null, Direction: 0, // 图片等位置信息
 	Attack: 20, NormalAttack: 20, ImgLeftMove: 12, BirthSpeed: 5, LastTorch: [null, null], // 豌豆图片对齐偏移量、 初始速度默认、 上次被加热的格子
 	Altitude: 1, // 子弹高度，陆地子弹还是天上子弹
@@ -178,7 +178,7 @@ oPeaBullet = InheritO(CBullets, {
 oNormalBullet = InheritO(CBullets, { // 常规无任何效果的子弹、不带方向影响图片转弯的子弹
 	EName: "oNormalBullet", 
 	PicArr: ["images/Plants/PeaBulletHit.gif", "images/Plants/PB00.gif"], NormalGif: 1, SplashGif: 0,
-	Speed: [0, 0, 0], Weight: [0, 0.01, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
+	Speed: [0, 0, 0], Weight: [0, 0.15, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
 	Width: 56, Height: 34, HalfWid: null, HalfHei: null, Direction: 0, CanChangeDire: true, // 图片等位置信息
 	Attack: 20, AbsLeftMove: 0, ImgLeftMove: 0, // 攻击伤害等
 	Altitude: 1, // 子弹高度，陆地子弹还是天上子弹

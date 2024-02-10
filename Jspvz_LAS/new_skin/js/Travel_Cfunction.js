@@ -167,6 +167,7 @@ var InitHandBookTRCard = function() {
 var Set_Change_EXModeList = function(){
 	EXGAME_LIST_TYPE = !EXGAME_LIST_TYPE;
 	$("minigame_Change_Mode2").innerText = (EXGAME_LIST_TYPE ? "拓展关卡" : "在线关卡");
-	(EXGAME_LIST_TYPE ? SetBlock($("dTravelChange")) : SetNone($("dTravelChange")));
+	SetBlock(EXGAME_LIST_TYPE ? $("dTravelChange") : $("dTravelUnlock"));
+	SetNone(!EXGAME_LIST_TYPE ? $("dTravelChange") : $("dTravelUnlock"));
 	Set_Next_Page_EXModeList(0);
 }

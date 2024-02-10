@@ -20,7 +20,7 @@
 		CanChange = false, !f && ++NowLevel, AllAudioPauseCanceled(), oSym.Start(), oCv["Gradient_Rect"](0, [[1, 125]], oSym["NowStep"], [0, 0, 0], () => {
 			SelectModal(oS.Lvl), oS.NowLevel = NowLevel, oS.Plant_Ground = PG, oCv && oCv["__Delete__"] && oCv["__Delete__"]();
 		});
-		LevelStore["MaxPlay"] = Math.max(LevelStore["MaxPlay"], NowLevel), oLocalVar["SaveVar"](); // 确认最大游玩关卡
+		if (!isNaN(NowLevel)) LevelStore["MaxPlay"] = Math.max(LevelStore["MaxPlay"], NowLevel), oLocalVar["SaveVar"](); // 确认最大游玩关卡
 	};
 
 // ====================================================================================================
@@ -358,24 +358,37 @@
 				第十一关: 6 ~ 9列, 普通罐子: { 普僵 * 2 + 路障 * 2 + 小丑 * 1 + 反向双发 * 5 + 火炬树桩 * 3 + 高坚果 * 3 + 倭瓜 * 3 } + 植物罐子: { 路灯花 * 2 } + 僵尸罐子: { 铁桶 * 3 }
 				第十二关: 6 ~ 9列, 普通罐子: { 小丑 * 2 + 铁桶 * 1 + 路障 * 3 + 普僵 * 5 + 反向双发 * 6 + 坚果 * 1 } + 植物罐子: { 大嘴花 * 2 + 土豆地雷 * 1 } + 僵尸罐子: { 橄榄球 * 2 + 舞王 * 1 }
 				第十三关: 3 ~ 9列, 普通罐子: { 小丑 * 12 + 铁桶 * 3 + 普僵 * 2 + 路障 * 3 + 坚果 * 4 + 大嘴花 * 6 + 地刺 * 3 + 杨桃 * 2 + 胆小 * 2 } + 植物罐子: { 寒冰蘑 * 2 } + 僵尸罐子: { 舞王 * 3 }
-				第十四关: 3 ~ 9列, 普通罐子: { 寒冰射手 * 6 + 高坚果 * 2 + 南瓜头 * 2 + 地刺 * 4 + 双发 * 3 +反向双发 * 3 + 普通僵尸 * 4 + 路障僵尸 * 2 + 小丑僵尸 * 2 + 铁桶僵尸 * 1 + 小鬼僵尸 * 1 + 撑杆僵尸 * 2 + 铁门僵尸 * 2 + 报纸僵尸 * 2 } + 植物罐子: { 大嘴花 * 2 } + 僵尸罐子: { 冰车僵尸 * 2 + 舞王僵尸 * 2 }
+				第十四关: 3 ~ 9列, 普通罐子: { 寒冰射手 * 6 + 高坚果 * 2 + 南瓜头 * 2 + 地刺 * 4 + 双发 * 3 + 反向双发 * 3 + 普通僵尸 * 4 + 路障僵尸 * 2 + 小丑僵尸 * 2 + 铁桶僵尸 * 1 + 小鬼僵尸 * 1 + 撑杆僵尸 * 2 + 铁门僵尸 * 2 + 报纸僵尸 * 2 } + 植物罐子: { 大嘴花 * 2 } + 僵尸罐子: { 冰车僵尸 * 2 + 舞王僵尸 * 2 }
 				第十五关: 2 ~ 9列, 普通罐子: { 大嘴花 * 1 + 魅惑菇 * 9 + 高坚果 * 1 + 倭瓜 * 2 + 地刺 * 2 + 反向双发 * 2 + 樱桃炸弹 * 1 + 双发 * 1 + 小喷菇 * 2 + 普通僵尸 * 4 + 路障僵尸 * 1 + 小丑僵尸 * 2 + 铁桶僵尸 * 2 + 撑杆僵尸 * 2 + 铁门僵尸 * 2 + 报纸 * 4 + 冰车 * 1 + 舞王 * 2 } + 植物罐子: { 土豆雷 * 3 } + 僵尸罐子: { 橄榄球僵尸 * 3 + 小鬼僵尸 * 1 }
 
-				// 第四小节: 迷雾砸罐（盲砸）
-				第十六关: 6 ~ 9列, F(7列, 5s), 普通罐子: {  } + 植物罐子: {  } + 僵尸罐子: {  }
+				// 第四小节: 泳池砸罐
+				第十六关: 5 ~ 9列, 普通罐子: { 反向双发 * 4 + 双发 * 3 + 寒冰 * 2 + 坚果 * 1 + 土豆雷 * 1 } + 植物罐子: { 荷叶 * 4 } + 僵尸罐子: { 撑杆 * 2 + 小鬼 * 2 + 路障 * 1 + 水路障 * 2 + 铁门 * 3 + 小丑 * 1 + 铁桶 * 1 + 水路铁桶 * 1 + 水路僵尸 * 2 }
+				第十七关: 5 ~ 9列, 普通罐子: { 反向双发 * 3 + 双发 * 1 + 寒冰 * 2 + 坚果 * 1 + 窝瓜 * 1 + 三线 * 2 } + 植物罐子: { 荷叶 * 2 + 水草 * 1 } + 僵尸罐子: { 撑杆 * 2 + 小鬼 * 2 + 路障 * 3 + 铁门 * 2 + 小丑 * 1 + 铁桶 * 3 + 潜水 * 2 + 海豚 * 1 + 橄榄 * 1 }
+				第十八关: 3 ~ 9列, 普通罐子: { 反向双发 * 3 + 双发 * 3 + 寒冰 * 3 + 三线 * 3 + 荷叶 * 4 } + 植物罐子: { 窝瓜 * 2 + 辣椒 * 1 } + 僵尸罐子: { 撑杆 * 4 + 小鬼 * 4 + 小丑 * 3 + 海豚 * 4 + 潜水 * 4 + 橄榄 * 2 + 舞王 * 2 }
+				第十九关: 3 ~ 9列, 普通罐子: { 双发 * 4 + 寒冰 * 3 + 三线 * 3 + 荷叶 * 4 + 地刺 * 4 + 坚果 * 3 } + 植物罐子: { 高坚果 * 2 } + 僵尸罐子: { 撑杆 * 4 + 铁桶 * 5 + 小丑 * 3 + 海豚 * 3 + 铁门 * 4 + 橄榄 * 3 + 冰车 * 3 }
+				第二十关: 2 ~ 9列, 普通罐子: { 反向双发 * 3 + 双发 * 2 + 三线 * 2 + 荷叶 * 4 + 火树 * 2 + 地刺 * 2 + 坚果 * 2 + 高坚果 * 1 + 水草 * 1 } + 植物罐子: { 窝瓜 * 1 + 辣椒 * 1 } + 僵尸罐子: { 撑杆 * 4 + 小鬼 * 2 + 小丑 * 3 + 海豚 * 3 + 潜水 * 3 + 橄榄 * 3 + 舞王 * 3 + 冰车 * 2 + 铁桶 * 4 }
+
+				// 第五小节: 迷雾砸罐（盲砸）
+				第二一关: 6 ~ 9列, F(7列, 5s), 普通罐子: {  } + 植物罐子: {  } + 僵尸罐子: {  }
 
 			当局者迷，旁观者清。 
 		*/
 		3: () => {
 			oLocalVar.GetObj("EX_End_Pool_10")["NowVaseLvl"] ??= "01";
 			let EnterID = oLocalVar.GetObj("EX_End_Pool_10")["NowVaseLvl"]["toString"]()["padStart"](2, "0");
-			let SavePart = ["01", "06", "10", "11", "14", "15", Infinity]; // 存档点编号
+			let SavePart = ["01", "06", "09", "11", "14", "16", "18", "20", Infinity]; // 存档点编号
 			oLocalVar.GetObj("EX_End_Pool_10")["NowVaseLvl"] = Number(oLocalVar.GetObj("EX_End_Pool_10")["NowVaseLvl"]), oLocalVar.SaveVar();
 
 			// 加载音乐
+			let RandMusic = (ED) => ED ? ("EX10-3MusicED_" + Math.floor(Math.random() * 4 + 1)) : ("EX10-3Music0" + Math.floor(Math.random() * 2 + 1));
+
 			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=1990182380.mp3", audioname: "EX10-3Music01", loop: true}, { volume: 0.6 });
 			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=1990182378.mp3", audioname: "EX10-3Music02", loop: true}, { volume: 0.6 });
-			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=1990182377.mp3", audioname: "EX10-3Music03", loop: true}, { volume: 0.7 });
+
+			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=1990182377.mp3", audioname: "EX10-3MusicED_1", loop: true}, { volume: 0.7 });
+			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=28561005.mp3", audioname: "EX10-3MusicED_2", loop: true}, { volume: 1 });
+			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=494992638.mp3", audioname: "EX10-3MusicED_3", loop: true}, { volume: 1 });
+			NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=760280.mp3", audioname: "EX10-3MusicED_4", loop: true}, { volume: 0.8 });
 
 			oS.Init($FJ(oSys, {
 				PName: [oPeashooter, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCattail, oCabbage_Pro, oMelonPult_Pro],
@@ -383,11 +396,11 @@
 				Block_Level_Task: (EnterID == "01" ? "<a style=\"font-size:15px;line-height:1.8;position:relative;top:-10px;\">铁人夺冠：1.欢迎来到铁人夺冠罐子马拉松项目，您需要经理重重考验，不断通关砸罐子关卡来通过此项目。<br>2.马拉松设有存档点，若该小节为存档点标题结尾将会携带“（存档点）”字样，请注意留意。<br>3.若您中途退出游戏，可以进行选择存档点到您最近的存档点开始游玩，不必担心从头开始的问题。<br>失败将从最近的存档点重新开始，祝君好运<br></a>" : ""), 
 				LevelName: "EX-10 勇闯者 - 铁人夺冠: 第 " + EnterID + " 节" + (SavePart["includes"](EnterID) ? "（存档点）" : ""), SelectCardList: [], DefLoad2: () => { for (let i of oS.SelectCardList) SelectCard(i, 1); },
 				DefLoad: () => { oS.RiddleAutoGrow(); NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:250", 0, EDAll); }, 
-				LF: [0, 1, 1, 1, 1, 1, 1], GroundType: 1, SunNum: 0, DKind: 0, ShowScroll: false, ProduceSun: false, StartGameMusic: (Math.random() < 0.5 ? "EX10-3Music01" : "EX10-3Music02"), 
+				LF: [0, 1, 1, 1, 1, 1, 1], GroundType: 1, SunNum: 0, DKind: 0, ShowScroll: false, ProduceSun: false, StartGameMusic: RandMusic(false), 
 				RiddleAutoGrow: function () {
 					let Data = LevelList[EnterID];
 
-					if (Data == null) return oS.DefLoad2 = ShowWinText, oS.StartGame = () => { ClearChild($("DivA")), StopMusic(), PlayMusic(oS.LoadMusic = oS.StartGameMusic = "EX10-3Music03"); };
+					if (Data == null) return oS.DefLoad2 = ShowWinText, oS.StartGame = () => { ClearChild($("DivA")), StopMusic(), PlayMusic(oS.LoadMusic = oS.StartGameMusic = RandMusic(true)); };
 
 					switch (Data["ReadType"]) {
 						case 0: 
@@ -397,12 +410,12 @@
 								for (let Str in Plants) { // 生成植物
 									let [R, C, Grow] = Str["split"]("_")["map"]((X) => Number(X)), Val = Plants[Str];
 									if (Grow) CustomSpecial(Val, R, C);
-									else oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = false)); // 生成罐子
+									else oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = !XRay[1])); // 生成罐子
 								}
 								for (let C = Left; C <= Right; ++C) { // 生成僵尸
 									for (let R = 1; R <= oS.R; ++R) {
 										if (oGd.$[R + "_" + C + "_1"] != null) continue;
-										Index = GetRandom(ZKeys), oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": window[Index] }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = false)); // 生成罐子
+										Index = GetRandom(ZKeys), oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": window[Index] }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = !XRay[2])); // 生成罐子
 										if (--ZList[Index] <= 0) delete ZList[Index], ZKeys["splice"](ZKeys["findIndex"]((ID) => ID == Index), 1); // 删除该品种的僵尸
 									}
 								}
@@ -415,12 +428,12 @@
 								for (let Str in Plants) { // 生成植物
 									let [R, C, Grow] = Str["split"]("_")["map"]((X) => Number(X)), Val = Plants[Str];
 									if (Grow) CustomSpecial(Val, R, C);
-									else oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = false)); // 生成罐子
+									else oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = !XRay[1])); // 生成罐子
 								}
 								for (let Str in Zombies) { // 生成僵尸
 									let [R, C] = Str["split"]("_")["map"]((X) => Number(X)), Val = Zombies[Str];
-									if (Str[0] == "L") for (let I = Left; I <= Right; ++I) oFlowerVase_New.prototype.SpecialBirth(Number(Str[1]), I, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = false));
-									else oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = false));
+									if (Str[0] == "L") for (let I = Left; I <= Right; ++I) oFlowerVase_New.prototype.SpecialBirth(Number(Str[1]), I, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = !XRay[2]));
+									else oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 10000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = !XRay[2]));
 								}
 							}
 							break;
@@ -432,22 +445,54 @@
 								LeftRound.sort(() => Math.random() - 0.5); // 随机排序
 								for (let Str in Zombies) while (--Zombies[Str] >= 0) {
 									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
-									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = true));
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0]));
 								}
 								for (let Str in Plants) while (--Plants[Str] >= 0) {
 									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
-									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = true));
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0]));
 								}
 								for (let Str in Greens) while (--Greens[Str] >= 0) {
 									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
-									oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = false));
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = !XRay[1]));
 								}
 								for (let Str in Blacks) while (--Blacks[Str] >= 0) {
 									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
-									oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = false));
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 2, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2000, OBJ.XRay = XRay[2], OBJ.AutoSetXRay = !XRay[2]));
 								}
 							}
-						}
+							break;
+
+						case 3: 
+							{
+								$("tGround")["innerHTML"] = '<img style="position:absolute;left:256px;top:266px;clip:rect(5px,720px,163px,5px);filter:alpha(opacity=1);opacity:1;" src="images/New_interface/pool.gif">'; // 换成泳池
+								oGd.$LF = [0, 1, 1, 2, 2, 1, 1], oGd.$ZF = [0, 1, 1, 2, 2, 1, 1]; // 设置水路
+								let [Left, Right] = Data["Range"], Zombies1 = Data["Zombies1"], Zombies2 = Data["Zombies2"], Plants = Data["Plants"], Greens = Data["Greens"], XRay = Data["XRay"], KeepLilyPad = Data["KeepLilyPad"];
+								let LeftRound = []; for (let C = Left; C <= Right; ++C) for (let R = 1; R <= oS.R; ++R) if (oGd.$LF[R] == 2) LeftRound.push([R, C]);
+								LeftRound.sort(() => Math.random() - 0.5); // 随机排序
+								for (let Str in Zombies2) while (LeftRound["length"] && --Zombies2[Str] >= 0) { // 水路僵尸处理
+									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2500, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0])).AutoSummonBase = !KeepLilyPad;
+								}
+								for (let Str in Plants) while (LeftRound["length"] && --Plants[Str] >= 0) { // 普通植物选择
+									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2500, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0])).AutoSummonBase = !KeepLilyPad;
+								}
+								for (let C = Left; C <= Right; ++C) for (let R = 1; R <= oS.R; ++R) if (oGd.$LF[R] != 2) LeftRound.push([R, C]);
+								LeftRound.sort(() => Math.random() - 0.5); // 随机排序
+								for (let Str in Greens) while (LeftRound["length"] && --Greens[Str] >= 0) {
+									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 1, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2500, OBJ.XRay = XRay[1], OBJ.AutoSetXRay = !XRay[1])).AutoSummonBase = !KeepLilyPad;
+								}
+								for (let Str in Plants) while (LeftRound["length"] && --Plants[Str] >= 0) { // 普通植物选择
+									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Plants", "Value": Val }, (OBJ) => (OBJ.CardTime = 2500, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0])).AutoSummonBase = !KeepLilyPad;
+								}
+								for (let Str in Zombies1) while (LeftRound["length"] && --Zombies1[Str] >= 0) { // 水路僵尸处理
+									let [R, C] = LeftRound[0], Val = window[Str]; LeftRound["splice"](0, 1);
+									oFlowerVase_New.prototype.SpecialBirth(R, C, 0, { "Type": "Zombie", "Value": Val }, (OBJ) => (OBJ.CardTime = 2500, OBJ.XRay = XRay[0], OBJ.AutoSetXRay = !XRay[0])).AutoSummonBase = !KeepLilyPad;
+								}
+							}
+					}
 				}, 
 				StartGame: function() {
 					ClearChild($("DivA")), oP.Monitor(), SetVisible($("tdShovel"), $("dFlagMeter"), $("dTop"));
@@ -487,6 +532,13 @@
 					"14": { "ReadType": 2, Range: [3, 9], Zombies: { "oZombie": 4, "oConeheadZombie": 2, "oJackinTheBoxZombie": 2, "oBucketheadZombie": 1, "oImp": 1, "oPoleVaultingZombie": 2, "oScreenDoorZombie": 2, "oNewspaperZombie": 2 }, Plants: { "oSnowPea": 6, "oTallNut": 2, "oPumpkinHead": 2, "oSpikeweed": 4, "oRepeater": 3, "oRepeater2": 3 }, Greens: { "oChomper": 2 }, Blacks: { "oZomboni": 2, "oDancingZombie": 2 }, XRay: [0, 1, 1], }, 
 					"15": { "ReadType": 2, Range: [2, 9], Zombies: { "oZombie": 4, "oConeheadZombie": 1, "oJackinTheBoxZombie": 2, "oBucketheadZombie": 2, "oPoleVaultingZombie": 2, "oScreenDoorZombie": 2, "oNewspaperZombie": 4, "oZomboni": 1, "oDancingZombie": 2 }, Plants: { "oChomper": 1, "oHypnoShroom": 9, "oTallNut": 1, "oSquash": 2, "oSpikeweed": 2, "oRepeater2": 2, "oCherryBomb": 1, "oRepeater": 1, "oPuffShroom": 2 }, Greens: { "oPotatoMine": 3 }, Blacks: { "oFootballZombie": 3, "oImp": 1 }, XRay: [0, 1, 1], }, 
 
+					// 第四部分 —— 斗
+					"16": { "ReadType": 3, Range: [5, 9], Zombies1: { "oPoleVaultingZombie": 2, "oImp": 2, "oConeheadZombie": 1, "oScreenDoorZombie": 3, "oJackinTheBoxZombie": 1, "oBucketheadZombie": 1 }, Zombies2: { "oDuckyTubeZombie1": 2, "oDuckyTubeZombie2": 2, "oDuckyTubeZombie3": 1 }, Plants: { "oRepeater": 3, "oRepeater2": 4, "oSnowPea": 2, "oWallNut": 1, "oPotatoMine": 1 }, Greens: { "oLilyPad": 4 }, XRay: [0, 0, 0], KeepLilyPad: false }, 
+					"17": { "ReadType": 3, Range: [5, 9], Zombies1: { "oPoleVaultingZombie": 2, "oImp": 2, "oConeheadZombie": 3, "oScreenDoorZombie": 2, "oJackinTheBoxZombie": 1, "oBucketheadZombie": 3, "oFootballZombie": 1 }, Zombies2: { "oDolphinRiderZombie": 1, "oSnorkelZombie": 2 }, Plants: { "oRepeater": 1, "oRepeater2": 3, "oSnowPea": 2, "oWallNut": 1, "oSquash": 1, "oThreepeater": 2 }, Greens: { "oLilyPad": 2, "oTangleKelp": 1 }, XRay: [0, 0, 0], KeepLilyPad: false }, 
+					"18": { "ReadType": 3, Range: [3, 9], Zombies1: { "oPoleVaultingZombie": 4, "oImp": 4, "oJackinTheBoxZombie": 3, "oFootballZombie": 2, "oDancingZombie": 2 }, Zombies2: { "oDolphinRiderZombie": 4, "oSnorkelZombie": 4 }, Plants: { "oRepeater": 3, "oRepeater2": 3, "oSnowPea": 3, "oThreepeater": 3, "oLilyPad": 4 }, Greens: { "oSquash": 2, "oJalapeno": 1 }, XRay: [0, 0, 0], KeepLilyPad: false }, 
+					"19": { "ReadType": 3, Range: [3, 9], Zombies1: { "oPoleVaultingZombie": 4, "oBucketheadZombie": 5, "oJackinTheBoxZombie": 3, "oScreenDoorZombie": 4, "oFootballZombie": 3, "oZomboni": 3 }, Zombies2: { "oDolphinRiderZombie": 3 }, Plants: { "oRepeater": 4, "oSnowPea": 3, "oThreepeater": 3, "oLilyPad": 4, "oSpikeweed": 4, "oWallNut": 3 }, Greens: { "oTallNut": 2 }, XRay: [0, 0, 0], KeepLilyPad: false }, 
+					"20": { "ReadType": 3, Range: [2, 9], Zombies1: { "oPoleVaultingZombie": 4, "oImp": 2, "oJackinTheBoxZombie": 3, "oFootballZombie": 3, "oDancingZombie": 3, "oZomboni": 2, "oBucketheadZombie": 4 }, Zombies2: { "oDolphinRiderZombie": 3, "oSnorkelZombie": 3 }, Plants: { "oRepeater": 2, "oRepeater2": 3, "oThreepeater": 2, "oLilyPad": 4, "oTorchwood": 2, "oSpikeweed": 2, "oWallNut": 2, "oTallNut": 1, "oTangleKelp": 1 }, Greens: { "oSquash": 1, "oJalapeno": 1 }, XRay: [0, 0, 0], KeepLilyPad: false }, 
+
 				}, 
 				AddConfirm: (TEXT = "输入 “JSPVZ-LAS” 确认删除", Value = "JSPVZ-LAS", CallBack = () => {}) => { // 在游戏内显示一个输入框来让用户确认重要信息
 					HiddenLevel(), HiddenMiniGame(1), HiddenRiddleGame(1), HiddenTravelGame(1), SetNone($("dShowMsgLogin")), SetNone($('dSurface')); // 隐藏所有界面
@@ -498,18 +550,19 @@
 					let dConfirmAccept = NewEle("dConfirmAccept", "input", ButtonCSS + "position:absolute;left:300px;top:210px;color:#00FF00;width:100px;", {}, dConfirm, { class: "ButtonStyle", value: "确认", type: "button" });
 					let dConfirmCancel = NewEle("dConfirmCancel", "input", ButtonCSS + "position:absolute;left:425px;top:210px;color:#FF0000;width:100px;", {}, dConfirm, { class: "ButtonStyle", value: "取消", type: "button" });
 					if (Value === "") SetHidden(dConfirmInput);
-					dConfirmAccept["onclick"] = () => { PlayAudio("tap"); if (dConfirmInput["value"] == Value) ClearChild(dConfirm, DivA), CallBack(true); };
-					dConfirmCancel["onclick"] = () => { PlayAudio("tap"), ClearChild(dConfirm, DivA), CallBack(false); };
+					dConfirmAccept["onclick"] = dConfirmAccept["click"] = () => { PlayAudio("tap"); if (dConfirmInput["value"] == Value) ClearChild(dConfirm, DivA), CallBack(true); };
+					dConfirmCancel["onclick"] = dConfirmCancel["click"] = () => { PlayAudio("tap"), ClearChild(dConfirm, DivA), CallBack(false); };
 				}, 
 				AddConfirmPromise: (TEXT = "输入 “JSPVZ-LAS” 确认删除", Value = "JSPVZ-LAS") => {
 					return new Promise((Resolve) => { AddConfirm(TEXT, Value, Resolve); });
 				}, 
 				ShowWinText: async () => {
 					let Stores = oLocalVar.GetObj("EX_End_Pool_10"); 
-					await AddConfirmPromise("提示:\n恭喜！\n您已成功通过目前更新的所有关卡！\n游玩记录记录已保存，若未来有新关卡更新，\n您可以重新进入本关继续游玩！\n感谢您的支持！", "");
-					Stores["NowVaseLvl"] = 16, Stores["MaxVaseLvl"] = Math.max(Stores["NowVaseLvl"], Stores["MaxVaseLvl"]), oLocalVar.SaveVar(); // 保存进度
+					let Result = await AddConfirmPromise("提示: 恭喜！\n您已成功通过目前更新的所有关卡！\n游玩记录已保存，若未来有新关卡更新，\n您可以重新进入本关继续游玩！\n感谢您的支持！\n您可以按“确认”进入致谢者名单！", "");
+					Stores["NowVaseLvl"] = 21, Stores["MaxVaseLvl"] = Math.max(Stores["NowVaseLvl"], Stores["MaxVaseLvl"]), oLocalVar.SaveVar(); // 保存进度
 					let oCv = new oEffect({Dev_Style: {width: 1800, height: 600, zIndex: 130}, Height: 600, Width: 1800}, EDAll);
-					oCv.Gradient_Rect(0, [[1, 300]], oSym["NowStep"], [0, 0, 0], () => SelectModal(__Normal_Start_Room__));
+					if (Result) oCv.Gradient_Rect(0, [[1, 100]], oSym["NowStep"], [0, 0, 0], () => { NowLevel = "Staff", Change_Level(1), CanChange = false; });
+					else oCv.Gradient_Rect(0, [[1, 300]], oSym["NowStep"], [0, 0, 0], () => SelectModal(__Normal_Start_Room__));
 				}, 
 
 				// 存档点
@@ -536,6 +589,7 @@
 					let dChoseTitle1 = NewEle("dChoseTitle1", "div", "position:relative;text-align:center;line-height:88px;height:88px;left:35%;width:30%;font-size:30px;font-weight:bold;font-family:黑体;color:#fff;cursor:pointer;", { innerHTML: "选 择 阶 段", onclick: () => window["open"]("https://www.bilibili.com/video/av680890718/"), "title": "幻想万花镜" }, dChosePanel1, { "class":"dRiddleTitle" });
 					let dBack1 = NewEle("dBack1", "div", "position:absolute;width:89px;height:26px;top:564px;left:700px;background-position:center top;background:url(images/interface/Almanac_CloseButton.png);cursor:pointer;text-align:center;line-height:26px;color:#000080;font-size:12px;", { onmouseover: function() { this.style.backgroundPosition='bottom'; }, onmouseout: function() { this.style.backgroundPosition='top'; }, onclick: function() { CanChange && SelectModal(__Normal_Start_Room__); }, innerText: "返 回" }, dChooseLevelBox, {"class": "button"});
 					let dOpen1 = NewEle("dOpen1", "div", "position:absolute;width:89px;height:26px;top:564px;left:100px;background-position:center top;background:url(images/interface/Almanac_CloseButton.png);cursor:pointer;text-align:center;line-height:26px;color:#000080;font-size:12px;", { onmouseover: function() { this.style.backgroundPosition='bottom'; }, onmouseout: function() { this.style.backgroundPosition='top'; }, onclick: function() { CanChange && Genshin_Open(); }, innerText: "启 动" }, dChooseLevelBox, {"class": "button"});
+					let dStaffDiv = NewEle("dStaffDiv1", "input", "position:absolute;left:650px;top:85px;width:225px;height:35px;border-radius:12.5px;white-space:pre;background:rgba(0,0,0,0.733);color:rgb(255,255,255);font-family:Regular;font-size:20px;cursor:pointer;visibility:visible;white-space:pre;", {"onclick": () => GotoStaffLevel() }, dChooseLevelBox, {"type": "button", "value": "点击查看制作者名单"});
 
 					let dLevelADiv = NewEle("dLevelADiv", "div", "left:100px;top:225px;background-image:url(new_skin/Images/InterFace/background_new_3.png);display:block;position:absolute;z-index:100;cursor:pointer;background-position:-12.5px,0px;background-size:324px,139px;background-repeat:no-repeat;width:300px;height:139px;border:5px solid rgba(255,255,255,0.5);border-radius:15px;", { onclick: function() { CanChange && (NowLevel = 1), Change_Level(1); } }, dChooseLevelBox);
 					let dLevelATXT = NewEle("dLevelATXT", "div", "text-align:center;line-height:60px;font-size:30px;font-weight:bold;font-family:黑体;color:#fff;position:relative;top:15px;", { innerHTML: "第一部分: 什伍连坐<br><font style=\"font-size:20px\">点此进入</font>" }, $("dLevelADiv"));
@@ -547,6 +601,7 @@
 					let dLevelCTXT = NewEle("dLevelCTXT", "div", "text-align:center;line-height:60px;font-size:30px;font-weight:bold;font-family:黑体;color:#fff;position:relative;top:15px;", { innerHTML: "第三部分: 铁人夺冠<br><font style=\"font-size:20px\">点此进入</font>" }, $("dLevelCDiv"));
 
 
+
 					// 选择第三部分存档点
 					let dChooseSavesBox = NewEle("dChooseSavesBox", "div", "position:absolute;left:900px;top:0px;z-index:105;", 0, EDAll);
 					let dChosePanel2 = NewEle("dChosePanel2", "div", "display:block;position:absolute;left:0px;top:0px", 0, dChooseSavesBox, {"class":"Almanac_ZombieBack"});
@@ -556,7 +611,7 @@
 
 
 					if (LevelStore["MaxPlay"] <= 2) { // 解锁到第二关布局
-						SetHidden(dLevelCDiv);
+						SetHidden(dLevelCDiv, dStaffDiv);
 						dLevelADiv["style"]["left"] = "100px", dLevelADiv["style"]["top"] = "225px";
 						dLevelBDiv["style"]["left"] = "487.5px", dLevelBDiv["style"]["top"] = "225px";
 					} else if (LevelStore["MaxPlay"] >= 3) { // 解锁到第三关布局
@@ -597,18 +652,19 @@
 				}, 
 				VaseSaveList: {
 					"第一小节 —— 弈: ": ["01"], 
-					"第二小节 —— 战: ": ["06", "10"], 
-					"第三小节 —— 勇: ": ["11", "14", "15"], 
+					"第二小节 —— 战: ": ["06", "09"], 
+					"第三小节 —— 勇: ": ["11", "14"], 
+					"第四小节 —— 斗: ": ["16", "18", "20"],  
 				}, 
 				"SummonVaseList": (Ele) => { // 生成目前关卡所对应的选关
-					let Part = 1, Top = 150, Left = 100; LineWei = 100, MaxValPlay = Number(LevelStore["MaxVaseLvl"]) || 1;
+					let Part = 1, Top = 150, Left = 100; LineWei = 75, MaxValPlay = Number(LevelStore["MaxVaseLvl"]) || 1;
 					for (let Val in VaseSaveList) {
-						let Title = Val, Value = VaseSaveList[Val], BtnLeft = Left + 187, BtnAdd = 175;
+						let Title = Val, Value = VaseSaveList[Val], BtnLeft = Left + 180, BtnAdd = 150;
 						if (Number(Value[0]) > MaxValPlay) return; // 如果超过了，直接取消生成接下来的按钮
 						NewEle("dPart" + Part, "div", "position:absolute;left:" + Left + "px;top:" + Top + "px;font-size:25px;font-family:Regular;color:rgb(44,35,24);white-space:pre;", { "innerHTML": Title }, Ele);
 						for (let ID of Value) {
 							if (Number(ID) > MaxValPlay) return; // 如果超过了，直接取消生成接下来的按钮
-							let BtnEle = NewEle("dPartBtn" + Part + ID, "input", "width:150px;height:35px;border-radius:12.5px;white-space:pre;background:rgba(0,0,0,0.733);color:rgb(255,255,255);font-family:Regular;font-size:20px;cursor:pointer;visibility:visible;position:absolute;left:" + BtnLeft + "px;top:" + (Top - 5) + "px;color:#FFFFFF;", 0, Ele, { class: "ButtonStyle", value: "第 " + ID + " 小节", type: "button" });
+							let BtnEle = NewEle("dPartBtn" + Part + ID, "input", "width:130px;height:35px;border-radius:12.5px;white-space:pre;background:rgba(0,0,0,0.733);color:rgb(255,255,255);font-family:Regular;font-size:20px;cursor:pointer;visibility:visible;position:absolute;left:" + BtnLeft + "px;top:" + (Top - 5) + "px;color:#FFFFFF;", 0, Ele, { class: "ButtonStyle", value: "第 " + ID + " 小节", type: "button" });
 							BtnLeft += BtnAdd, BtnEle.onclick = (() => {
 								let LvlID = Number(ID);
 								return () => {
@@ -620,10 +676,118 @@
 						}
 						Top += LineWei, ++Part;
 					}
+				}, 
+				"GotoStaffLevel": () => { // 去致谢名单关卡
+					if (CanChange == false) return;
+					NowLevel = "Staff", Change_Level(1), CanChange = false;
 				}
 			}));
 		}, 
-		"default": () => (oS.Init({ LvlClearFunc: function() {delete oS.NowLevel; delete oS.Plant_Ground;} }, {}, {}), SelectModal(__Normal_Start_Room__), true)
+
+
+		// EX10 致谢名单界面
+		"Staff": () => {
+			oS.Init({
+				PicArr: ["new_skin/Images/InterFace/Travel_Background.png"],
+				backgroundImage: "new_skin/Images/InterFace/Travel_Background.png",
+				LvlClearFunc: oSys["LvlClearFunc"], CanStartLevel: false, 
+				LoadAccess: function() {
+					let Staff = oS["Staff_HTML"]["join"]("");
+					$("tGround")["style"] = "background:url(new_skin/Images/InterFace/Travel_Background.png) no-repeat;left:0px;top:-100px;width:900px;height:730px;background-size:100% 100%;visibility:visible;"; // 背景图片
+					NewEle("dStaff_Block", "div", "visibility:visible;height:100%;width:100%;z-index:100;display:block;overflow:auto;white-space:pre;", {"className": "WindowFrame Hidden_Container Not_Chose"}, EDAll); // pointer-events:none;
+					NewEle("dStaff_HTML", "div", "line-height:1;text-align:center;color:#FFFFFF;font-size:15px;font-family:RanTian,Regular,Briannetod,微软雅黑,Verdana,Tahoma;-webkit-text-stroke-width:0px;-webkit-text-stroke-color:#000000;word-break:break-all;white-space:pre;tab-size:1;", {"innerHTML": Staff}, $("dStaff_Block"));
+					NewEle("dReturn", "input", "position:absolute;left:25px;top:550px;width:150px;height:35px;border-radius:12.5px;white-space:pre;background:rgba(0,0,0,0.733);color:rgb(255,255,255);font-family:Regular;font-size:20px;cursor:pointer;visibility:visible;white-space:pre;z-index:120", {"onclick": () => GotoChooseLevel() }, EDAll, {"type": "button", "value": "返回选关"});
+					let oCv = new oEffect({Dev_Style: {width: 1800, height: 600, zIndex: 150}, Height: 600, Width: 900}, EDAll);
+					oCv["Gradient_Rect"](1, [[0, 100]], oSym["NowStep"], [0, 0, 0], () => { oCv["__Delete__"](), SetVisible($("dMenu")), PlayAudio("tap"), oS["CanStartLevel"] = true; } );
+					AllAudioStop(), PlayMusic(oS.LoadMusic = "pure_snows");
+				},
+				Staff_HTML: [
+					'<!-- 制作名单 -->',
+					'<a style="font-size:100px;-webkit-text-stroke-width:4px;"><br><br>EX10 致谢<br><br><br></a><br><br><br>',
+					'<a style="font-size:30px;-webkit-text-stroke-width:1px;">（请用鼠标下滑查看）<br><br><br><br><br><br><br><br><br><br></a>',
+					'',
+					'<!-- EX10 - 1 关卡策划 -->',
+					'<a style="font-size:70px;-webkit-text-stroke-width:2px;">EX10 - 1</a><br><a style="font-size:20px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">策划</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">创意</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">程序</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">测试</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅   snz   白鹤亮翅<br></a><br><a style="font-size:15px;">（排名不分先后，下同）</a><br>',
+					'<a style="font-size:350px;"><br></a>',
+					'',
+					'<!-- EX10 - 2 关卡策划 -->',
+					'<a style="font-size:70px;-webkit-text-stroke-width:2px;">EX10 - 2</a><br><a style="font-size:20px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">策划</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">创意</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">程序</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">测试</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅   snz   白鹤亮翅<br></a><br>',
+					'<a style="font-size:350px;"><br></a>',
+					'',
+					'<!-- EX10 - 3 关卡策划 -->',
+					'<a style="font-size:70px;-webkit-text-stroke-width:2px;">EX10 - 3</a><br><a style="font-size:20px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">策划</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">创意</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:35px;line-height:1.3;">我是帅:  第 01 ~ 11、13 小节</a><br>', 
+					'<a style="font-size:35px;line-height:1.3;">B站的J:  第 12、14、15 小节</a><br>', 
+					'<a style="font-size:35px;line-height:1.3;">snz:  第 16 ~ 20 小节</a><br>', 
+					'<a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">程序</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅<br></a><br><a style="font-size:60px;"><br></a>',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">测试</a><br><a style="font-size:5px;"><br></a>',
+					'<a style="font-size:40px;line-height:1.3;">我是帅   snz   白鹤亮翅   B站的J<br></a><br>',
+					'<a style="font-size:350px;"><br></a>',
+					'',
+					'<!-- 特别感谢 -->',
+					'<a style="font-size:65px;line-height:1.25;-webkit-text-stroke-width:2px;">特别感谢</a><br>',
+					'<a style="font-size:35px;line-height:1.5;word-spacing:1em;">snz jspvz低玩 江南游戏 白鹤亮翅<br>寒冰投手 B站的J<br>屏幕前的你</a><br><a style="font-size:225px;"><br></a>',
+					'<a style="font-size:350px;"><br></a>',
+					'',
+					'<!-- 音乐列表，可以点击音乐播放 -->',
+					'<a style="font-size:55px;-webkit-text-stroke-width:2px;">本关音乐列表</a><br><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'pure_snows\')">pure snows ~  ——  水月陵</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'nice_graveyard\')">素敵な墓場で暮しましょ  ——  上海アリス幻樂団</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'True_Admin\')">聖徳伝説 ～ True Administrator  ——  上海アリス幻樂団</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'22636605\')">青空の影  ——  上海アリス幻樂団</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'1990182380\')">Odyssey  ——  Ice</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'1990182378\')">Vast Forests  ——  Ice</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'1990182377\')">White Flower  ——  Ice</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'28561005\')">one\'s future  ——  Key Sounds Label</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'494992638\')">白色  ——  灰澈</a><br>',
+					'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(\'760280\')">Saya\'s Melody  ——  麻枝准</a><br>',
+					'<a style="font-size:250px;"><br></a> <!-- 大跨度 -->',
+					'',
+					'<a style="font-size:70px;-webkit-text-stroke-width:2px;">EX10</br></a>',
+					'<a style="font-size:60px;-webkit-text-stroke-width:2px;">2023 - 2024</br></a>',
+					'<a style="font-size:250px;"><br></a>',
+					''
+				],
+			}, {}, {
+				"Play": (N) => (StopMusic(oS.LoadMusic), PlayMusic(oS.LoadMusic = N)), // 播放音乐
+				"Internet_URL_Music_List": ["761323", "22706973", "760979", "1319520140", "471936", "786262", "22765919", "857905", "471834", "495562302", "28219117", "461074907", "1312561189"],
+				"Can_Play_Internet": true,
+				"Play2": function (ID) { // 网络音乐
+					if (window["Can_Play_Internet"] == false) return alert("您点击的速度太快了，请稍后再试！");
+					window["Can_Play_Internet"] = false, setTimeout(() => (Can_Play_Internet = true), 2500); // 2.5秒间隔
+					StopMusic(oS.LoadMusic), (delete oAudio["_OL_STAFF_Music_"]);
+					NewURLAudio({url: "https://music.163.com/song/media/outer/url?id=" + ID + ".mp3", audioname: "_OL_STAFF_Music_", loop: true}), PlayMusic(oS.LoadMusic = "_OL_STAFF_Music_");
+				}, 
+				"GotoChooseLevel": () => { // 返回选关界面
+					if (!oS["CanStartLevel"]) return;
+					console.log("感谢您的游玩！"), SelectModal(oS.Lvl), PlayAudio("tap");
+				}
+			});
+
+		}, 
+
+		"default": () => ( oS.Init({ LvlClearFunc: function() {delete oS.NowLevel; delete oS.Plant_Ground;} }, {}, {}), SelectModal(__Normal_Start_Room__), true)
 	})();
 
 	// (NowLevel <= 5) && (SelectModal(oS.Lvl), oS.NowLevel = NowLevel); // 下一阶段

@@ -27,9 +27,9 @@ var oCabbage_Pro = InheritO(oPeashooter, {
 	HitZombie: function(f, self) {
 		f.getPea(f, 0), f.getHit2(f, self.Attack); // getHit2没有声音
 	},
-	NormalAttack: function(zid) {
+	NormalAttack: function(Zid, Force = false) {
 		let self = this, Ele = $(self.id), TaskZombie = oZ.getArZ(self.pixelLeft + self.beAttackedPointR, oS.W, self.R, true).find((Z) => (Z.Altitude != 3)); // 找到最左边的僵尸
-		if (!TaskZombie) return; // 没有任何僵尸，摆烂
+		if (!Force && !TaskZombie) return; // 没有任何僵尸，摆烂
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(135, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 
@@ -73,10 +73,10 @@ oMelonPult_Pro = InheritO(oCabbage_Pro, {
 		}
 		Bself["Destroy"]();
 	}, 
-	GetAngle: (X, Y, lastX, lastY) => 90 - 25 + 180 / Math.PI * Math.atan2(Y - lastY, X - lastX), 
-	NormalAttack: function(zid) {
+	GetAngle: (X, Y, lastX, lastY) => 90 - 180 / Math.PI * Math.atan2(Y - lastY, X - lastX), 
+	NormalAttack: function(Zid, Force = false) {
 		let self = this, Ele = $(self.id), TaskZombie = oZ.getArZ(self.pixelLeft + self.beAttackedPointR, oS.W, self.R, true).find((Z) => (Z.Altitude != 3)); // 找到最左边的僵尸
-		if (!TaskZombie) return; // 没有任何僵尸，摆烂
+		if (!Force && !TaskZombie) return; // 没有任何僵尸，摆烂
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(285, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 
@@ -111,9 +111,9 @@ var oCabbage = InheritO(oCabbage_Pro, {
 	GetDX: function () { return - Math.floor((40 + this.width) * 0.5); }, 
 	getShadow: function(a) { return "left:" + (a.width * 0.5 - 22) + "px;top:" + (a.height - 22) + "px"; },
 	GetAngle: (X, Y, lastX, lastY) => 90 - 180 / Math.PI * Math.atan2(Y - lastY, X - lastX), 
-	NormalAttack: function(zid) {
+	NormalAttack: function(Zid, Force = false) {
 		let self = this, Ele = $(self.id), TaskZombie = oZ.getArZ(self.pixelLeft + self.beAttackedPointR, oS.W, self.R, true).find((Z) => (Z.Altitude != 3)); // 找到最左边的僵尸
-		if (!TaskZombie) return; // 没有任何僵尸，摆烂
+		if (!Force && !TaskZombie) return; // 没有任何僵尸，摆烂
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(180, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 
@@ -146,9 +146,9 @@ oMelonPult = InheritO(oMelonPult_Pro, {
 	Tooltip: '可以对成群的僵尸造成巨大伤害',
 	Produce: '西瓜投手可以对成群的僵尸造成巨大伤害。<p>伤害：<font color="#FF0000">高</font><br>范围：<font color="#FF0000">投掷</font><br>特点：<font color="#FF0000">西瓜可以对目标附近的僵尸造成伤害</font></p>低调从来不是西瓜投手的风格，“太阳——赐予我——力量，我可是草地上最能打的人”，他说“我不是吹牛，瞅瞅那些统计数据，你就会明白了。”<p>素材提供 - B站的J',
 	GetAngle: (X0, Y0, X1, Y1, Angle) => Angle + 7.5, 
-	NormalAttack: function(zid) {
+	NormalAttack: function(Zid, Force = false) {
 		let self = this, Ele = $(self.id), TaskZombie = oZ.getArZ(self.pixelLeft + self.beAttackedPointR, oS.W, self.R, true).find((Z) => (Z.Altitude != 3)); // 找到最左边的僵尸
-		if (!TaskZombie) return; // 没有任何僵尸，摆烂
+		if (!Force && !TaskZombie) return; // 没有任何僵尸，摆烂
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(185, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 

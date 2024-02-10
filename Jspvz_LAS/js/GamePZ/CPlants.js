@@ -475,7 +475,7 @@ oThreepeater = InheritO(oPeashooter, {
 	NormalAttack: function() {
 		let self = this, R = self.R, C = self.C; 
 		for (a in self.oTrigger) {
-			let dY = GetY(R) - GetY(a), dX = 300;
+			let dY = GetY(R) - GetY(a), dX = 200;
 			let Tick = dX / 5, dInit = -dY * 2 / Tick, dAdd = -dInit / Tick;
 			let MaxS, MinS; (dY > 0) ? (MaxS = 0, MinS = -Infinity) : (MaxS = Infinity, MinS = 0);
 			let Pea = new oPeaBullet(), self = this;
@@ -483,7 +483,7 @@ oThreepeater = InheritO(oPeashooter, {
 			Pea.Birth({ 
 				X: self["AttackedLX"] + 25, Y: 32, Z: self["pixelTop"] + 60, Attack: 20, 
 				Assign: { 
-					Width: 43, Height: 18, AbsLeftMove: 25, Speed: [0, 0, dInit], Gravity: [0, 0, dAdd], Weight:[0, 0, 1], 
+					Width: 43, Height: 18, AbsLeftMove: 25, Speed: [0, 0, dInit], Gravity: [0, 0, dAdd], Weight:[0, 0.1, 1], 
 					BirthSpeed: 5, MaxSpeed: [Infinity, Infinity, MaxS], MinSpeed: [-Infinity, -Infinity, MinS], PeaProperty: 0, 
 					RegularR: a
 				} 

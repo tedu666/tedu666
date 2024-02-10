@@ -480,7 +480,7 @@ oCoord = {
 			return $SSml(a, [ - 50, 100, 140, 220, 295, 379, 460, 540, 625, 695, 775, 855, 935], [ - 2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 		};
 		GetR = function(a) {
-			return $SSml(a, [86, 181, 281, 386, 476], [0, 1, 2, 3, 4, 5])
+			return $SSml(a, [86, 181, 281, 386, 476, 610], [0, 1, 2, 3, 4, 5, 6])
 		};
 		GetX = function(a) {
 			return $SEql(a, {
@@ -557,7 +557,7 @@ oCoord = {
 			return $SSml(a, [ - 50, 100, 140, 220, 295, 379, 460, 540, 625, 695, 775, 855, 935], [ - 2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 		};
 		GetR = function(a) {
-			return $SSml(a, [86, 171, 264, 368, 440, 532], [0, 1, 2, 3, 4, 5, 6])
+			return $SSml(a, [86, 171, 264, 368, 440, 532, 610], [0, 1, 2, 3, 4, 5, 6, 7])
 		};
 		GetX = function(a) {
 			return $SEql(a, {
@@ -1278,7 +1278,7 @@ oT = {
 	}
 },
 oGT = {
-	KeyList: new Set(["ZombieBirth", "ZombieDie", "PlantBirth", "PlantDie", "Enter-Level", "Exit-Level", "InitoGT"]), 
+	KeyList: new Set(["ZombieBirth", "ZombieDie", "PlantBirth", "PlantDie", "Enter-Level", "Exit-Level", "InitoGT", "BulletBirth"]), 
 	TriggerList: new Map(), 
 	Init: function () {
 		let self = this, KList = self.KeyList;

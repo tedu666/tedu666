@@ -92,7 +92,7 @@
 				let Pea = new oPeaBullet();
 				Pea.Birth({ X: self["AttackedLX"] + 26, Y: 30, Z: self["pixelTop"] + 45, 
 					Assign: {
-						Weight: [Math.random() * 0.04, 0.01, Math.random() * 0.05 - 0.025], Gravity: [-1, 0, 1], PeaProperty: -1
+						Weight: [Math.random() * 0.04, 0.15, Math.random() * 0.05 - 0.025], Gravity: [-1, 0, 1], PeaProperty: -1
 					} 
 				});
 			}
