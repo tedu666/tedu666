@@ -1,9 +1,9 @@
 let __BulletImg_Mode__ = "Canvas"; // "Dom" | "Animate" | "Canvas" 三种不同展示方式
 
 var oBu = {
-	BList: {}, BKeys: [], DList: [], CanvasList: {}, NowData: 0, 
+	BList: {}, BKeys: [], DList: [], InitList: [], CanvasList: {}, NowData: 0, 
 	Init: function () { 
-		let self = this; self["BList"] = {}, self["BKeys"] = {}; 
+		let self = this; self["BList"] = {}, self["BKeys"] = {}, self["DList"] = [], self["InitList"] = []; 
 		for (let O in self["CanvasList"]) self["CanvasList"][O]["__Delete__"]();
 		for (let R = 0; R <= oS["R"] + 1; ++R) {
 			self["CanvasList"][R] = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: R * 3 + 2, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
@@ -12,14 +12,15 @@ var oBu = {
 	}, 
 	Get_ID: function () { return "_" + Math["random"](); }, 
 	Del: function (Did) { let self = this; self["DList"]["push"](Did); }, 
-	Add: function (Obj) { let self = this; self["BList"][Obj["ID"]] = Obj; oGT.OnTrigger("BulletBirth", Obj) }, 
+	Add: function (Obj, dTime) { let self = this; self["BList"][Obj["ID"]] = Obj, self["InitList"]["push"]([dTime, Obj]); oGT.OnTrigger("BulletBirth", Obj) }, 
 	ReBindingCanvas: function () { // 重新把所有的画布绑定 
 		let self = this, CanvasList = self["CanvasList"]; 
 		for (let Q in CanvasList) CanvasList[Q]["ReBinding"](); 
 	}, 
 	TraversalOf: function (Tick = 1) { // 批量处理子弹移动
-		let self = this, BList = self["BList"], DList = self["DList"], CanvasList = self["CanvasList"];
+		let self = this, BList = self["BList"], DList = self["DList"], InitList = self["InitList"], CanvasList = self["CanvasList"];
 		self["NowData"] = new Date();
+		for (let INObj of InitList) if (oSym.Now - INObj[0] > 0) INObj[1]["Fresh"](oSym.Now - INObj[0]); self["InitList"]["length"] = 0; // 调整初始时的偏移
 		for (let Q in CanvasList) CanvasList[Q]["Clear_Canvas"]();
 		for (let K in BList) BList[K]["Fresh"](Tick); // 刷新
 		for (let D of DList) delete self["BList"][D]; self["DList"]["length"] = 0; // 清除子弹
@@ -41,7 +42,11 @@ var CBullets = NewO({
 	RandomPic: function (l) { let link = l + (l["indexOf"]('?') != -1 ? "&" : "?") + Math["random"](); return link; }, // 下次也可以对这两部分进行优化
 	CheckOutLimit: (A, B) => B[0] > A || B[1] < A, // 判断数 A 是否在 [B[0], B[1]] 外
 	CheckOut: (O) => O["CheckOutLimit"](O["Pos"][0], O["Border"][0]) || O["CheckOutLimit"](O["Pos"][1], O["Border"][1]) || O["CheckOutLimit"](O["Pos"][2], O["Border"][2]), // 判断是否出界
-	Destroy: function () { let self = this; ClearChild(self["Ele"], self["Shadow"]), self["WasDestroy"] = true, oBu["Del"](self["ID"]); }, 
+	Destroy: function () { 
+		let self = this; // 如果是画布模式，则没有必要清除
+		if (__BulletImg_Mode__ != "Canvas") ClearChild(self["Ele"], self["Shadow"]);
+		self["WasDestroy"] = true, oBu["Del"](self["ID"]); 
+	}, 
 	Fresh: function (Tick) { let self = this; if (self["CheckOut"](self)) self["Die"]("Out_Limit"); self["Move"](Tick); }, // 刷新子弹，包括移动
 	Move: function () { let self = this; self["Die"](); }, 
 	Die: function () { let self = this; self["Destroy"](); }, 
@@ -97,9 +102,15 @@ var CBullets = NewO({
 		self["LstPos"][0] = self["Pos"]["concat"](), self["LstPos"][1] = self["Pos"]["concat"](); // 备份初始数据
 		self["zIndex"] = zIndex ?? (3 * self["R"] + 2), self["NormalGif"] = NormalGif, self["SplashGif"] = SplashGif; // 设置图片优先级
 		self["EleURL"] = self["PicArr"][self["NormalGif"]]; // 设置图片地址
-		self["Ele"] = NewImg(ID, self["PicArr"][self["NormalGif"]], "left:" + self["ImgPos"][0] + "px; top:" + self["ImgPos"][1] + "px; z-index:" + self["zIndex"] + "; will-change:transform;", (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置图片
-		self["Shadow"] = NewEle(ID + "_Shadow", "div", "z-index:1; opacity:0.5; background-size:29px; background-repeat:no-repeat; width:29px; top:" + (self["Pos"][2] + 30) + "px; left:" + self["Pos"][0] + "px; will-change:transform;", { className: "Shadow" }, (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置影子
-		Object["assign"](self, Assign), self["DataAdjust"](), self["PrivateBirth"](self), self["ImageAdjust"](0), oBu["Add"](self); // 自定义
+	
+		if (__BulletImg_Mode__ != "Canvas") { // 画布模式特判
+			self["Ele"] = NewImg(ID, self["PicArr"][self["NormalGif"]], "left:" + self["ImgPos"][0] + "px; top:" + self["ImgPos"][1] + "px; z-index:" + self["zIndex"] + "; will-change:transform;", (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置图片
+			self["Shadow"] = NewEle(ID + "_Shadow", "div", "z-index:1; opacity:0.5; background-size:29px; background-repeat:no-repeat; width:29px; top:" + (self["Pos"][2] + 30) + "px; left:" + self["Pos"][0] + "px; will-change:transform;", { className: "Shadow" }, (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置影子
+		} else {
+			self["Ele"] = self["Shadow"] = { "src": self["PicArr"][self["NormalGif"]] };
+		}
+	
+		Object["assign"](self, Assign), self["DataAdjust"](), self["PrivateBirth"](self), self["ImageAdjust"](0), oBu["Add"](self, self["CreateTime"][1]); // 自定义
 		return self; // 返回
 	}, 
 }), 

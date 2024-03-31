@@ -44,7 +44,7 @@ var Show_MINI_LIST = function(){
 	LevelList.push(GetLevelTable('new_level/PovertyOfTheSoil_2', '贫瘠之地2', 'new_skin/Level_View/PovertyOfTheSoil_2.png'));
 	LevelList.push(GetLevelTable('new_level/ViewStar', '观星', 'new_skin/Level_View/ViewStar.jpg'));
 	LevelList.push(GetLevelTable('new_level/CardRain', '种子雨', 'new_skin/Level_View/CardRain.png'));
-	LevelList.push(GetLevelTable('test_level/Test', '子弹测试', 'new_skin/Level_View/CardRain.png'));
+	LevelList.push(GetLevelTable('new_level/LayDown', '你敢放下它么', 'new_skin/Level_View/LayDwon.png'));
 
 	Set_Next_Page_Minigames(0, true);
 };
@@ -54,7 +54,7 @@ var NormalBetaLevelInit = function(){
 	BetaLevelList.push(GetLevelTable('test_level/CardRemake', '卡槽轮班', 'new_skin/Level_View/CardRemake.png'));
 	BetaLevelList.push(GetLevelTable('test_level/Protect_Brain', '超乎寻常的战役', 'new_skin/Level_View/Protect_Brain.png'));
 	BetaLevelList.push(GetLevelTable('test_level/third_party_level/HELP', '*绝望*', 'new_skin/Level_View/Third_ZombossW.png')); // 第三方关卡 - 白鹤亮翅提供
-	BetaLevelList.push(GetLevelTable('test_level/LayDown', '你敢放下它么', 'new_skin/Level_View/LayDwon.png'));
+	BetaLevelList.push(GetLevelTable('test_level/Test', '子弹测试', 'new_skin/Level_View/CardRain.png'));
 };
 
 var Init_Beta_Level = function(){

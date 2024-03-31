@@ -3,55 +3,44 @@ $n = (a) => document.createElement(a),
 ClearChild = function() {
 	var a = arguments.length, c;
 	while (a--) try { c = arguments[a], c.parentNode.removeChild(c), c = null; } catch(b) {};
-},
-SetBlock = function() {
+}, SetBlock = function() {
 	var a = arguments.length; while (a--) arguments[a].style.display = "block";
-},
-SetNone = function() {
+}, SetNone = function() {
 	var a = arguments.length;
 	while (a--) arguments[a].style.display = "none";
-},
-SetHidden = function() {
+}, SetHidden = function() {
 	var a = arguments.length;
 	while (a--) arguments[a].style.visibility = "hidden";
-},
-SetVisible = function() {
+}, SetVisible = function() {
 	var a = arguments.length;
 	while (a--) arguments[a].style.visibility = "visible";
-},
-SetAlpha = function(c, b, a) { 
+}, SetAlpha = function(c, b, a) { 
 	c.style.opacity = a;
-},
-SetStyle = function (d, b) {
+}, SetStyle = function (d, b) {
 	var c = d.style, a;
 	for (a in b) c[a] = b[a];
 	return d
-},
-NewImg = function(f, e, b, c, d) {
+}, NewImg = function(f, e, b, c, d) {
 	var a = $n("img"); a.src = e, b && (a.style.cssText = b);
 	if (d) for (v in d) a[v] = d[v];
 	f && (a.id = f), c && c.appendChild(a);
 	return a
-},
-EditImg = function(e, f, c, b, a) {
+}, EditImg = function(e, f, c, b, a) {
 	f && (e.id = f), c && (e.src = c), b && SetStyle(e, b), a && a.appendChild(e);
 	return e
-},
-NewEle = function(h, b, d, a, e, f, g, c) {
+}, NewEle = function(h, b, d, a, e, f, g, c) {
 	g = $n(b), h && (g.id = h), d && (g.style.cssText = d);
 	if (a) for (c in a) g[c] = a[c];
 	if (f) for (c in f) g.setAttribute(c, f[c]);
 	e && e.appendChild(g);
 	return g
-},
-EditEle = function(g, f, a, e, b, c) {
+}, EditEle = function(g, f, a, e, b, c) {
 	if (f) for (c in f) g.setAttribute(c, f[c]);
 	a && SetStyle(g, a);
 	if (b) for (c in b) g[c] = b[c];
 	e && e.appendChild(g);
 	return g
-}, 
-GetRandom = (R = 1e10) => { return Math["floor"](Math["random"]() * R); }, 
+}, GetRandom = (R = 1e10) => { return Math["floor"](Math["random"]() * R); }, 
 VisitorName = "游客" + GetRandom(1e10); // 确定游客 id
 
 Date.prototype.format = function(b) {
@@ -83,3 +72,9 @@ $("txtChat")["addEventListener"]("keydown", function (Event) {
 	if (Event["ctrlKey"] || Event["metaKey"]) return this["value"] += "\n", this["scrollTop"] = this["scrollHeight"], Monitor(); // 如果是功能键，加上 \n
 	Event["preventDefault"](), $("frm")["onsubmit"](); // 否则发送
 });
+
+
+// 获取参数
+let LocationValue = Object.fromEntries(new URLSearchParams(window["location"]["search"]));
+
+

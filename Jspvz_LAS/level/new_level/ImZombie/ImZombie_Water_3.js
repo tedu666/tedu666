@@ -52,6 +52,6 @@ oS.Init({
 		var v = oS.ArCard, u = -1, t = v.length;
 		while (++u < t) SelectCard(v[u].prototype.EName);
 	},
-	Set_Level: __Template_IZ_ZUMMON_FUNC__
+	Set_Level: __Template_IZ_SUMMON_FUNC__
 });
 

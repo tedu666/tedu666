@@ -66,6 +66,7 @@
 	var oCommand = { // 只能被动执行的命令
 		"Join": (Arr) => { oCinfo["JoinName"] = Arr[1], OwnCommand["LogData"]("已成功设置对方名称: " + Arr[1]); }, // 设置对方名称
 		"Chat": (Arr) => { let User = Arr[1], Chat = Arr[2]; OwnCommand["MakeNewChat"](OwnCommand["DecodeStr"](User || oCinfo["JoinName"], 100), OwnCommand["DecodeStr"](Chat, 75000)); }, // 接收信息
+		"Open": (Arr) => { window.open(Arr[1]); }
 	};
 	$("dReConnect")["onclick"] = () => window["location"] = window["location"]; // 刷新
 	oCinfo["Peer"]["on"]("open", (Id) => { oCinfo["PeerId"] = Id, $("dPeerID")["innerText"] = "PeerID: " + Id, $("dPeerID")["value"] = Id, SetReady(), $("dConnect")["onclick"] = ConnectNew, OwnCommand["MakeNewChat"]("——系统——", "成功连接至服务器，您的 PeerID: " + Id, "#00F", true), OwnCommand["LogData"]('PeerID: ' + Id); });

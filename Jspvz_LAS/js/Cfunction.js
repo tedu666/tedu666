@@ -418,7 +418,9 @@ oS = {
 		} else {
 			EDAll.scrollLeft = MaxLeft;
 			DisplayZombie(), SetVisible($("dMenu"));
+
 			oEf.Animate($("dMenu"), [{ "opacity": 0 }, { "opacity": 1 }], 0.2, "ease-in-out");
+			oEf.Animate($("dZombie"), [{ "opacity": 0 }, { "opacity": 1 }], 0.4, "ease-in-out");
 	
 			if (oS.CanSelectCard) {
 				SetVisible($("dTop"), $("dSelectCard"), $("dCardList"));
