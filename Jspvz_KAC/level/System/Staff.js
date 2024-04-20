@@ -25,7 +25,7 @@ oS.Init({
 		'',
 		'<!-- 图片素材 -->',
 		'<a style="font-size:65px;-webkit-text-stroke-width:2px;">素材提供</a><br>',
-		'<a style="font-size:35px;line-height:1.3;">lonelystar<br>江南游戏<br>PVZ2素材吧<br></a><br><a style="font-size:225px;"><br></a>',
+		'<a style="font-size:35px;line-height:1.3;">lonelystar<br>江南游戏<br>PVZ2素材吧<br>jspvz低玩<br>B站的J<br></a><br><a style="font-size:225px;"><br></a>',
 		'',
 		'<!-- 制作人 -->',
 		'<a style="font-size:65px;line-height:1.25;-webkit-text-stroke-width:2px;">主要制作人</a><br>',

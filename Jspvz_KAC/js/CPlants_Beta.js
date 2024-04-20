@@ -1,17 +1,12 @@
 // 借鉴于旅行的卷心菜
-var oCabbage = InheritO(oPeashooter, {
-	EName: "oCabbage",
-	CName: "卷心菜投手",
-	width: 115,
-	height: 103,
-	beAttackedPointL: 30,
-	beAttackedPointR: 75,
-	SunNum: 125,
-	AttackGif: 5,
-	Attack: 40, // 攻击伤害
-	Is_AOE: false,
-	Judge_Strength: 1.1,
-	Attack_Await_Time: 290, // 等待时间
+var oCabbage_Pro = InheritO(oPeashooter, {
+	EName: "oCabbage_Pro", CName: "卷心菜投手",
+	width: 115, height: 103, 
+	beAttackedPointL: 30, beAttackedPointR: 75,
+	SunNum: 125, Attack: 45, // 攻击伤害
+	AttackGif: 5, 
+	Is_AOE: false, Judge_Strength: 1.1,
+	Attack_Await_Time: 260, // 等待时间
 	AudioArr: ["CabbageAttack1", "CabbageAttack2"], // 音效
 	PicArr: function() {
 		var b = "new_skin/", a = b + "Images/Plants/Cabbage/";
@@ -91,8 +86,8 @@ var oCabbage = InheritO(oPeashooter, {
 });
 
 
-var oMelonPult = InheritO(oCabbage, {
-	EName: "oMelonPult",
+var oMelonPult_Pro = InheritO(oCabbage_Pro, {
+	EName: "oMelonPult_Pro",
 	CName: "西瓜投手",
 	width: 190,
 	height: 120,

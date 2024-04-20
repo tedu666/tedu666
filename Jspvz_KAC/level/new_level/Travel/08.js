@@ -1,5 +1,5 @@
 oS.Init({
-	PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCabbage],
+	PName: [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTallNut, oSeaShroom, oPlantern, oCactus, oSplitPea, oStarfruit, oPumpkinHead, oFlowerPot, oCoffeeBean, oGarlic, oGloomShroom, oTwinSunflower, oSpikerock, oGatlingPea_Pro, oTorchwood_Pro, oCabbage_Pro],
 	ZName: [oBackupDancer, oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oFootballZombie, oDancingZombie, oDuckyTubeZombie1, oDuckyTubeZombie2, oDuckyTubeZombie3, oDolphinRiderZombie, oSnorkelZombie, oZomboni, oJackinTheBoxZombie, oBalloonZombie],
 	PicArr: ["new_skin/InterFace/background_new_3.png"],
 	backgroundImage: "new_skin/InterFace/background_new_3.png",
@@ -125,7 +125,7 @@ oS.Init({
 	},
 	FlagToEnd: function() {
  		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDAll);
-		NewImg("imgSF", "new_skin/Images/Card/MelonPult.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDAll, {onclick: function() {GetNewCard(this, oMelonPult, 0);}});
+		NewImg("imgSF", "new_skin/Images/Card/MelonPult.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDAll, {onclick: function() {GetNewCard(this, oMelonPult_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDAll);
 
 		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});

@@ -227,6 +227,7 @@ var GameLogout = function() {
 
 	d = _Init_User_Data_Obj_(), d.UserName = Name;
 	Store.set("__JSPVZ_KAC_UserData__Name_" + Name + "__", d), Store.set("__JSPVZ_KAC_UserEXMode_Info", d);
+	oLocalVar["LevelVars"][Name] = {}, oLocalVar.SaveVar();
 
 	TravelInfo = d, SetUserData(Name, TravelInfo.AdvTravel);
 	Set_Next_Page_EXModeList(0, 1);
@@ -265,10 +266,13 @@ var oLocalVar = { // 处理所有关卡的变量的
 	GetObj: function (Name = oS.LvlEName) {
 		let self = this, UName = TravelInfo.UserName, Var, Obj; // 单独把每个玩家数据隔离开来
 		self.SaveVar(), Var = Store.get(self.StoreName) ?? {}, PlayerOwn = Var[UName] ?? {}, Obj = PlayerOwn[Name] ?? {}; // 先保存防止多次获取
-		self.LevelVars[UName] ??= {}, self.LevelVars[UName][Name] = Obj; return Obj;
+		self.LevelVars[UName] ??= {}, self.LevelVars[UName][Name] ??= {};
+		for (let Did in self.LevelVars[UName][Name]) delete self.LevelVars[UName][Name][Did];
+		for (let Did in Obj) self.LevelVars[UName][Name][Did] = Obj[Did]; 
+		return self.LevelVars[UName][Name];
 	}, 
 	SaveVar: function () {
 		let self = this, Name = self.StoreName, Var = self.LevelVars;
 		Store.set(Name, Object.assign(Store.get(Name) ?? {}, Var));
 	}
-}
+};

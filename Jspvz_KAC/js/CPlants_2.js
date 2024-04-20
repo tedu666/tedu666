@@ -1,4 +1,4 @@
-oFlowerVase = InheritO(CPlants, {
+var oFlowerVase = InheritO(CPlants, {
 	EName: "oFlowerVase", CName: "花瓶", // ID 中文名
 	SunNum: 0, coolTime: 0, // 阳光 冷却时间
 	canEat: 0, Stature: -1, // 是否可以被吃 身高
@@ -219,11 +219,8 @@ oFlowerVase = InheritO(CPlants, {
 		for (var O in $Z) if ($Z[O].PZ != 0) return false; // 如果有非魅惑的僵尸，直接返回
 		return true;
 	}
-});
-
-
-
-var oRepeater2 = InheritO(oRepeater, { 
+}), 
+oRepeater2 = InheritO(oRepeater, { 
 	EName: "oRepeater2",
 	CName: "反向双发射手",
 	PicArr: ["images/Card/Plants/Repeater2.png", "images/Plants/Repeater2/0.gif", "images/Plants/Repeater2/Repeater2.gif", "images/Plants/PB00.gif", "images/Plants/PeaBulletHit.gif"],
@@ -260,12 +257,8 @@ var oRepeater2 = InheritO(oRepeater, {
 	getTriggerRange: function(a, b, c) {
 		return [[100, b + 25, 1]]
 	}
-});
-
-
-
-
-var oGatlingPea_Pro = InheritO(oGatlingPea, {
+}), 
+oGatlingPea_Pro = InheritO(oGatlingPea, {
 	CanGrow: CPlants.prototype.CanGrow,
 	Tooltip: "一次发射四颗豌豆<br>遇到火炬树桩后伤害大幅度提升<br>有几率一次发出多颗豌豆",
 	CName: "加特林（加强版）",
@@ -284,9 +277,8 @@ var oGatlingPea_Pro = InheritO(oGatlingPea, {
 			c && c.NormalAttack1(); --b && oSym.addTask(15, arguments.callee, [d, b])
 		}, [this.id, w]);
 	}
-});
-
-var oTorchwood_Pro = InheritO(oTorchwood, {
+}), 
+oTorchwood_Pro = InheritO(oTorchwood, {
 	SunNum: 275,
 	coolTime: 20,
 	HP: 1024,
@@ -336,26 +328,23 @@ var oTorchwood_Pro = InheritO(oTorchwood, {
 			if (g) {for (e = g[1]; e < 11; e++) {delete d[f + "_" + e];}}
 		},[a])
 	}
-});
-
-var oNutBowling_pro = InheritO(oNutBowling, {
+}), 
+oNutBowling_pro = InheritO(oNutBowling, {
 	SunNum: 100,
 	coolTime: 5,
 	EName: "oNutBowling_pro"
-});
-var oBoomNutBowling_pro = InheritO(oBoomNutBowling, {
+}), 
+oBoomNutBowling_pro = InheritO(oBoomNutBowling, {
 	SunNum: 150,
 	coolTime: 30,
 	EName: "oBoomNutBowling_pro"
-});
-var oHugeNutBowling_pro = InheritO(oHugeNutBowling, {
+}), 
+oHugeNutBowling_pro = InheritO(oHugeNutBowling, {
 	SunNum: 750,
 	coolTime: 120,
 	EName: "oHugeNutBowling_pro"
-});
-
-
-var oFlowerVase_New = InheritO(oFlowerVase, {
+}), 
+oFlowerVase_New = InheritO(oFlowerVase, {
 	PicArr: ["new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png", "new_skin/InterFace/Scary_Pot.png"],
 
 	/*
@@ -378,20 +367,17 @@ var oFlowerVase_New = InheritO(oFlowerVase, {
 
 		return Obj;
 	}, 
-});
-
-var oBrains_New = InheritO(oBrains, {
+}), 
+oBrains_New = InheritO(oBrains, {
 	EName: "oBrains_New",
 	PKind: 4,
 	PicArr: ["new_skin/Images/Plants/brain.png"]
-});
-
-var oLawnCleaner_New = InheritO(oLawnCleaner, {
+}), 
+oLawnCleaner_New = InheritO(oLawnCleaner, {
 	EName: "oLawnCleaner_New",
 	PicArr: ["images/New_interface/LawnMower_body.png"]
-});
-
-var oReStarfruit = InheritO(oStarfruit, {
+}), 
+oReStarfruit = InheritO(oStarfruit, {
 	EName: "oReStarfruit",
 	CName: "连发杨桃",
 	SunNum: 250,
