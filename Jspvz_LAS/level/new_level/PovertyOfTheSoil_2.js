@@ -50,9 +50,9 @@ oS.Init({ // 该注释为了方便学习者快速阅读代码
 		29: [ShowFinalWave, 0]
 	},
 	FlagToEnd: function() { // 通关时执行的函数
-		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, { // 奖杯
+		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, { // 奖杯
 			onclick: function() {SelectModal(0), PlayAudio("winmusic");} // 先 SelectModal 可以确保过关音乐正常播放
 		});
-		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove); // 箭头
+		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll); // 箭头
 	}
 }, {}); // 兼容 IE 是件大活

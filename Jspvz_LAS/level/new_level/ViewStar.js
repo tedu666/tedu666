@@ -91,13 +91,13 @@ oS.Init({
 		9 : [ShowLargeWave, 0],
 	},
 	FlagToEnd: function() {
-		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {
+		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {
 			onclick: function() {
 				SelectModal(0);
 				PlayAudio("winmusic");
 			}
 		});
-		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove)
+		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll)
 	},	
 	DefFlagPrgs: function() {
 		var f = oP,c = f.FlagZombies,e = f.FlagToSumNum,
@@ -112,7 +112,7 @@ oS.Init({
 },{
 	GroundOnmousemove1 : function(j) {
 		j = window.event || j;
-		var d = j.clientX - EDMoveoffsetLeft + EBody.scrollLeft || EElement.scrollLeft,
+		var d = j.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft,
 		b = j.clientY + EBody.scrollTop || EElement.scrollTop,
 		k = oS.ChoseCard,
 		h = ChosePlantX(d),

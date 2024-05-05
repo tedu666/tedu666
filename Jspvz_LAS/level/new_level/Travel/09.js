@@ -103,8 +103,8 @@ oS.Init({
 		NewImg("imgSF", "images/Card/Plants/Catttail.png", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCattail, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 
-		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 		Win_Travel(9, 10);
 	}
 },{

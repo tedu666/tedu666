@@ -132,13 +132,13 @@ false && oS.Init({
 	},
 	GotoNextWave : function(survival_times){
 		if(survival_times >= 5){//如果超过第五波，结束关卡
-			NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {
+			NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {
 				onclick: function() {
 					SelectModal(0);
 					PlayAudio("winmusic");
 				}
 			});//奖杯
-			NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+			NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 			return;//退出函数
 		}
 		(function(){

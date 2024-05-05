@@ -12,16 +12,16 @@ let __Ctk_User_PassWord_ = async function(){
 	});
 };
 
-let __GetUrl__ = (async function(){
-	return "https://kac-jspvz.rth5.com/online/Level_List.json";
-	// (!IS_Get) && (await __Ctk_User_PassWord_());
-	// return OL_URL;
+let __GetUrl__ = (async function() {
+	return "";
+//	return "https://kac-jspvz.rth5.com/online/Level_List.json";
 });
 
 //rc4(OnlineUrl_RC4, "");
 
 
 
+/*
 
 //检查当前版本
 (async function(){
@@ -32,7 +32,7 @@ let __GetUrl__ = (async function(){
 		let DJson = JSON.parse(f), Text = DJson.Text, Func = DJson.Func;
 
 		if (!Text || Text == "") Text = "检测到可能有新版本，是否跳转至下载链接？";
-		if (!Func || Func == "") Func = 'window["open"]("https://www.luogu.com.cn/paste/1rhbg5ok");';
+		if (!Func || Func == "") Func = 'window["open"]("https://www.luogu.com/paste/1rhbg5ok");';
 
 		if (Number(DJson.Ver) > Number(__NowVer__)) w = confirm(Text);
 		if (w) eval(Func);
@@ -43,6 +43,7 @@ let __GetUrl__ = (async function(){
 	});
 })();
 
+*/
 
 
 (async function(){ //条款等

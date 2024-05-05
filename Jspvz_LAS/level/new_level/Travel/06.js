@@ -88,8 +88,8 @@ oS.Init({
 	FlagMaxWaitTime: 1990, // 最多等待 19 秒再出下一波僵尸
 	FlagZombieWaitTime: 500, // 如果这一波所有僵尸死亡，那么 5 秒钟内出下一波
 	FlagToEnd: function() {
-		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 		Win_Travel(6, 7);
 	}
 },{

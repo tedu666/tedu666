@@ -86,8 +86,8 @@ oS.Init({
 		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDMove);
 		NewImg("imgSF", "new_skin/images/Card/Cabbage.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCabbage_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
-		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 		Win_Travel(5, 6);
 	}
 },__Template_ReSet_Object__(___Template_Protect_Brain___,{

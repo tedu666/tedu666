@@ -119,8 +119,8 @@ oS.Init({
 		if (GameLevelData["Sum_Num"] < GameLevelData["Task_FlagEndSun"]) return SetHidden($("dCardList"), $("dSunNum"), $("tdShovel")), GameOver("您所拥有阳光数量未达标 <br>请再接再厉"); // 阳光太少
 		if (GameLevelData["Plants_Num"] > GameLevelData["Task_Plant"]) return SetHidden($("dCardList"), $("dSunNum"), $("tdShovel")), GameOver("场上植物数量不得大于 " + GameLevelData["Task_Plant"] + " 株 <br>请再接再厉"); // 植物太多
 
-		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 		Win_Travel(7, 8);
 	}
 },{

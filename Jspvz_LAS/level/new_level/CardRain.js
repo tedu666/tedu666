@@ -93,8 +93,8 @@ oS.Init({
 		39: [ShowFinalWave, 0]
 	},
 	FlagToEnd: function() {
-		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, { onclick: function() { SelectModal(0), PlayAudio("winmusic"); } });
-		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, { onclick: function() { SelectModal(0), PlayAudio("winmusic"); } });
+		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 	}
 },{
 	dRand: function (l, r) { return Math.floor(Math.random() * (r - l + 1) + l); }, 

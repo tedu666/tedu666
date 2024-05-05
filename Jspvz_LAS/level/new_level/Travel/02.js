@@ -67,8 +67,8 @@ oS.Init({
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 		Win_Travel(2, 3);
 
-//		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-//		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+//		NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+//		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 	}
 },{
 	$Flower: {},

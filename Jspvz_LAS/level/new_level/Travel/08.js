@@ -128,8 +128,8 @@ oS.Init({
 		NewImg("imgSF", "new_skin/Images/Card/MelonPult.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oMelonPult_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 
-		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDMove, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
-		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDMove);
+		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
+		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);
 		Win_Travel(8, 9);
 	}
 },{
@@ -185,7 +185,7 @@ oS.Init({
 /*
 $("dShowMsgLogin").onmousedown = function(j){
 	this._ = true;
-	var d = j.clientX - EDMoveoffsetLeft + EBody.scrollLeft || EElement.scrollLeft, b = j.clientY + EBody.scrollTop || EElement.scrollTop;
+	var d = j.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft, b = j.clientY + EBody.scrollTop || EElement.scrollTop;
 	this._left = d - this.offsetLeft;
 	this._top = b - this.offsetTop;
 	// this._left = this._top = 100;
@@ -198,7 +198,7 @@ $("dShowMsgLogin").onmouseup = function(){
 $("dShowMsgLogin").onmousemove = function(j){
 	// console.log(j);
 	j = window.event || j;
-	var d = j.clientX - EDMoveoffsetLeft + EBody.scrollLeft || EElement.scrollLeft, b = j.clientY + EBody.scrollTop || EElement.scrollTop;
+	var d = j.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft, b = j.clientY + EBody.scrollTop || EElement.scrollTop;
 	if(this._ == true) {
 		this.style.marginLeft = (d - this._left) + "px";
 		this.style.marginTop = (b - this._top) + "px";
