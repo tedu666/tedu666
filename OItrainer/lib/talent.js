@@ -1,0 +1,2580 @@
+﻿/* talent.js - 学生特质（talent）管理器
+   目的：提供一个集中注册/触发学生特质的管理器（TalentManager），便于扩展特质逻辑并在事件或比赛中调用。
+   使用说明：在页面中先于 `game.js` 加载本文件，或者确保在触发 student.triggerTalents 之前 window.TalentManager 已就绪。
+   API:
+     - register(name, handler): 注册特质处理器。handler(student, eventName, ctx) -> 可修改学生/游戏状态，返回可选描述字符串。
+     - clear(): 清除所有已注册特质
+     - handleStudentEvent(student, eventName, ctx): 对单个学生按其特质逐一调用已注册 handler
+     - registerDefaultTalents(game, utils): 注册一些示例特质（可选）
+     - getTalentInfo(name): 获取天赋的描述信息（用于UI显示）
+     - setTalentInfo(name, info): 设置天赋的描述信息
+*/
+(function(global){
+  const TalentManager = {
+    // talents: { name -> { name, description, color, prob, handler } }
+    _talents: {},
+
+    // 注册单个天赋 (完整定义对象)
+    // talentDef: { name, description, color?, prob?: 0.0-1.0, handler?: function }
+    registerTalent(talentDef){
+      if(!talentDef || !talentDef.name) throw new Error('invalid talent definition');
+      // kind: 'positive' | 'negative' (default positive for backward compatibility)
+      const def = Object.assign({ description: '', color: '#2b6cb0', prob: 0.0, handler: null, kind: 'positive' }, talentDef);
+      // beneficial 表示是否为正面天赋，优先使用显式字段，否则根据 kind 推断
+      def.beneficial = (typeof def.beneficial !== 'undefined') ? Boolean(def.beneficial) : (def.kind !== 'negative');
+      // 同步一个首字母大写的别名以兼容可能的外部使用（用户要求字段名为 Beneficial）
+      def.Beneficial = def.beneficial;
+      this._talents[def.name] = def;
+    },
+
+    // 清除所有天赋定义
+    clearTalents(){ this._talents = {}; },
+
+    // 获取已注册天赋名列表
+    getRegistered(){ return Object.keys(this._talents); },
+
+    // 获取天赋定义
+    getTalent(name){ return this._talents[name]; },
+
+    // 获取天赋显示信息（兼容旧 API）
+    getTalentInfo(name){
+      const t = this.getTalent(name);
+      if(!t) return { name, description: '暂无描述', color: '#2b6cb0' };
+      return { name: t.name, description: t.description, color: t.color };
+    },
+
+    // 触发某学生的天赋事件（遍历学生天赋并调用 handler）
+    handleStudentEvent(student, eventName, ctx){
+      // Allow event handling even if student has no talents registered.
+      if(!student) return [];
+      const results = [];
+
+      // First, call handlers for talents the student actually has.
+      if(student.talents){
+        for(const tName of Array.from(student.talents)){
+          const t = this.getTalent(tName);
+          if(t && typeof t.handler === 'function'){
+            try{
+              const res = t.handler(student, eventName, ctx || {});
+              if(res) results.push({ talent: tName, result: res });
+            }catch(e){ console.error('talent handler error', tName, e); }
+          }
+        }
+      }
+
+      // Then, always invoke an internal cleanup handler (if registered).
+      // Some talents apply temporary modifications for the duration of a contest
+      // and expect a global cleanup step to restore original values. Registering
+      // that cleanup as a normal talent ("__talent_cleanup__") is convenient,
+      // but it shouldn't require the student to actually possess that talent.
+      // Call it unconditionally so temporary boosts are reliably reverted.
+      try{
+        const internal = this.getTalent('__talent_cleanup__');
+        if(internal && typeof internal.handler === 'function'){
+          const res = internal.handler(student, eventName, ctx || {});
+          if(res) results.push({ talent: '__talent_cleanup__', result: res });
+        }
+      }catch(e){ console.error('internal talent handler error', '__talent_cleanup__', e); }
+
+      return results;
+    },
+
+    // 尝试为学生获取新天赋（每名学生最多可拥有 MAX_TALENTS 个天赋）
+    // 修改后的机制：只会获得正面天赋，同时有相同概率移除负面天赋
+    tryAcquireTalent(student, multiplier = 1.0) {
+      if (!student || !student.active) return;
+      if (!(student.talents instanceof Set)) {
+        student.talents = new Set();
+      }
+
+      // 检查是否有"庸才"天赋，如果有则无法获得新天赋
+      if (student.talents.has('庸才')) {
+        return;
+      }
+
+      const MAX_TALENTS = 4;
+
+      // 全局概率门槛：每次训练/外出集训后，学生只有一定概率有机会获得天赋（最多1个）
+      let globalGetTalentProb;
+      try{
+        globalGetTalentProb = (typeof GET_TALENT_Probability !== 'undefined') ? Number(GET_TALENT_Probability) : (typeof window !== 'undefined' && typeof window.GET_TALENT_Probability !== 'undefined' ? Number(window.GET_TALENT_Probability) : 0.5);
+        // 若当前为简单难度（game.difficulty === 1），则将总体获得天赋概率翻倍（上限 1.0）
+        try{
+          if(typeof window !== 'undefined' && window.game && Number(window.game.difficulty) === 1){
+            globalGetTalentProb = Math.min(1.0, (isFinite(globalGetTalentProb) ? globalGetTalentProb : 0.5) * 2.0);
+          }
+        }catch(e){}
+        if(getRandom() >= (isFinite(globalGetTalentProb) ? globalGetTalentProb : 0.5)){
+          return; // 未通过总体概率门槛，无机会获得天赋
+        }
+      }catch(e){ 
+        globalGetTalentProb = 0.5;
+      }
+
+      // 从已注册天赋中遍历（this._talents 存储实际定义）
+      const registered = Object.values(this._talents || {});
+      
+      // 第一步：尝试获得正面天赋（只考虑未达到上限的情况）
+      if (student.talents.size < MAX_TALENTS) {
+        for (const tDef of registered) {
+          if (!tDef || !tDef.name) continue;
+          // 只处理正面天赋（beneficial === true）
+          if (!tDef.beneficial) continue;
+          // 如果学生已有此天赋则跳过
+          if (student.talents.has(tDef.name)) continue;
+          const prob = Number(tDef.prob || 0) || 0;
+          if (prob <= 0) continue;
+          if (getRandom() < prob * multiplier) {
+            student.talents.add(tDef.name);
+            // 优先将天赋获得作为事件卡片推送到事件面板；若无 pushEvent，再回退到旧的 showEventModal
+            try{ if(window.pushEvent) window.pushEvent({ name: '天赋获得', description: `${student.name} 在训练中激发了新的潜能，获得了天赋：【${tDef.name}】！`, week: window.game ? window.game.week : undefined }); }catch(e){}
+            //try{ if(window.showEventModal) window.showEventModal && window.showEventModal({ name: '天赋获得1', description: `${student.name} 在训练中激发了新的潜能，获得了天赋：【${tDef.name}】！`, week: window.game ? window.game.week : undefined }); }catch(e){}
+            // 获得天赋后不立即返回，继续尝试移除负面天赋
+            break;
+          }
+        }
+      }
+
+      // 第二步：尝试移除负面天赋（概率与获得天赋相同）
+      // 收集学生当前拥有的负面天赋
+      const negativeTalents = Array.from(student.talents).filter(tName => {
+        const tDef = this.getTalent(tName);
+        return tDef && tDef.beneficial === false;
+      });
+      
+      if (negativeTalents.length > 0) {
+        // 使用相同的全局概率判断是否有机会移除负面天赋
+        if (getRandom() < (isFinite(globalGetTalentProb) ? globalGetTalentProb : 0.5)) {
+          // 随机选择一个负面天赋移除
+          const removedTalentName = negativeTalents[Math.floor(getRandom() * negativeTalents.length)];
+          student.talents.delete(removedTalentName);
+          try{ 
+            if(window.showEventModal) {
+              window.showEventModal({ 
+                name: '负面天赋消除', 
+                description: `${student.name} 通过不断的努力和训练，成功克服了负面状态，消除了天赋：【${removedTalentName}】！`, 
+                week: window.game ? window.game.week : undefined 
+              });
+            }
+          }catch(e){}
+        }
+      }
+    },
+
+    // 为学生分配天赋（用于初始分配/招募时调用）
+    // 此方法与 tryAcquireTalent 类似，但为静默分配（不弹出事件模态），便于初始化流程使用。
+    // 修改后：只会分配正面天赋
+    assignTalentsToStudent(student, multiplier = 1.0) {
+      if (!student) return;
+      if (!(student.talents instanceof Set)) student.talents = new Set();
+      // 如果标记为庸才，跳过分配
+      if (student.talents.has('庸才')) return;
+      const MAX_TALENTS = 4;
+      if (student.talents.size >= MAX_TALENTS) return;
+      const registered = Object.values(this._talents || {});
+      // 全局概率门槛：初始分配/招募时也适用（决定是否有机会在该时刻获得任何天赋）
+      try{
+        let globalGetTalentProb = (typeof GET_TALENT_Probability !== 'undefined') ? Number(GET_TALENT_Probability) : (typeof window !== 'undefined' && typeof window.GET_TALENT_Probability !== 'undefined' ? Number(window.GET_TALENT_Probability) : 0.5);
+        // 简单难度下翻倍（上限 1.0）
+        try{
+          if(typeof window !== 'undefined' && window.game && Number(window.game.difficulty) === 1){
+            globalGetTalentProb = Math.min(1.0, (isFinite(globalGetTalentProb) ? globalGetTalentProb : 0.5) * 2.0);
+          }
+        }catch(e){}
+        if(getRandom() >= (isFinite(globalGetTalentProb) ? globalGetTalentProb : 0.5)){
+          return; // 未通过总体概率门槛
+        }
+      }catch(e){ /* ignore and proceed */ }
+      // 只遍历正面天赋进行分配
+      for (const tDef of registered) {
+        if (!tDef || !tDef.name) continue;
+        // 只处理正面天赋（beneficial === true）
+        if (!tDef.beneficial) continue;
+        if (student.talents.has(tDef.name)) continue;
+        const prob = Number(tDef.prob || 0) || 0;
+        if (prob <= 0) continue;
+        try{
+          if (getRandom() < prob * multiplier) {
+            student.talents.add(tDef.name);
+            // 每次 assign 调用最多添加一个天赋
+            return;
+          }
+        }catch(e){ console.error('assignTalentsToStudent error', e); }
+      }
+    },
+
+    // 为初始学生强制分配且仅分配一个天赋（用于游戏开始时的初始名册）
+    // 要求：每名初始学生必须至少拥有一个天赋；选择逻辑为按各天赋的 prob 字段作为权重随机选择（包含正/负面天赋）
+    assignInitialTalent(student){
+      try{
+        if(!student) return;
+        if(!(student.talents instanceof Set)) student.talents = new Set();
+        // 如果学生已有任意天赋（例如对点招生时带来的），则不覆盖
+        if(student.talents.size > 0) return;
+
+        // 特殊处理：为"周康阳"分配多个强力天赋
+        if(student.name === '周康阳'){
+          const specialTalents = ['冷静', '心态稳定', 'Ad-hoc大师', '抗压奇才', '铁人', '没建文件夹'];
+          for(const talentName of specialTalents){
+            const talentDef = this.getTalent(talentName);
+            if(talentDef){
+              student.talents.add(talentName);
+            }
+          }
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了增强天赋: ${Array.from(student.talents).join(', ')}`);
+          return;
+        }
+        
+        // 特殊处理：为"戴江齐"分配"虚惊一场"天赋
+        if(student.name === '戴江齐'){
+          student.talents.add('虚惊一场');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 虚惊一场`);
+          return;
+        }
+        
+        // 特殊处理：为"毛嘉怡"分配"爱玩"天赋
+        if(student.name === '毛嘉怡'){
+          student.talents.add('爱玩');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 爱玩`);
+          return;
+        }
+        
+        // 特殊处理：郭羽冲、陈昕阳、沈吉滪有50%概率获得"lumina"天赋
+        if(student.name === '郭羽冲' || student.name === '陈昕阳' || student.name === '沈吉滪'){
+          if(getRandom() < 0.5){
+            student.talents.add('lumina');
+            console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: lumina`);
+            return;  // 获得lumina后直接返回，不再分配其他天赋
+          } else {
+            console.log(`[天赋系统] ${student.name} 未获得 lumina 天赋（50%概率未触发），将随机分配其他天赋`);
+            // 不返回，继续正常的天赋分配流程
+          }
+        }
+        
+        // 特殊处理：为"杜瑜皓"分配"魔怔"天赋
+        if(student.name === '杜瑜皓'){
+          student.talents.add('魔怔');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 魔怔`);
+          return;
+        }
+        
+        // 特殊处理：为"李白天"分配"高冷"天赋
+        if(student.name === '李白天'){
+          student.talents.add('高冷');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 高冷`);
+          return;
+        }
+        
+        // 特殊处理：为"李羿辰"分配"超能力者"天赋
+        if(student.name === '李羿辰'){
+          student.talents.add('超能力者');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 超能力者`);
+          return;
+        }
+        
+        // 特殊处理：为"罗恺"分配"T1恐惧症"天赋
+        if(student.name === '罗恺'){
+          student.talents.add('T1恐惧症');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: T1恐惧症`);
+          return;
+        }
+        
+        // 特殊处理：为"陈诺"分配"dx"天赋
+        if(student.name === '陈诺'){
+          student.talents.add('dx');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: dx`);
+          return;
+        }
+        
+        // 特殊处理：为"王相文"分配"临门一脚"天赋
+        if(student.name === '王相文'){
+          student.talents.add('临门一脚');
+          console.log(`[天赋系统] 为特殊学生 ${student.name} 分配了特殊天赋: 临门一脚`);
+          return;
+        }
+
+        const registered = Object.values(this._talents || {});
+        const candidates = registered.filter(t => t && t.name);
+        if(candidates.length === 0) return;
+
+        // 使用 prob 作为权重进行加权随机选择；若所有 prob 为 0 则回退为均匀选择
+        let total = 0;
+        for(const c of candidates){ total += Number(c.prob || 0); }
+
+        let chosen = null;
+        if(total > 0){
+          let r = getRandom() * total;
+          for(const c of candidates){
+            const w = Number(c.prob || 0);
+            if(r < w){ chosen = c; break; }
+            r -= w;
+          }
+          if(!chosen) chosen = candidates[candidates.length - 1];
+        } else {
+          chosen = candidates[Math.floor(getRandom() * candidates.length)];
+        }
+
+        if(chosen){
+          student.talents.add(chosen.name);
+          // 初始分配不强制弹窗，但保留事件卡记录以便玩家查看
+          //try{ if(window && window.pushEvent) window.pushEvent({ name: '初始天赋分配', description: `${student.name} 初始获得天赋：【${chosen.name}】`, week: window.game ? window.game.week : undefined }); }catch(e){}
+        }
+      }catch(e){ console.error('assignInitialTalent error', e); }
+    },
+
+  // 检查并处理天赋丧失
+  // 修改后的机制：只会丧失正面天赋，同时有相同概率获得负面天赋
+  checkAndHandleTalentLoss(student) {
+    if (!student || !student.active || !student.talents || student.talents.size === 0) {
+      return;
+    }
+
+    const TALENT_LOSS_THRESHOLD = TALENT_LOST_VALUE; // 丧失天赋的压力阈值
+    const TALENT_LOSS_PROB = 0.1;    // 丧失天赋的基础概率
+
+    if (Number(student.pressure || 0) >= TALENT_LOSS_THRESHOLD) {
+      if (getRandom() < TALENT_LOSS_PROB) {
+        // 第一步：只从正面天赋中选择进行丧失
+        const positiveTalents = Array.from(student.talents).filter(tName => {
+          const tDef = this.getTalent(tName);
+          return tDef && tDef.beneficial === true;
+        });
+
+        if (positiveTalents.length > 0) {
+          const lostTalentIndex = Math.floor(getRandom() * positiveTalents.length);
+          const lostTalentName = positiveTalents[lostTalentIndex];
+          // 从Set中移除该天赋名
+          student.talents.delete(lostTalentName);
+          const tDef = this.getTalent(lostTalentName);
+          const displayName = (tDef && tDef.name) ? tDef.name : lostTalentName;
+
+          // 将天赋丧失作为事件卡片推送；兼容旧 modal 接口
+          try{ if(window.pushEvent) window.pushEvent({ name: '天赋丧失', description: `由于长期处于高压状态，${student.name} 感到身心俱疲，不幸丧失了天赋：【${displayName}】！`, week: window.game ? window.game.week : undefined }); }catch(e){}
+          //try{ if(window.showEventModal) window.showEventModal && window.showEventModal({ name: '天赋丧失', description: `由于长期处于高压状态，${student.name} 感到身心俱疲，不幸丧失了天赋：【${displayName}】！`, week: window.game ? window.game.week : undefined }); }catch(e){}
+        }
+
+        // 第二步：尝试获得负面天赋（概率与丧失天赋相同）
+        if (getRandom() < TALENT_LOSS_PROB) {
+          const MAX_TALENTS = 4;
+          // 只有未达到上限时才能获得负面天赋
+          if (student.talents.size < MAX_TALENTS) {
+            const registered = Object.values(this._talents || {});
+            // 遍历所有负面天赋
+            for (const tDef of registered) {
+              if (!tDef || !tDef.name) continue;
+              // 只处理负面天赋（beneficial === false）
+              if (tDef.beneficial !== false) continue;
+              // 如果学生已有此天赋则跳过
+              if (student.talents.has(tDef.name)) continue;
+              const prob = Number(tDef.prob || 0) || 0;
+              if (prob <= 0) continue;
+              // 使用天赋自身的概率判断是否获得
+              if (getRandom() < prob) {
+                student.talents.add(tDef.name);
+                try{ 
+                  if(window.showEventModal) {
+                    window.showEventModal({ 
+                      name: '负面天赋获得', 
+                      description: `由于长期处于高压状态，${student.name} 产生了负面心理，获得了负面天赋：【${tDef.name}】！`, 
+                      week: window.game ? window.game.week : undefined 
+                    });
+                  }
+                }catch(e){}
+                // 获得第一个负面天赋后立即返回（限制每次最多1个）
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+    // 旧兼容：提供 register / setTalentInfo 接口，但它们会映射到新的数据结构
+    register(name, handler){
+      // 注册仅逻辑处理器，显示信息需通过 setTalentInfo 单独设置
+      if(!name || typeof handler !== 'function') throw new Error('invalid talent register');
+      if(!this._talents[name]) this._talents[name] = { name, description: '', color: '#2b6cb0', prob: 0.0, handler, kind: 'positive', beneficial: true, Beneficial: true };
+      else this._talents[name].handler = handler;
+    },
+    clear(){ this.clearTalents(); },
+    setTalentInfo(name, info){
+      if(!this._talents[name]) this._talents[name] = { name, description: '', color: '#2b6cb0', prob: 0.0, handler: null };
+      Object.assign(this._talents[name], info);
+    },
+
+    // 注册默认天赋（此处保持空实现，调用者可自行添加）
+    registerDefaultTalents(game, utils){
+      // 注册请求中的天赋实现（有概率分配 + 事件触发效果）
+      // utils: { uniform, uniformInt, normal, clamp }
+      // Provide a safe clamp wrapper: when called with one argument, return the numeric value;
+      // when called with min/max, forward to utils.clamp. This avoids accidental NaN when
+      // existing code calls clamp(x) but utils.clamp expects (val,min,max).
+      let clamp;
+      if(utils && typeof utils.clamp === 'function'){
+        clamp = function(val, min, max){
+          if(typeof min === 'undefined' && typeof max === 'undefined'){
+            const n = Number(val);
+            return isFinite(n) ? n : 0;
+          }
+          return utils.clamp(val, min, max);
+        };
+      } else {
+        clamp = function(val){ const n = Number(val); return isFinite(n) ? n : 0; };
+      }
+
+      // helper: ensure per-contest temporary storage on student
+      function ensureTemp(student){
+        student._talent_backup = student._talent_backup || {};
+        student._talent_state = student._talent_state || {};
+        // initialize per-contest constmental copy if not present
+        if(typeof student._talent_state.constmental === 'undefined'){
+          student._talent_state.constmental = Number(student.mental || 50);
+        }
+      }
+
+      // 冷静：比赛开始触发，临时提升所有能力 20%
+      this.registerTalent({
+        name: '冷静',
+        description: '比赛开始时有较高概率在比赛中保持冷静，所有能力临时+20%。',
+        color: '#4CAF50',
+        prob: 0.10,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            ensureTemp(student);
+            if(eventName !== 'contest_start') return null;
+            // 触发概率基础 60%，赛前压力>=60 每超 10 点额外 +10%
+            let base = 0.6;
+            const pressure = Number(student.pressure) || 0;
+            if(pressure >= 60){
+              base += Math.floor((pressure - 60) / 10) * 0.1;
+            }
+            if(getRandom() < base){
+              // 备份并放大
+              if(!student._talent_backup['冷静']){
+                // backup raw original values (avoid forcing fallback to 0 which may mask bugs)
+                student._talent_backup['冷静'] = { thinking: student.thinking, coding: student.coding, constmental: (student._talent_state && student._talent_state.constmental) || student.mental };
+                student.thinking = clamp(Number(student.thinking||0) * 1.2);
+                student.coding = clamp(Number(student.coding||0) * 1.2);
+                // adjust the per-contest constmental rather than the base mental
+                student._talent_state.constmental = clamp(Number(student._talent_state.constmental||student.mental||50) * 1.2);
+                student._talent_state['冷静'] = true;
+                return '冷静发动：全能力 +20%（赛中临时）';
+              }
+            }
+          }catch(e){ console.error('冷静 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 伽罗瓦：遇到数学题时可能触发，数学知识与思维能力 +50%
+      this.registerTalent({
+        name: '伽罗瓦',
+        description: '遇到数学题时有概率爆发，数学知识与思维能力临时+50%。',
+        color: '#FF9800',
+        prob: 0.05,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            ensureTemp(student);
+            if(eventName !== 'contest_select_problem') return null;
+            const state = ctx && ctx.state;
+            const pid = ctx && (ctx.problemId || ctx.problemId === 0 ? ctx.problemId : ctx.problemId);
+            if(!state) return null;
+            const probObj = state.getProblem(pid);
+            if(!probObj || !probObj.tags) return null;
+            if(!probObj.tags.includes('数学')) return null;
+            if(getRandom() < 0.25){
+              // 备份并放大
+              if(!student._talent_backup['伽罗瓦']){
+                student._talent_backup['伽罗瓦'] = { thinking: student.thinking, knowledge_math: student.knowledge_math };
+                student.thinking = clamp(Number(student.thinking||0) * 1.5);
+                student.knowledge_math = Number(student.knowledge_math||0) * 1.5;
+                student._talent_state['伽罗瓦'] = true;
+                return '伽罗瓦发动：数学与思维能力 +50%（本题临时）';
+              }
+            }
+          }catch(e){ console.error('伽罗瓦 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 爆发型：连续换题 2 次后下一题发动，所有知识点与思维能力提高100%
+      this.registerTalent({
+        name: '爆发型',
+        description: '连续换题两次后，下一题有较大概率爆发，知识点与思维能力临时翻倍。',
+        color: '#E91E63',
+        prob: 0.05,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            ensureTemp(student);
+            // track skips on student._talent_state._skipCount
+            if(eventName === 'contest_skip_problem'){
+              student._talent_state._skipCount = (student._talent_state._skipCount || 0) + 1;
+              return null;
+            }
+            if(eventName === 'contest_select_problem'){
+              const cnt = student._talent_state._skipCount || 0;
+              // 如果累计 2 次以上跳题，则有50%概率发动
+              student._talent_state._skipCount = 0; // 重置计数
+              if(cnt >= 2 && getRandom() < 0.5){
+                if(!student._talent_backup['爆发型']){
+                  student._talent_backup['爆发型'] = {
+                    thinking: student.thinking,
+                    knowledge_ds: student.knowledge_ds,
+                    knowledge_graph: student.knowledge_graph,
+                    knowledge_string: student.knowledge_string,
+                    knowledge_math: student.knowledge_math,
+                    knowledge_dp: student.knowledge_dp
+                  };
+                  student.thinking = clamp(Number(student.thinking||0) * 2.0);
+                  student.knowledge_ds = Number(student.knowledge_ds||0) * 2.0;
+                  student.knowledge_graph = Number(student.knowledge_graph||0) * 2.0;
+                  student.knowledge_string = Number(student.knowledge_string||0) * 2.0;
+                  student.knowledge_math = Number(student.knowledge_math||0) * 2.0;
+                  student.knowledge_dp = Number(student.knowledge_dp||0) * 2.0;
+                  student._talent_state['爆发型'] = true;
+                  return '爆发型发动：所有知识点与思维能力翻倍（本题临时）';
+                }
+              }
+            }
+            // reset on solve
+            if(eventName === 'contest_solve_problem' || eventName === 'contest_pass_subtask'){
+              student._talent_state._skipCount = 0;
+            }
+          }catch(e){ console.error('爆发型 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 心态稳定：已解题数 >=3 时心理素质提高50%
+      this.registerTalent({
+        name: '心态稳定',
+        description: '比赛中解题数达到 3 题后，心理素质提升 50%。',
+        color: '#2196F3',
+        prob: 0.10,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            ensureTemp(student);
+            if(eventName !== 'contest_solve_problem') return null;
+            const state = ctx && ctx.state;
+            if(!state) return null;
+            const solvedCount = state.problems.filter(p => p.solved).length;
+            if(solvedCount >= 3){
+              if(!student._talent_backup['心态稳定']){
+                student._talent_backup['心态稳定'] = { constmental: (student._talent_state && student._talent_state.constmental) || student.mental };
+                student._talent_state.constmental = clamp(Number(student._talent_state.constmental||student.mental||0) * 1.5);
+                student._talent_state['心态稳定'] = true;
+                return '心态稳定发动：心理素质 +50%（赛中临时）';
+              }
+            }
+          }catch(e){ console.error('心态稳定 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // Ad-hoc 大师：极低概率直接通过当前题目的最后一档（即直接得满分）
+      this.registerTalent({
+        name: 'Ad-hoc大师',
+        description: '思考阶段有小概率直接通过当前题目的最后一档部分分（即直接得满分）。',
+        color: '#9C27B0',
+        prob: 0.03,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            if(eventName !== 'contest_thinking') return null;
+            // 触发概率 1%
+            if(getRandom() < 0.01){
+              const state = ctx && ctx.state;
+              const pid = ctx && (ctx.problemId || ctx.problemId === 0 ? ctx.problemId : ctx.problemId);
+              if(!state) return null;
+              const probObj = state.getProblem(pid);
+              if(!probObj) return null;
+              const lastIdx = probObj.subtasks.length - 1;
+              if(lastIdx < 0) return null;
+              const lastSub = probObj.subtasks[lastIdx];
+              if(!lastSub) return null;
+              // 直接通过最后一档（满分）
+              state.updateScore(pid, lastSub.score);
+              // 将 currentSubtask 移动到末尾，标记为已尝试
+              probObj.currentSubtask = probObj.subtasks.length;
+              if(probObj.solved){
+                return `Ad-hoc大师发动：直接 AC 了 T${pid+1}（满分 ${lastSub.score}）`;
+              }
+              return `Ad-hoc大师发动：直接通过了 T${pid+1} 的最后一档，得分 ${lastSub.score}`;
+            }
+          }catch(e){ console.error('Ad-hoc大师 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 稳扎稳打：完全顺序开题（在选题阶段由选择逻辑遵守）
+      this.registerTalent({
+        name: '稳扎稳打',
+        description: '只按题目顺序从前到后做题（不会跳到靠后的题目）。',
+        color: '#795548',
+        prob: 0.30,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          // 此天赋主要由 ContestSimulator.selectProblem 检查，无需在事件中处理
+          return null;
+        }
+      });
+
+      // 激进：思维能力 +100%，心理素质 -50%，只尝试当前题目的最后一档
+      this.registerTalent({
+        name: '激进',
+        description: '激进做题风格：思维能力大幅提升但心理素质下降，只尝试最后一档部分分。',
+        color: '#F44336',
+        prob: 0.05,
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            ensureTemp(student);
+            // 在比赛开始时立即应用效果（永久到本场比赛结束）
+            if(eventName === 'contest_start'){
+                if(!student._talent_backup['激进']){
+                student._talent_backup['激进'] = { thinking: student.thinking, constmental: (student._talent_state && student._talent_state.constmental) || student.mental };
+                student.thinking = clamp(Number(student.thinking||0) * 1.4);
+                // reduce per-contest constmental, not base mental
+                student._talent_state.constmental = clamp(Number(student._talent_state.constmental||student.mental||0) * 0.5);
+                student._talent_state['激进'] = true;
+                // 标记为激进以便模拟器在尝试档位时只尝试最后一档
+                student._talent_state._aggressive = true;
+                return '激进风格：思维能力翻倍，心理素质减半（本场临时）';
+              }
+            }
+          }catch(e){ console.error('激进 天赋错误', e); }
+          return null;
+        }
+      });
+
+        // 新增天赋：数据结构狂热者
+        this.registerTalent({
+          name: '数据结构狂热者',
+          description: "若选中题标签含 '数据结构'，在模拟赛中本题临时使 数据结构能力 翻倍（x2）。",
+          color: '#00BCD4',
+          prob: 0.08,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_select_problem') return null;
+              // 仅在模拟赛生效
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              const state = ctx.state;
+              const pid = ctx.problemId;
+              if(!state) return null;
+              const probObj = state.getProblem(pid);
+              if(!probObj || !probObj.tags) return null;
+              if(!probObj.tags.includes('数据结构')) return null;
+              // 确保不会重复备份
+              if(!student._talent_backup['数据结构狂热者']){
+                student._talent_backup['数据结构狂热者'] = { knowledge_ds: Number(student.knowledge_ds || 0) };
+                student.knowledge_ds = Number(student.knowledge_ds || 0) * 2.0;
+                student._talent_state['数据结构狂热者'] = true;
+                return '数据结构狂热者发动：本题 数据结构能力 翻倍（本题临时）';
+              }
+            }catch(e){ console.error('数据结构狂热者 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 新增天赋：图论直觉
+        this.registerTalent({
+          name: '图论直觉',
+          description: "在模拟赛选题时若题目含 '图论' 标签，有 30% 概率临时增加 图论 +60% 和 思维 +20%。",
+          color: '#3F51B5',
+          prob: 0.05,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_select_problem') return null;
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              const state = ctx.state;
+              const pid = ctx.problemId;
+              if(!state) return null;
+              const probObj = state.getProblem(pid);
+              if(!probObj || !probObj.tags) return null;
+              if(!probObj.tags.includes('图论')) return null;
+              if(getRandom() < 0.30){
+                if(!student._talent_backup['图论直觉']){
+                  student._talent_backup['图论直觉'] = { knowledge_graph: Number(student.knowledge_graph || 0), thinking: Number(student.thinking || 0) };
+                  student.knowledge_graph = Number(student.knowledge_graph || 0) * 1.6;
+                  student.thinking = clamp(Number(student.thinking || 0) * 1.2);
+                  student._talent_state['图论直觉'] = true;
+                  return '图论直觉发动：图论知识 +60%，思维 +20%（本题临时）';
+                }
+              }
+            }catch(e){ console.error('图论直觉 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 新增天赋：赛场狂热
+        this.registerTalent({
+          name: '赛场狂热',
+          description: '比赛前半段（前 50% 题目）思维 +25%，后半段心理素质 constmental 衰减至 0.8 倍。',
+          color: '#FF5722',
+          prob: 0.08,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              // 仅在模拟赛生效
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              const state = ctx.state;
+              // 在比赛开始时记录半数分界点
+              if(eventName === 'contest_start'){
+                if(state && Array.isArray(state.problems)){
+                  student._talent_state._赛场狂热_half = Math.ceil(state.problems.length / 2);
+                  student._talent_state._赛场狂热_appliedFirst = false;
+                  student._talent_state._赛场狂热_appliedSecond = false;
+                }
+                return null;
+              }
+              // 在选题阶段根据题号判断属于前半段或后半段并应用对应临时调整
+              if(eventName === 'contest_select_problem'){
+                const pid = ctx.problemId;
+                const half = Number(student._talent_state._赛场狂热_half || 0);
+                if(typeof pid === 'undefined' || !half) return null;
+                // 前半段：思维 +25%（只需第一次进入前半段时应用）
+                if(pid < half && !student._talent_backup['赛场狂热_first']){
+                  student._talent_backup['赛场狂热_first'] = { thinking: Number(student.thinking || 0) };
+                  student.thinking = clamp(Number(student.thinking || 0) * 1.25);
+                  student._talent_state._赛场狂热_appliedFirst = true;
+                  return '赛场狂热（前半段）发动：思维 +25%（赛中临时）';
+                }
+                // 后半段：心理素质（per-contest constmental）衰减至 0.8 倍（只需第一次进入后半段时应用）
+                if(pid >= half && !student._talent_backup['赛场狂热_second']){
+                  student._talent_backup['赛场狂热_second'] = { constmental: student._talent_state && student._talent_state.constmental };
+                  student._talent_state.constmental = clamp(Number(student._talent_state.constmental || student.mental || 50) * 0.8);
+                  student._talent_state._赛场狂热_appliedSecond = true;
+                  return '赛场狂热（后半段）发动：心理素质下降至 80%（赛中临时）';
+                }
+              }
+            }catch(e){ console.error('赛场狂热 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 新增天赋：最后一搏
+        this.registerTalent({
+          name: '最后一搏',
+          description: '在比赛最后一题触发，临时提升所有 knowledge +100%（模拟赛中生效）。',
+          color: '#CDDC39',
+          prob: 0.05,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_select_problem') return null;
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              const state = ctx.state;
+              if(!state || !Array.isArray(state.problems)) return null;
+              const remaining = state.problems.filter(p => !p.solved).length;
+              if(remaining <= 1){
+                if(!student._talent_backup['最后一搏']){
+                  student._talent_backup['最后一搏'] = {
+                    knowledge_ds: Number(student.knowledge_ds || 0), knowledge_graph: Number(student.knowledge_graph || 0),
+                    knowledge_string: Number(student.knowledge_string || 0), knowledge_math: Number(student.knowledge_math || 0),
+                    knowledge_dp: Number(student.knowledge_dp || 0)
+                  };
+                  student.knowledge_ds = Number(student.knowledge_ds || 0) * 2.0;
+                  student.knowledge_graph = Number(student.knowledge_graph || 0) * 2.0;
+                  student.knowledge_string = Number(student.knowledge_string || 0) * 2.0;
+                  student.knowledge_math = Number(student.knowledge_math || 0) * 2.0;
+                  student.knowledge_dp = Number(student.knowledge_dp || 0) * 2.0;
+                  student._talent_state['最后一搏'] = true;
+                  return '最后一搏发动：所有知识 +100%（赛中临时）';
+                }
+              }
+            }catch(e){ console.error('最后一搏 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 新增天赋：跳跃思维
+        this.registerTalent({
+          name: '跳跃思维',
+          description: '每跳题一次，思维 +10%，可叠加（最多 3 层，模拟赛中临时生效）。',
+          color: '#009688',
+          prob: 0.08,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_skip_problem') return null;
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              // layers tracked in _talent_state._jump_layers
+              const layers = student._talent_state._jump_layers || 0;
+              if(layers >= 3) return null;
+              // backup initial thinking once
+              if(!student._talent_backup['跳跃思维']){
+                student._talent_backup['跳跃思维'] = { thinking: Number(student.thinking || 0) };
+              }
+              const newLayers = Math.min(3, layers + 1);
+              student._talent_state._jump_layers = newLayers;
+              // apply multiplier: each层 +10% 叠加
+              student.thinking = clamp(Number(student._talent_backup['跳跃思维'].thinking || student.thinking || 0) * Math.pow(1.1, newLayers));
+              student._talent_state['跳跃思维'] = true;
+              return `跳跃思维发动：跳题次数增加至 ${newLayers} 层，思维 +${(newLayers*10)}%（赛中临时）`;
+            }catch(e){ console.error('跳跃思维 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 新增天赋：偏科
+        this.registerTalent({
+          name: '偏科',
+          description: '比赛中偏科：随机将一个知识点 +200%，另一个 -50%。',
+          color: '#673AB7',
+          prob: 0.04,
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_thinking') return null;
+              if(!ctx || ctx.contestName !== '模拟赛') return null;
+              // Small trigger chance per thinking tick
+              //if(getRandom() >= 0.05) return null;
+              if(student._talent_backup['偏科']) return null; // only once per contest
+              const keys = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+              // pick two distinct indices
+              const i = Math.floor(getRandom() * keys.length);
+              let j = Math.floor(getRandom() * keys.length);
+              while(j === i) j = Math.floor(getRandom() * keys.length);
+              const up = keys[i], down = keys[j];
+              student._talent_backup['偏科'] = {};
+              student._talent_backup['偏科'][up] = Number(student[up] || 0);
+              student._talent_backup['偏科'][down] = Number(student[down] || 0);
+              // apply changes
+              student[up] = Number(student[up] || 0) * 3.0; // +200% -> x3
+              student[down] = Number(student[down] || 0) * 0.5; // -50% -> x0.5
+              student._talent_state['偏科'] = { up: up, down: down };
+              return `偏科发动：${up.replace('knowledge_','')} +200%，${down.replace('knowledge_','')} -50%（本场临时）`;
+            }catch(e){ console.error('偏科 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // ========== 新增天赋集合 (根据用户要求) ==========
+        // 摸鱼大师：训练后，当强度高于 80 时（在现有代码中以 intensity===3 视为高强度），50%概率取消本次压力增加，但知识增益减少30%
+        this.registerTalent({
+          name: '摸鱼大师',
+          description: '训练强度>80 时有50%概率触发：取消本次压力增加，但知识增益减少30%。',
+        color: '#607D8B',
+        prob: 0.15,
+        kind: 'negative',
+        beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx) return null;
+              // Accept different training-related sources (legacy: 'task_training', 'training', etc.)
+              const src = ctx.source || '';
+              if(!(src === 'training' || src === 'task_training' || (typeof src === 'string' && src.indexOf('train') === 0))) return null;
+              const intensity = Number(ctx.intensity) || 1;
+              // 把 intensity===3 视为强度>80
+              if(intensity < 3) return null;
+              if(getRandom() < 0.5){
+                return { action: 'moyu_cancel_pressure', reduceKnowledgeRatio: 0.30, message: '摸鱼大师：本次训练压力取消，知识增益-30%'};
+              }
+            }catch(e){ console.error('摸鱼大师 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 抗压奇才：压力增加后，当增幅超过 10 时触发，将本次压力增幅减半
+        this.registerTalent({
+          name: '抗压奇才',
+          description: '当压力增加超过10时自动触发：将本次压力增幅减半。',
+        color: '#009688',
+        prob: 0.12,
+        kind: 'positive',
+        beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx || typeof ctx.amount === 'undefined') return null;
+              const amt = Number(ctx.amount) || 0;
+              if(amt > 10){
+                return { action: 'halve_pressure', message: '抗压奇才：本次压力增幅减半' };
+              }
+            }catch(e){ console.error('抗压奇才 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 睡觉也在想题：放假/娱乐结束时触发，30%概率随机提升一项知识+2，同时压力-5
+        this.registerTalent({
+          name: '睡觉也在想题',
+          description: '放假结束时概率触发：随机提升一项知识点，同时压力-5。',
+        color: '#3F51B5',
+        prob: 0.07,
+        kind: 'positive',
+        beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'vacation_end' && eventName !== 'entertainment_finished') return null;
+              if(getRandom() < 0.30){
+                const keys = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                const idx = Math.floor(getRandom() * keys.length);
+                const key = keys[idx];
+                if(typeof student[key] === 'number'){
+                  student[key] += 2;
+                }
+                student.pressure = Math.max(0, Number(student.pressure || 0) - 5);
+                return '睡觉也在想题：知识+2，压力-5';
+              }
+            }catch(e){ console.error('睡觉也在想题 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 高原反应：外出集训时（outing -> province）若去青海/西藏/云南则压力翻倍
+        this.registerTalent({
+          name: '高原反应',
+          description: '在前往高原地区集训时压力翻倍。',
+        color: '#795548',
+        prob: 0.05,
+        kind: 'negative',
+        beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx || ctx.source !== 'outing') return null;
+              const prov = (ctx.province || ctx.province_name || ctx.provinceName || '') + '';
+              if(!prov) return null;
+              if(prov.indexOf('青海') !== -1 || prov.indexOf('西藏') !== -1 || prov.indexOf('云南') !== -1){
+                return { action: 'double_pressure', message: '高原反应：本次集训压力翻倍' };
+              }
+            }catch(e){ console.error('高原反应 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 电竞选手：娱乐活动-打CS 时，如果压力>50 则直接退队去学电竞
+        this.registerTalent({
+          name: '电竞选手',
+          description: '打游戲时，如果压力过大将直接退队去学电竞。',
+        color: '#F57C00',
+        prob: 0.02,
+        kind: 'negative',
+        beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'entertainment_finished') return null;
+              if(!ctx || !ctx.entertainmentName || ctx.entertainmentName.indexOf('CS') === -1) return null;
+              if(Number(student.pressure || 0) > 50){
+                student.active = false;
+                student._quit_for_esports = true;
+                return '电竞选手：直接退队去学电竞';
+              }
+            }catch(e){ console.error('电竞选手 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 原题机（伪）：模拟赛开始时能力+100%，模拟赛结束时还原并清零模拟赛收益（外部需处理收益清零）
+        this.registerTalent({
+          name: '原题机（伪）',
+          description: '模拟赛时所有能力巨幅提升，但是模拟赛效果归零',
+        color: '#8BC34A',
+        prob: 0.05,
+        kind: 'negative',
+        beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName === 'mock_start'){
+                student._talent_backup = student._talent_backup || {};
+                if(!student._talent_backup['原题机（伪）']){
+                  student._talent_backup['原题机（伪）'] = { thinking: student.thinking, coding: student.coding, mental: student.mental };
+                  student.thinking = Number(student.thinking || 0) * 2.0;
+                  student.coding = Number(student.coding || 0) * 2.0;
+                  student.mental = Number(student.mental || 0) * 2.0;
+                  student._talent_state = student._talent_state || {};
+                  student._talent_state['原题机（伪）'] = true;
+                  return { action: 'mock_boost', message: '原题机（伪）：模拟赛能力临时+100%' };
+                }
+              }
+              if(eventName === 'mock_end'){
+                if(student._talent_backup && student._talent_backup['原题机（伪）']){
+                  const bak = student._talent_backup['原题机（伪）'];
+                  student.thinking = bak.thinking; student.coding = bak.coding; student.mental = bak.mental;
+                  delete student._talent_backup['原题机（伪）'];
+                  if(student._talent_state) student._talent_state['原题机（伪）'] = false;
+                  return { action: 'mock_cleanup', message: '原题機（伪）：模拟赛效果清零并还原能力' };
+                }
+              }
+            }catch(e){ console.error('原题机（伪） 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 卡卡就过了：比赛时已通过当前题得分大于70，有30%概率直接通过此题
+        this.registerTalent({
+          name: '卡卡就过了',
+          description: '比赛时已取得本题得分>70分时，一定概率直接通过此题',
+        color: '#FFC107',
+        prob: 0.03,
+        kind: 'positive',
+        beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_thinking' && eventName !== 'contest_select_problem') return null;
+              if(!ctx || !ctx.state) return null;
+              const pid = ctx.problemId;
+              const probObj = ctx.state.getProblem(pid);
+              if(!probObj) return null;
+              if(probObj.maxScore > 70){
+                if(getRandom() < 0.30){
+                  return { action: 'auto_pass_problem', message: '卡卡就过了：直接通过此题' };
+                }
+              }
+            }catch(e){ console.error('卡卡就过了 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 林黛玉：每回合结束 100% 触发，获得生病状态
+        this.registerTalent({
+          name: '林黛玉',
+          description: '一直生病',
+        color: '#E91E63',
+        prob: 0.01,
+        kind: 'negative',
+        beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+                // 仅在每周结算时触发，避免与回合级别事件重复
+                if(eventName !== 'week_end') return null;
+                student.sick_weeks = (student.sick_weeks || 0) + 1;
+                return { action: 'get_sick', message: '林黛玉：获得生病状态' };
+              }catch(e){ console.error('林黛玉 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 风神：事件 台风 时 100% 触发，效果压力清零
+        this.registerTalent({
+          name: '风神',
+          description: '台风时压力清零',
+        color: '#03A9F4',
+        prob: 0.03,
+        kind: 'positive',
+        beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx || ctx.source !== 'typhoon') return null;
+              student.pressure = 0;
+              return { action: 'clear_pressure', message: '风神：压力清零' };
+            }catch(e){ console.error('风神 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // ========== 新增天赋集合 (第二批) ==========
+        
+        // 慢热：比赛前半场降低能力，后半场提升能力
+        this.registerTalent({
+          name: '慢热',
+          description: '比赛初期能力受限，但随着时间推移逐渐进入状态。前半场思维与编程-20%，后半场+20%。',
+          color: '#90A4AE',
+          prob: 0.08,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName === 'contest_start'){
+                // 记录比赛开始时间和总时长以便计算半场
+                if(ctx && ctx.state){
+                  student._talent_state._慢热_startTick = ctx.state.tick || 0;
+                  student._talent_state._慢热_totalTicks = ctx.state.totalTicks || 180;
+                  student._talent_state._慢热_phase = 'first';
+                }
+                // 前半场：降低 20%
+                if(!student._talent_backup['慢热_first']){
+                  student._talent_backup['慢热_first'] = { thinking: Number(student.thinking || 0), coding: Number(student.coding || 0) };
+                  student.thinking = clamp(Number(student.thinking || 0) * 0.8);
+                  student.coding = clamp(Number(student.coding || 0) * 0.8);
+                  return '慢热（前半场）：思维与编程-20%';
+                }
+              }
+              // 在比赛进行中检查是否进入后半场
+              if(eventName === 'contest_thinking' || eventName === 'contest_select_problem'){
+                if(!ctx || !ctx.state) return null;
+                const currentTick = ctx.state.tick || 0;
+                const startTick = student._talent_state._慢热_startTick || 0;
+                const totalTicks = student._talent_state._慢热_totalTicks || 180;
+                const halfTick = startTick + Math.floor(totalTicks / 2);
+                
+                // 如果已进入后半场且尚未切换
+                if(currentTick >= halfTick && student._talent_state._慢热_phase === 'first'){
+                  student._talent_state._慢热_phase = 'second';
+                  // 恢复前半场的降低
+                  if(student._talent_backup['慢热_first']){
+                    const bak = student._talent_backup['慢热_first'];
+                    student.thinking = bak.thinking;
+                    student.coding = bak.coding;
+                    delete student._talent_backup['慢热_first'];
+                  }
+                  // 应用后半场提升 20%
+                  if(!student._talent_backup['慢热_second']){
+                    student._talent_backup['慢热_second'] = { thinking: Number(student.thinking || 0), coding: Number(student.coding || 0) };
+                    student.thinking = clamp(Number(student.thinking || 0) * 1.2);
+                    student.coding = clamp(Number(student.coding || 0) * 1.2);
+                    return '慢热（后半场）：思维与编程+20%';
+                  }
+                }
+              }
+            }catch(e){ console.error('慢热 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 虎头蛇尾：比赛前半场提升能力，后半场降低能力
+        this.registerTalent({
+          name: '虎头蛇尾',
+          description: '比赛开始时状态极佳，但耐力不足。前半场思维与心理+30%，后半场所有能力-20%。',
+          color: '#FF6F00',
+          prob: 0.08,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName === 'contest_start'){
+                if(ctx && ctx.state){
+                  student._talent_state._虎头蛇尾_startTick = ctx.state.tick || 0;
+                  student._talent_state._虎头蛇尾_totalTicks = ctx.state.totalTicks || 180;
+                  student._talent_state._虎头蛇尾_phase = 'first';
+                }
+                // 前半场：提升 30%
+                if(!student._talent_backup['虎头蛇尾_first']){
+                  student._talent_backup['虎头蛇尾_first'] = { 
+                    thinking: Number(student.thinking || 0), 
+                    constmental: (student._talent_state && student._talent_state.constmental) || student.mental 
+                  };
+                  student.thinking = clamp(Number(student.thinking || 0) * 1.3);
+                  student._talent_state.constmental = clamp(Number(student._talent_state.constmental || student.mental || 50) * 1.3);
+                  return '虎头蛇尾（前半场）：思维与心理+30%';
+                }
+              }
+              if(eventName === 'contest_thinking' || eventName === 'contest_select_problem'){
+                if(!ctx || !ctx.state) return null;
+                const currentTick = ctx.state.tick || 0;
+                const startTick = student._talent_state._虎头蛇尾_startTick || 0;
+                const totalTicks = student._talent_state._虎头蛇尾_totalTicks || 180;
+                const halfTick = startTick + Math.floor(totalTicks / 2);
+                
+                if(currentTick >= halfTick && student._talent_state._虎头蛇尾_phase === 'first'){
+                  student._talent_state._虎头蛇尾_phase = 'second';
+                  // 恢复前半场提升
+                  if(student._talent_backup['虎头蛇尾_first']){
+                    const bak = student._talent_backup['虎头蛇尾_first'];
+                    student.thinking = bak.thinking;
+                    student._talent_state.constmental = bak.constmental;
+                    delete student._talent_backup['虎头蛇尾_first'];
+                  }
+                  // 应用后半场降低 20%
+                  if(!student._talent_backup['虎头蛇尾_second']){
+                    student._talent_backup['虎头蛇尾_second'] = { 
+                      thinking: Number(student.thinking || 0), 
+                      coding: Number(student.coding || 0),
+                      constmental: student._talent_state.constmental
+                    };
+                    student.thinking = clamp(Number(student.thinking || 0) * 0.8);
+                    student.coding = clamp(Number(student.coding || 0) * 0.8);
+                    student._talent_state.constmental = clamp(Number(student._talent_state.constmental || 50) * 0.8);
+                    return '虎头蛇尾（后半场）：所有能力-20%';
+                  }
+                }
+              }
+            }catch(e){ console.error('虎头蛇尾 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 完美主义：比赛满分则压力清零，否则压力增加
+        this.registerTalent({
+          name: '完美主义',
+          description: '若比赛满分，则压力清零；否则压力增加。',
+          color: '#9C27B0',
+          prob: 0.05,
+          kind: 'positive',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_finish') return null;
+              if(!ctx || !ctx.state) return null;
+              const state = ctx.state;
+              const totalScore = state.problems.reduce((sum, p) => sum + (p.maxScore || 0), 0);
+              const maxPossible = state.problems.reduce((sum, p) => {
+                const subtasks = p.subtasks || [];
+                return sum + subtasks.reduce((s, sub) => s + (sub.score || 0), 0);
+              }, 0);
+              
+              if(totalScore >= maxPossible && maxPossible > 0){
+                // 满分：压力清零
+                student.pressure = 0;
+                return { action: 'perfect_clear_pressure', message: '完美主义：满分！压力清零' };
+              } else {
+                // 未满分：标记压力惩罚翻倍
+                student.pressure += 15;
+                return { action: 'perfect_double_penalty', message: '完美主义：未满分，压力增加' };
+              }
+            }catch(e){ console.error('完美主义 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 绝境逢生：比赛过半且得分为0时有概率爆发
+        this.registerTalent({
+          name: '绝境逢生',
+          description: '在比赛过半但得分仍为0时，有概率爆发，短时大幅提升能力。',
+          color: '#D32F2F',
+          prob: 0.04,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName === 'contest_thinking' || eventName === 'contest_select_problem'){
+                if(!ctx || !ctx.state) return null;
+                const state = ctx.state;
+                const currentTick = state.tick || 0;
+                const totalTicks = state.totalTicks || 180;
+                const halfTick = Math.floor(totalTicks / 2);
+                
+                // 检查是否过半且得分为0
+                if(currentTick >= halfTick){
+                  const totalScore = state.problems.reduce((sum, p) => sum + (p.maxScore || 0), 0);
+                  if(totalScore === 0 && !student._talent_state._绝境逢生_triggered){
+                    if(getRandom() < 0.5){
+                      student._talent_state._绝境逢生_triggered = true;
+                      // currentTick 单位为 tick（每 tick = 5 分钟），持续 30 分钟 => 6 ticks
+                      student._talent_state._绝境逢生_endTick = currentTick + 6;
+                      
+                      if(!student._talent_backup['绝境逢生']){
+                        student._talent_backup['绝境逢生'] = { thinking: Number(student.thinking || 0), coding: Number(student.coding || 0) };
+                        student.thinking = clamp(Number(student.thinking || 0) * 2.0);
+                        student.coding = clamp(Number(student.coding || 0) * 2.0);
+                        return '绝境逢生发动：思维与编程翻倍（30分钟）';
+                      }
+                    }
+                  }
+                }
+                
+                // 检查效果是否到期
+                const endTick = student._talent_state._绝境逢生_endTick || 0;
+                if(endTick > 0 && currentTick >= endTick && student._talent_backup['绝境逢生']){
+                  const bak = student._talent_backup['绝境逢生'];
+                  student.thinking = bak.thinking;
+                  student.coding = bak.coding;
+                  delete student._talent_backup['绝境逢生'];
+                  student._talent_state._绝境逢生_endTick = 0;
+                  return '绝境逢生效果结束';
+                }
+              }
+            }catch(e){ console.error('绝境逢生 天赋错误', e); }
+            return null;
+          }
+        });
+
+
+        // 遇强则强：面对高难度题目时能力提升
+        this.registerTalent({
+          name: '遇强则强',
+          description: '挑战远超自己能力的题目时，反而会更兴奋。',
+          color: '#1976D2',
+          prob: 0.06,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_check_subtask') return null;
+              if(!ctx || typeof ctx.difficulty === 'undefined') return null;
+              const diff = Number(ctx.difficulty) || 0;
+              const ability = Number(ctx.checkType === 'thinking' ? student.thinking : student.coding) || 0;
+              
+              // 难度高于能力30%以上
+              if(diff > ability * 1.3){
+                return { action: 'boost_ability', amount: 0.25, message: '遇强则强：能力临时+25%' };
+              }
+            }catch(e){ console.error('遇强则强 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 遇弱则弱：面对简单题目时容易粗心
+        this.registerTalent({
+          name: '遇弱则弱',
+          description: '面对简单题目时容易粗心，导致发挥失常。',
+          color: '#757575',
+          prob: 0.06,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_check_subtask') return null;
+              if(!ctx || typeof ctx.difficulty === 'undefined') return null;
+              const diff = Number(ctx.difficulty) || 0;
+              const ability = Number(ctx.checkType === 'thinking' ? student.thinking : student.coding) || 0;
+              
+              // 难度低于能力50%
+              if(diff < ability * 0.5){
+                return { action: 'reduce_ability', amount: 0.30, message: '遇弱则弱：粗心大意，能力-30%' };
+              }
+            }catch(e){ console.error('遇弱则弱 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 读题专家：降低思维难度
+        this.registerTalent({
+          name: '读题专家',
+          description: '擅长理解题意，在思维检定上占有优势。',
+          color: '#00897B',
+          prob: 0.10,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_check_subtask') return null;
+              if(!ctx || ctx.checkType !== 'thinking') return null;
+              return { action: 'reduce_difficulty', amount: 0.10, message: '读题专家：思维难度-10%' };
+            }catch(e){ console.error('读题专家 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 键盘侠：降低代码难度
+        this.registerTalent({
+          name: '键盘侠',
+          description: '编码速度极快，在代码检定上占有优势。',
+          color: '#5E35B1',
+          prob: 0.10,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'contest_check_subtask') return null;
+              if(!ctx || ctx.checkType !== 'coding') return null;
+              return { action: 'reduce_difficulty', amount: 0.10, message: '键盘侠：代码难度-10%' };
+            }catch(e){ console.error('键盘侠 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 字符串魔法师：字符串题目能力提升
+        this.registerTalent({
+          name: '字符串魔法师',
+          description: '对字符串处理有特殊技巧，编码能力和相关知识提升。',
+          color: '#C2185B',
+          prob: 0.05,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_select_problem') return null;
+              const state = ctx && ctx.state;
+              const pid = ctx && ctx.problemId;
+              if(!state) return null;
+              const probObj = state.getProblem(pid);
+              if(!probObj || !probObj.tags || !probObj.tags.includes('字符串')) return null;
+              
+              if(getRandom() < 0.30){
+                if(!student._talent_backup['字符串魔法师']){
+                  student._talent_backup['字符串魔法师'] = { 
+                    knowledge_string: Number(student.knowledge_string || 0),
+                    coding: Number(student.coding || 0)
+                  };
+                  student.knowledge_string = Number(student.knowledge_string || 0) * 1.6;
+                  student.coding = clamp(Number(student.coding || 0) * 1.6);
+                  student._talent_state['字符串魔法师'] = true;
+                  return '字符串魔法师发动：字符串知识与编程+60%';
+                }
+              }
+            }catch(e){ console.error('字符串魔法师 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 知识熔炉：解题后可能提升其他知识点
+        this.registerTalent({
+          name: '知识熔炉',
+          description: '在比赛中解决题目时，可能触类旁通，临时提升其他知识点。',
+          color: '#F4511E',
+          prob: 0.04,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_pass_subtask') return null;
+              if(getRandom() < 0.10){
+                const allKnowledge = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                // 获取当前题目的知识点（如果有）
+                const currentKnowledge = ctx && ctx.knowledgeType;
+                const others = allKnowledge.filter(k => k !== currentKnowledge);
+                if(others.length > 0){
+                  const randomK = others[Math.floor(getRandom() * others.length)];
+                  const backupKey = '知识熔炉_' + randomK;
+                  if(!student._talent_backup[backupKey]){
+                    student._talent_backup[backupKey] = Number(student[randomK] || 0);
+                    student[randomK] = Number(student[randomK] || 0) * 1.2;
+                    student._talent_state['知识熔炉'] = true;
+                    return `知识熔炉发动：${randomK.replace('knowledge_','')}知识+20%`;
+                  }
+                }
+              }
+            }catch(e){ console.error('知识熔炉 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 举一反三：训练时其他知识点也微小增长（监听 pressure_change 事件并检查 source）
+        this.registerTalent({
+          name: '举一反三',
+          description: '训练时效率更高，训练主知识点时，其他知识点也可能微小增长。',
+          color: '#7CB342',
+          prob: 0.08,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 需要监听训练相关事件
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx) return null;
+              const src = ctx.source || '';
+              if(!(src === 'training' || src === 'task_training' || (typeof src === 'string' && src.indexOf('train') === 0))) return null;
+              // 避免重复触发
+              if(student._talent_state && student._talent_state._举一反三_triggered) return null;
+              if(getRandom() < 0.20){
+                // 获取训练的目标知识点（优先 ctx.topic，其次尝试 ctx.task.type）
+                const topic = ctx.topic || (ctx.task && (ctx.task.type || ctx.task.topic));
+                const allKnowledge = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                // 根据 topic 确定主练知识点
+                let mainKnowledge = null;
+                if(topic === '数据结构') mainKnowledge = 'knowledge_ds';
+                else if(topic === '图论') mainKnowledge = 'knowledge_graph';
+                else if(topic === '字符串') mainKnowledge = 'knowledge_string';
+                else if(topic === '数学') mainKnowledge = 'knowledge_math';
+                else if(topic === 'DP') mainKnowledge = 'knowledge_dp';
+                
+                // 如果有主练知识点，则其他知识点额外增长
+                if(mainKnowledge){
+                  const others = allKnowledge.filter(k => k !== mainKnowledge);
+                  // 假设主练知识点本次增长了某个值，其他知识点增长 10%（需外部系统配合）
+                  // 这里我们直接给其他知识点加少量值
+                  for(const k of others){
+                    student[k] = Number(student[k] || 0) + 0.5; // 小幅增长
+                  }
+                  if(!student._talent_state) student._talent_state = {};
+                  student._talent_state._举一反三_triggered = true;
+                  return '举一反三：其他知识点也有所增长';
+                }
+              }
+            }catch(e){ console.error('举一反三 天赋错误', e); }
+            return null;
+          }
+        });
+
+
+        // 注意力涣散：训练效果降低（需要外部训练系统配合处理）
+        this.registerTalent({
+          name: '注意力涣散',
+          description: '学习效率低下，训练效果打折扣。',
+          color: '#616161',
+          prob: 0.05,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx) return null;
+              const src = ctx.source || '';
+              if(!(src === 'training' || src === 'task_training' || (typeof src === 'string' && src.indexOf('train') === 0))) return null;
+              return { action: 'reduce_all_gain', amount: 0.20, message: '注意力涣散：所有训练增益-20%' };
+            }catch(e){ console.error('注意力涣散 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 好奇宝宝：训练时可能学别的
+        this.registerTalent({
+          name: '好奇宝宝',
+          description: '训练时有概率"走神"去学别的，随机提升一项非目标知识。',
+          color: '#26C6DA',
+          prob: 0.06,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx) return null;
+              const src = ctx.source || '';
+              if(!(src === 'training' || src === 'task_training' || (typeof src === 'string' && src.indexOf('train') === 0))) return null;
+              if(student._talent_state && student._talent_state._好奇宝宝_triggered) return null;
+              
+              if(getRandom() < 0.5){
+                // 兼容不同的训练触发源，并从 ctx.task 回退获取 topic
+                const topic = ctx.topic || (ctx.task && (ctx.task.type || ctx.task.topic));
+                const allKnowledge = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                let mainKnowledge = null;
+                if(topic === '数据结构') mainKnowledge = 'knowledge_ds';
+                else if(topic === '图论') mainKnowledge = 'knowledge_graph';
+                else if(topic === '字符串') mainKnowledge = 'knowledge_string';
+                else if(topic === '数学') mainKnowledge = 'knowledge_math';
+                else if(topic === 'DP') mainKnowledge = 'knowledge_dp';
+                
+                if(mainKnowledge){
+                  const others = allKnowledge.filter(k => k !== mainKnowledge);
+                  const randomK = others[Math.floor(getRandom() * others.length)];
+                  // 减少目标知识增长，增加随机知识
+                  const mainVal = Number(student[mainKnowledge] || 0);
+                  student[mainKnowledge] = Math.max(0, mainVal * 0.5);
+                  student[randomK] = Number(student[randomK] || 0) + mainVal * 0.5;
+                  
+                  if(!student._talent_state) student._talent_state = {};
+                  student._talent_state._好奇宝宝_triggered = true;
+                  return `好奇宝宝：走神了，${randomK.replace('knowledge_','')}增长`;
+                }
+              }
+            }catch(e){ console.error('好奇宝宝 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 专注：高强度训练压力减少，低强度压力增加
+        this.registerTalent({
+          name: '专注',
+          description: '适合高强度训练，高强度下压力增长减缓；但讨厌低强度训练。',
+          color: '#5C6BC0',
+          prob: 0.07,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx || ctx.source !== 'training') return null;
+              const intensity = Number(ctx.intensity) || 1;
+              if(intensity >= 3){
+                // 在原有压力变化基础上减少 30%
+                return { action: 'reduce_pressure', amount: 0.30, message: '专注：高强度训练压力-30%' };
+              } else if(intensity <= 1){
+                return { action: 'increase_pressure', amount: 0.30, message: '专注：低强度训练压力+30%' };
+              }
+            }catch(e){ console.error('专注 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 劳逸结合：娱乐效果翻倍
+        this.registerTalent({
+          name: '劳逸结合',
+          description: '"娱乐"行动的效果翻倍。',
+          color: '#66BB6A',
+          prob: 0.10,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'entertainment_finished') return null;
+              // 直接增加额外的压力恢复（娱乐通常减压，这里再减一次）
+              const baseCost = Number(ctx && ctx.cost) || 10;
+              // 娱乐通常恢复压力，这里额外恢复相同数值
+              student.pressure = Math.max(0, Number(student.pressure || 0) - baseCost);
+              return '劳逸结合：娱乐压力恢复翻倍';
+            }catch(e){ console.error('劳逸结合 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 厌学：高压力时训练可能无效
+        this.registerTalent({
+          name: '厌学',
+          description: '压力较高时，训练可能完全无效并导致压力剧增。',
+          color: '#6D4C41',
+          prob: 0.04,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'pressure_change') return null;
+              if(!ctx || ctx.source !== 'training') return null;
+              if(student._talent_state && student._talent_state._厌学_triggered) return null;
+              
+              if(Number(student.pressure || 0) > 60){
+                if(getRandom() < 0.25){
+                  // 清空本次训练的知识增益（需要外部系统配合）
+                  // 这里直接增加额外压力
+                  student.pressure = Math.min((typeof MAX_PRESSURE !== 'undefined' ? MAX_PRESSURE : 100), Number(student.pressure || 0) + 15);
+                  if(!student._talent_state) student._talent_state = {};
+                  student._talent_state._厌学_triggered = true;
+                  return { action: 'reject_training', message: '厌学：训练无效，压力+15' };
+                }
+              }
+            }catch(e){ console.error('厌学 天赋错误', e); }
+            return null;
+          }
+        });
+
+
+        // 水土不服：外出集训效果下降
+        this.registerTalent({
+          name: '水土不服',
+          description: '"外出集训"时容易不适应，效果下降且压力增加更多。',
+          color: '#8D6E63',
+          prob: 0.06,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              if(eventName !== 'outing_finished' && eventName !== 'pressure_change') return null;
+              // 如果有高原反应则不触发
+              if(student.talents && student.talents.has('高原反应')) return null;
+              
+              if(eventName === 'outing_finished'){
+                // 减少知识增益
+                if(ctx && ctx.knowledge_gain){
+                  const reduction = ctx.knowledge_gain * 0.20;
+                  const allKnowledge = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                  const randomK = allKnowledge[Math.floor(getRandom() * allKnowledge.length)];
+                  student[randomK] = Math.max(0, Number(student[randomK] || 0) - reduction);
+                }
+                return '水土不服：集训增益-20%';
+              }
+              
+              if(eventName === 'pressure_change' && ctx && ctx.source === 'outing'){
+                // 增加额外压力
+                student.pressure = Math.min((typeof MAX_PRESSURE !== 'undefined' ? MAX_PRESSURE : 100), Number(student.pressure || 0) + ctx.amount * 0.30);
+                return '水土不服：压力额外+30%';
+              }
+            }catch(e){ console.error('水土不服 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 乐天派：每周压力恢复增加，燃尽概率降低（需要在每周结算时处理）
+        this.registerTalent({
+          name: '乐天派',
+          description: '天性乐观，每周压力自动恢复量增加，且不易"燃尽"。',
+          color: '#FFA726',
+          prob: 0.12,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 这个天赋主要在游戏逻辑中每周结算时检测并应用
+              // 在这里不做处理，返回标记即可
+              if(eventName === 'week_end'){
+                // 直接应用额外压力恢复
+                student.pressure = Math.max(0, Number(student.pressure || 0) - 3);
+                return '乐天派：额外压力恢复+3';
+              }
+            }catch(e){ console.error('乐天派 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 悲观主义：比赛失利压力加倍
+        this.registerTalent({
+          name: '悲观主义',
+          description: '容易积累压力，比赛失利（未晋级）时压力惩罚加倍。',
+          color: '#455A64',
+          prob: 0.08,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              // 监听比赛结束事件
+              if(eventName !== 'contest_finish') return null;
+              if(!ctx) return null;
+              // If passed is explicitly provided, only trigger on failure
+              if(typeof ctx.passed !== 'undefined'){
+                if(ctx.passed) return null;
+              } else {
+                // Try to infer failure from provided state: if any problem.solved exists, consider it not a loss
+                const state = ctx.state;
+                if(state && Array.isArray(state.problems)){
+                  const solvedCount = state.problems.filter(p => p && p.solved).length;
+                  if(solvedCount > 0) return null; // had at least one AC -> not considered失利
+                } else {
+                  // Cannot determine pass/fail; do not trigger to avoid false positives
+                  return null;
+                }
+              }
+              // 增加额外压力
+              student.pressure = Math.min((typeof MAX_PRESSURE !== 'undefined' ? MAX_PRESSURE : 100), Number(student.pressure || 0) + 15);
+              return '悲观主义：失利压力翻倍';
+            }catch(e){ console.error('悲观主义 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 铁人：生病概率降低（需要在生病检测逻辑中处理）
+        this.registerTalent({
+          name: '铁人',
+          description: '体质强健，因天气或高压导致生病的概率大幅降低。',
+          color: '#78909C',
+          prob: 0.10,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 这个天赋主要在生病检测逻辑中起作用
+              // 在这里返回标记供外部系统识别
+              return null; // 被动天赋，无需主动触发
+            }catch(e){ console.error('铁人 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 自愈：生病恢复加快（需要在每周结算中检测）
+        this.registerTalent({
+          name: '自愈',
+          description: '生病时恢复速度加快。',
+          color: '#81C784',
+          prob: 0.08,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 这个天赋需要在游戏主循环每周结算时检测
+              // 在这里返回被动标记
+              return null; // 被动天赋，在外部系统中处理
+            }catch(e){ console.error('自愈 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 压力转化：压力越高思维越强但心理越弱
+        this.registerTalent({
+          name: '压力转化',
+          description: '压力越高，比赛中思维越活跃，但心理稳定性越差。',
+          color: '#AB47BC',
+          prob: 0.04,
+          kind: 'positive',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              ensureTemp(student);
+              if(eventName !== 'contest_start') return null;
+              const pressure = Number(student.pressure || 0);
+              if(pressure > 50){
+                const layers = Math.floor((pressure - 50) / 10);
+                if(layers > 0 && !student._talent_backup['压力转化']){
+                  student._talent_backup['压力转化'] = {
+                    thinking: Number(student.thinking || 0),
+                    constmental: student._talent_state.constmental || student.mental
+                  };
+                  student.thinking = clamp(Number(student.thinking || 0) * Math.pow(1.1, layers));
+                  student._talent_state.constmental = clamp(Number(student._talent_state.constmental || student.mental || 50) * Math.pow(0.85, layers));
+                  student._talent_state['压力转化'] = true;
+                  return `压力转化：思维+${layers*10}%，心理-${Math.round((1-Math.pow(0.85,layers))*100)}%`;
+                }
+              }
+            }catch(e){ console.error('压力转化 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 扫把星：增加负面事件概率（被动天赋，在事件系统中检测）
+        this.registerTalent({
+          name: '扫把星',
+          description: '运气不佳，更容易触发负面的团队运营事件。',
+          color: '#424242',
+          prob: 0.05,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              // 被动天赋，在事件触发概率计算时检测
+              return null;
+            }catch(e){ console.error('扫把星 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 省钱大师：外出集训（outing）开支减免（被动天赋，外部花费逻辑需检测返回的 action）
+        this.registerTalent({
+          name: '省钱大师',
+          description: '规划开支能手：若学生参加外出集训，则本次集训开支直接减少 20000。',
+          color: '#43A047',
+          prob: 0.06,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 被动天赋：当外出集训结算时（事件 outing_finished 或类似），返回一个标准 action
+              // 外部系统应检测到 action === 'reduce_outing_cost' 并将金额从本次集训支出中减去 amount
+              if(eventName === 'outing_finished' || eventName === 'outing_cost_calculate'){
+                // 直接给出固定减免金额，概率触发可按需修改为固定必定触发或保留概率
+                // 这里按需求改为固定生效（如果需要概率，可改为 getRandom() < 0.2）
+                return { action: 'reduce_outing_cost', amount: 20000, message: '省钱大师：集训开支减20000' };
+              }
+            }catch(e){ console.error('省钱大师 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 氪金玩家：付费模拟效果提升
+        this.registerTalent({
+          name: '氪金玩家',
+          description: '坚信付费的力量，"付费模拟赛"的效果显著提升。',
+          color: '#FFD700',
+          prob: 0.04,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 监听模拟赛结束事件
+              // 注意：知识增幅已在 contest-integration.js 中应用，此处仅作为日志记录
+              if(eventName === 'mock_contest_finish' || eventName === 'mock_end'){
+                // 计算本次获得的知识增幅总和（仅用于日志显示）
+                const allKnowledge = ['knowledge_ds','knowledge_graph','knowledge_string','knowledge_math','knowledge_dp'];
+                let totalKnowledgeIncrease = 0;
+                for(const k of allKnowledge){
+                  // 注意：此时知识值已是最终值，包含50%加成
+                  // 为了显示实际增加的知识量，我们只是记录而不再修改
+                }
+                return '氪金玩家：付费模拟赛知识+50%';
+              }
+            }catch(e){ console.error('氪金玩家 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 天气敏感：天气影响翻倍（被动天赋，在舒适度计算中检测）
+        this.registerTalent({
+          name: '天气敏感',
+          description: '舒适度受天气影响剧烈，极端天气惩罚和良好天气增益都会加倍。',
+          color: '#80DEEA',
+          prob: 0.07,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              // 被动天赋，在舒适度计算逻辑中检测
+              return null;
+            }catch(e){ console.error('天气敏感 天赋错误', e); }
+            return null;
+          }
+        });
+
+        // 美食家：食堂影响翻倍（被动天赋，在舒适度和压力恢复计算中检测）
+        this.registerTalent({
+          name: '美食家',
+          description: '对食物异常执着，"食堂"设施等级对舒适度和压力恢复的影响翻倍。',
+          color: '#FF8A65',
+          prob: 0.08,
+          kind: 'positive',
+          beneficial: true,
+          handler: function(student, eventName, ctx){
+            try{
+              // 被动天赋，在食堂效果计算时检测
+              return null;
+            }catch(e){ console.error('美食家 天赋错误', e); }
+            return null;
+          }
+        });
+
+
+
+        // 庸才：无法习得新天赋（被动天赋，在 tryAcquireTalent 中检测）
+        this.registerTalent({
+          name: '庸才',
+          description: '资质平平，在训练中无法领悟任何新的天赋。',
+          color: '#9E9E9E',
+          prob: 0.03,
+          kind: 'negative',
+          beneficial: false,
+          handler: function(student, eventName, ctx){
+            try{
+              // 被动天赋，在 tryAcquireTalent 逻辑中检测
+              // 如果学生有"庸才"天赋，则直接返回不获得新天赋
+              return null;
+            }catch(e){ console.error('庸才 天赋错误', e); }
+            return null;
+          }
+        });
+
+      // ========== 特殊学生事件 ==========
+      
+      // 戴江齐：虚惊一场 - 25%的概率忘记参加比赛，导致爆零
+      this.registerTalent({
+        name: '虚惊一场',
+        description: '可能会忘记参加比赛，导致比赛爆零。',
+        color: '#FF6B6B',
+        prob: 0.0, // 不会自动分配，仅戴江齐拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对戴江齐生效
+            if(student.name !== '戴江齐') return null;
+            
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              // 50%概率触发
+              if(getRandom() < 0.25){
+                // 备份原始能力并设置为0
+                if(!student._talent_backup['虚惊一场']){
+                  student._talent_backup['虚惊一场'] = {
+                    thinking: student.thinking,
+                    coding: student.coding,
+                    knowledge_ds: student.knowledge_ds,
+                    knowledge_graph: student.knowledge_graph,
+                    knowledge_string: student.knowledge_string,
+                    knowledge_math: student.knowledge_math,
+                    knowledge_dp: student.knowledge_dp
+                  };
+                  // 将所有能力设置为0，导致无法得分
+                  student.thinking = 0;
+                  student.coding = 0;
+                  student.knowledge_ds = 0;
+                  student.knowledge_graph = 0;
+                  student.knowledge_string = 0;
+                  student.knowledge_math = 0;
+                  student.knowledge_dp = 0;
+                  student._talent_state['虚惊一场'] = true;
+                  return '💤 戴江齐忘记了参加比赛！本场比赛爆零！';
+                }
+              }
+            }
+          }catch(e){ console.error('虚惊一场 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 毛嘉怡：爱玩 - 可能拉一个其他学生一起在比赛前出去玩，导致两人都爆零
+      this.registerTalent({
+        name: '爱玩',
+        description: '可能会拉其他学生一起出去玩，导致两人都无法参加比赛。',
+        color: '#FF69B4',
+        prob: 0.0, // 不会自动分配，仅毛嘉怡拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对毛嘉怡生效
+            if(student.name !== '毛嘉怡') return null;
+            
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              // 30%概率触发
+              if(getRandom() < 0.1){
+                // 找到一个其他学生
+                const allStudents = (ctx && ctx.simulator && ctx.simulator.students) || [];
+                const otherStudents = allStudents.filter(st => st.student && st.student.name !== '毛嘉怡' && !st.student.isInternational);
+                
+                if(otherStudents.length > 0){
+                  // 随机选择一个学生
+                  const targetState = otherStudents[Math.floor(getRandom() * otherStudents.length)];
+                  const targetStudent = targetState.student;
+                  
+                  // 备份毛嘉怡的能力
+                  if(!student._talent_backup['爱玩']){
+                    student._talent_backup['爱玩'] = {
+                      thinking: student.thinking,
+                      coding: student.coding,
+                      knowledge_ds: student.knowledge_ds,
+                      knowledge_graph: student.knowledge_graph,
+                      knowledge_string: student.knowledge_string,
+                      knowledge_math: student.knowledge_math,
+                      knowledge_dp: student.knowledge_dp
+                    };
+                    student.thinking = 0;
+                    student.coding = 0;
+                    student.knowledge_ds = 0;
+                    student.knowledge_graph = 0;
+                    student.knowledge_string = 0;
+                    student.knowledge_math = 0;
+                    student.knowledge_dp = 0;
+                    student._talent_state['爱玩'] = true;
+                  }
+                  
+                  // 备份目标学生的能力
+                  if(!targetStudent._talent_backup) targetStudent._talent_backup = {};
+                  if(!targetStudent._talent_state) targetStudent._talent_state = {};
+                  if(!targetStudent._talent_backup['爱玩_受害者']){
+                    targetStudent._talent_backup['爱玩_受害者'] = {
+                      thinking: targetStudent.thinking,
+                      coding: targetStudent.coding,
+                      knowledge_ds: targetStudent.knowledge_ds,
+                      knowledge_graph: targetStudent.knowledge_graph,
+                      knowledge_string: targetStudent.knowledge_string,
+                      knowledge_math: targetStudent.knowledge_math,
+                      knowledge_dp: targetStudent.knowledge_dp
+                    };
+                    targetStudent.thinking = 0;
+                    targetStudent.coding = 0;
+                    targetStudent.knowledge_ds = 0;
+                    targetStudent.knowledge_graph = 0;
+                    targetStudent.knowledge_string = 0;
+                    targetStudent.knowledge_math = 0;
+                    targetStudent.knowledge_dp = 0;
+                    targetStudent._talent_state['爱玩_受害者'] = true;
+                  }
+                  
+                  return `🎮 毛嘉怡拉着 ${targetStudent.name} 一起出去玩了！两人本场比赛爆零！`;
+                }
+              }
+            }
+          }catch(e){ console.error('爱玩 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 郭羽冲、陈昕阳、沈吉滪：lumina - 20%概率比赛120分钟后无法过题
+      this.registerTalent({
+        name: 'lumina',
+        description: '比赛后半段可能无法继续做题。',
+        color: '#9370DB',
+        prob: 0.0, // 不会自动分配，仅特定学生拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对拥有此天赋的学生生效（郭羽冲、陈昕阳、沈吉滪）
+            if(!student.talents || !student.talents.has('lumina')) return null;
+            
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              // 20%概率触发
+              if(getRandom() < 0.2){
+                student._talent_state['lumina_triggered'] = true;
+                return `🌙 ${student.name} 的 lumina 天赋触发！比赛120分钟后将无法做题！`;
+              }
+            }
+            
+            // 在选题时检查是否已经过了120分钟
+            if(eventName === 'contest_select_problem' || eventName === 'contest_thinking'){
+              if(student._talent_state && student._talent_state['lumina_triggered']){
+                const state = ctx && ctx.state;
+                if(state){
+                  // 获取当前时间（tick * 5分钟）
+                  const currentTime = (state.tick || 0) * 5; // 分钟
+                  if(currentTime >= 120){
+                    // 超过120分钟，阻止做题
+                    if(!student._talent_backup['lumina']){
+                      student._talent_backup['lumina'] = {
+                        thinking: student.thinking,
+                        coding: student.coding,
+                        knowledge_ds: student.knowledge_ds,
+                        knowledge_graph: student.knowledge_graph,
+                        knowledge_string: student.knowledge_string,
+                        knowledge_math: student.knowledge_math,
+                        knowledge_dp: student.knowledge_dp
+                      };
+                      student.thinking = 0;
+                      student.coding = 0;
+                      student.knowledge_ds = 0;
+                      student.knowledge_graph = 0;
+                      student.knowledge_string = 0;
+                      student.knowledge_math = 0;
+                      student.knowledge_dp = 0;
+                      student._talent_state['lumina_active'] = true;
+                      return `🌙 ${student.name} 已经无法继续做题了...`;
+                    }
+                  }
+                }
+              }
+            }
+          }catch(e){ console.error('lumina 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 杜瑜皓：魔怔 - 20%概率让所有人打魔塔，本周无法训练
+      this.registerTalent({
+        name: '魔怔',
+        description: '可能会拉所有人一起打魔塔，导致本周无法训练。',
+        color: '#8B4513',
+        prob: 0.0, // 不会自动分配，仅杜瑜皓拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对杜瑜皓生效
+            if(student.name !== '杜瑜皓') return null;
+            
+            // 在周初触发检查（通过week_start事件，或者在训练时检查）
+            if(eventName === 'week_start' || eventName === 'training_start'){
+              // 20%概率触发
+              if(getRandom() < 0.2){
+                // 标记本周魔怔状态
+                if(!student._talent_state) student._talent_state = {};
+                const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+                if(game){
+                  if(!game._duYuHao_moZhen_week) game._duYuHao_moZhen_week = -1;
+                  if(game._duYuHao_moZhen_week !== game.week){
+                    game._duYuHao_moZhen_week = game.week;
+                    // 阻止所有学生训练
+                    if(Array.isArray(game.students)){
+                      for(let s of game.students){
+                        if(s && s.active !== false){
+                          if(!s._talent_state) s._talent_state = {};
+                          s._talent_state['魔怔_禁训'] = true;
+                        }
+                      }
+                    }
+                    return '🗼 杜瑜皓拉着所有人去打魔塔了！本周无法训练！';
+                  }
+                }
+              }
+            }
+            
+            // 在训练效果计算时检查
+            if(eventName === 'training_effect'){
+              if(student._talent_state && student._talent_state['魔怔_禁训']){
+                // 将训练效果归零
+                if(ctx && ctx.gains){
+                  ctx.gains.knowledge = 0;
+                  ctx.gains.thinking = 0;
+                  ctx.gains.coding = 0;
+                }
+                return null;
+              }
+            }
+          }catch(e){ console.error('魔怔 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 周康阳：没建文件夹 - 第一次参加NOIP/省选时25%概率爆零
+      this.registerTalent({
+        name: '没建文件夹',
+        description: '第一次参加NOIP和省选时可能忘记建立文件夹，导致爆零。',
+        color: '#FF4500',
+        prob: 0.0, // 不会自动分配，仅周康阳拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对周康阳生效
+            if(student.name !== '周康阳') return null;
+            
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              const contestName = ctx && ctx.contestName;
+              
+              // 只在NOIP和省选时触发
+              if(contestName === 'NOIP' || contestName === '省选'){
+                // 初始化参赛次数记录
+                if(!student._talent_state['没建文件夹_记录']){
+                  student._talent_state['没建文件夹_记录'] = {};
+                }
+                
+                // 检查是否是第一次参加这个比赛
+                const isFirstTime = !student._talent_state['没建文件夹_记录'][contestName];
+                
+                if(isFirstTime){
+                  // 记录参赛
+                  student._talent_state['没建文件夹_记录'][contestName] = true;
+                  
+                  // 25%概率触发
+                  if(getRandom() < 0.25){
+                    student._talent_state['没建文件夹_triggered'] = true;
+                    
+                    // 将所有能力设为0
+                    if(!student._talent_backup['没建文件夹']){
+                      student._talent_backup['没建文件夹'] = {
+                        thinking: student.thinking,
+                        coding: student.coding,
+                        knowledge_ds: student.knowledge_ds,
+                        knowledge_graph: student.knowledge_graph,
+                        knowledge_string: student.knowledge_string,
+                        knowledge_math: student.knowledge_math,
+                        knowledge_dp: student.knowledge_dp
+                      };
+                      student.thinking = 0;
+                      student.coding = 0;
+                      student.knowledge_ds = 0;
+                      student.knowledge_graph = 0;
+                      student.knowledge_string = 0;
+                      student.knowledge_math = 0;
+                      student.knowledge_dp = 0;
+                    }
+                    
+                    return `📁 周康阳忘记建立文件夹了！本场${contestName}将爆零！`;
+                  }
+                }
+              }
+            }
+          }catch(e){ console.error('没建文件夹 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 罗恺：T1恐惧症 - 50%概率过不了T1
+      this.registerTalent({
+        name: 'T1恐惧症',
+        description: '面对第一题时容易紧张，可能无法通过。',
+        color: '#8B0000',
+        prob: 0.0, // 不会自动分配，仅罗恺拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对罗恺生效
+            if(student.name !== '罗恺') return null;
+            
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              // 50%概率触发
+              if(getRandom() < 0.5){
+                student._talent_state['T1恐惧症_triggered'] = true;
+                return '😰 罗恺对T1感到恐惧！本场比赛T1可能无法通过！';
+              }
+            }
+            
+            // 在选择题目时触发
+            if(eventName === 'contest_select_problem'){
+              if(student._talent_state && student._talent_state['T1恐惧症_triggered']){
+                const state = ctx && ctx.state;
+                const problemId = ctx && (ctx.problemId !== undefined ? ctx.problemId : null);
+                
+                if(state && problemId === 0){ // T1是第一道题，id为0
+                  // 将T1的能力设为0，无法通过
+                  if(!student._talent_backup['T1恐惧症']){
+                    student._talent_backup['T1恐惧症'] = {
+                      thinking: student.thinking,
+                      coding: student.coding,
+                      knowledge_ds: student.knowledge_ds,
+                      knowledge_graph: student.knowledge_graph,
+                      knowledge_string: student.knowledge_string,
+                      knowledge_math: student.knowledge_math,
+                      knowledge_dp: student.knowledge_dp
+                    };
+                    student.thinking = 0;
+                    student.coding = 0;
+                    student.knowledge_ds = 0;
+                    student.knowledge_graph = 0;
+                    student.knowledge_string = 0;
+                    student.knowledge_math = 0;
+                    student.knowledge_dp = 0;
+                    student._talent_state['T1恐惧症_active'] = true;
+                    return '😰 罗恺在T1面前完全失去了能力...';
+                  }
+                } else if(problemId !== 0 && student._talent_state['T1恐惧症_active']){
+                  // 选择其他题目时，恢复能力
+                  if(student._talent_backup['T1恐惧症']){
+                    const backup = student._talent_backup['T1恐惧症'];
+                    student.thinking = backup.thinking;
+                    student.coding = backup.coding;
+                    student.knowledge_ds = backup.knowledge_ds;
+                    student.knowledge_graph = backup.knowledge_graph;
+                    student.knowledge_string = backup.knowledge_string;
+                    student.knowledge_math = backup.knowledge_math;
+                    student.knowledge_dp = backup.knowledge_dp;
+                    delete student._talent_backup['T1恐惧症'];
+                    student._talent_state['T1恐惧症_active'] = false;
+                    return '😮‍💨 罗恺离开T1后恢复了能力';
+                  }
+                }
+              }
+            }
+          }catch(e){ console.error('T1恐惧症 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 陈诺：dx - 压力增长速度2倍
+      this.registerTalent({
+        name: 'dx',
+        description: '压力增长速度是别人的2倍。',
+        color: '#4B0082',
+        prob: 0.0, // 不会自动分配，仅陈诺拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对陈诺生效
+            if(student.name !== '陈诺') return null;
+            
+            // 拦截压力变化事件，将压力增加翻倍
+            if(eventName === 'pressure_change'){
+              if(ctx && typeof ctx.amount === 'number'){
+                // 返回double_pressure动作，让压力翻倍
+                return { action: 'double_pressure' };
+              }
+            }
+          }catch(e){ console.error('dx 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 王相文：临门一脚 - 距离IOI晋级线50分内无法晋级
+      this.registerTalent({
+        name: '临门一脚',
+        description: '总是在关键时刻差一点，无法晋级IOI国家队。',
+        color: '#696969',
+        prob: 0.0, // 不会自动分配，仅王相文拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对王相文生效
+            if(student.name !== '王相文') return null;
+            
+            // 在IOI晋级判定时触发
+            if(eventName === 'ioi_qualification_check'){
+              // 这个需要在国家队晋级判定代码中调用
+              // 如果距离晋级线不超过50分，则阻止晋级
+              if(ctx && typeof ctx.score === 'number' && typeof ctx.qualificationLine === 'number'){
+                const gap = ctx.score - ctx.qualificationLine;
+                if(gap >= 0 && gap <= 50){
+                  // 距离晋级线50分以内，阻止晋级
+                  return { action: 'block_qualification', message: `王相文距离晋级线仅${gap}分，但因"临门一脚"天赋无法晋级` };
+                }
+              }
+            }
+          }catch(e){ console.error('临门一脚 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 李羿辰：超能力者 
+      this.registerTalent({
+        name: '超能力者',
+        description: '拥有来自机器人世界的超能力：能力上限是普通人的2倍，永远不会受到压力的影响，比赛中能力大幅提升。',
+        color: '#FFD700',
+        prob: 0.0, // 不会自动分配，仅李羿辰拥有
+        beneficial: true,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对李羿辰生效
+            if(student.name !== '李羿辰') return null;
+            
+            // 1. 永远不会压力过大：拦截所有压力增加
+            if(eventName === 'pressure_change'){
+              // 将压力变化归零，并且额外减压
+              student.pressure = Math.max(0, student.pressure - 5);
+              return { action: 'moyu_cancel_pressure' }; // 取消压力增加
+            }
+            
+            // 2. 比赛时大幅提升能力：在解题判定时提升成功率
+            if(eventName === 'contest_thinking' || eventName === 'contest_coding'){
+              // 提升能力但保持在2倍上限内
+              if(ctx && ctx.state){
+                ensureTemp(student);
+                if(!student._talent_backup['超能力者']){
+                  student._talent_backup['超能力者'] = {
+                    thinking: student.thinking,
+                    coding: student.coding
+                  };
+                }
+                // 将能力大幅提升，但不超过2倍上限
+                const maxThinking = (typeof MAX_THINKING !== 'undefined' ? MAX_THINKING : 100);
+                const maxCoding = (typeof MAX_CODING !== 'undefined' ? MAX_CODING : 100);
+                const targetThinking = Math.min(maxThinking * 2, Math.max(student.thinking * 1.5, maxThinking * 1.8));
+                const targetCoding = Math.min(maxCoding * 2, Math.max(student.coding * 1.5, maxCoding * 1.8));
+                
+                student.thinking = Math.max(student.thinking, targetThinking);
+                student.coding = Math.max(student.coding, targetCoding);
+                student._talent_state['超能力者_active'] = true;
+              }
+            }
+            
+            // 在比赛选题时也触发，确保整个比赛过程都有效
+            if(eventName === 'contest_start'){
+              ensureTemp(student);
+              return '⚡ 李羿辰的超能力觉醒！比赛中将发挥完美表现！';
+            }
+          }catch(e){ console.error('超能力者 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 李白天：高冷 - 100%概率使其他所有人压力增长速度增加25%
+      this.registerTalent({
+        name: '高冷',
+        description: '高冷的性格让周围的人倍感压力。',
+        color: '#4682B4',
+        prob: 0.0, // 不会自动分配，仅李白天拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对李白天生效
+            if(student.name !== '李白天') return null;
+            
+            if(eventName === 'week_start'){
+              // 50%概率触发
+              if(getRandom() < 1.0){
+                if(!student._talent_state) student._talent_state = {};
+                const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+                if(game){
+                  if(!game._liBaiTian_gaoLeng_week) game._liBaiTian_gaoLeng_week = -1;
+                  if(game._liBaiTian_gaoLeng_week !== game.week){
+                    game._liBaiTian_gaoLeng_week = game.week;
+                    game._liBaiTian_gaoLeng_active = true;
+                    return '❄️ 李白天散发出高冷气场，所有人压力增长速度+25%！';
+                  }
+                }
+              } else {
+                // 未触发，清除状态
+                const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+                if(game) game._liBaiTian_gaoLeng_active = false;
+              }
+            }
+            
+            // 监听其他人的压力变化事件
+            if(eventName === 'others_pressure_change'){
+              const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+              if(game && game._liBaiTian_gaoLeng_active){
+                // 其他学生的压力增加20%
+                if(ctx && ctx.targetStudent && ctx.targetStudent.name !== '李白天'){
+                  if(typeof ctx.pressureIncrease === 'number'){
+                    ctx.pressureIncrease *= 1.25;
+                  }
+                }
+              }
+            }
+          }catch(e){ console.error('高冷 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 魔女：李羿辰黑化后的特殊天赋 - 为所有其他人增加200%的压力增长，并清零心理素质
+      this.registerTalent({
+        name: '魔女',
+        description: '黑化的多头散发出恐怖的气场，所有其他学生的压力增长速度增加200%（×3），并持续清零心理素质。',
+        color: '#8B0000',
+        prob: 0.0, // 不会自动分配，仅黑化李羿辰拥有
+        beneficial: false,
+        handler: function(student, eventName, ctx){
+          try{
+            // 只对李羿辰（黑化）生效
+            if(student.name !== '李羿辰（黑化）' && !student._isBlackened) return null;
+            
+            if(eventName === 'week_start'){
+              // 每周开始时触发魔女效果
+              const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+              if(game){
+                if(!game._witch_week) game._witch_week = -1;
+                if(game._witch_week !== game.week){
+                  game._witch_week = game.week;
+                  game._witch_active = true;
+                  
+                  const affectedStudents = [];
+                  
+                  // 清零所有其他学生的心理素质，并记录影响
+                  for(let s of game.students){
+                    if(s && s.active !== false && s !== student){
+                      const oldMental = s.mental || 0;
+                      s.mental = 0;
+                      affectedStudents.push({
+                        name: s.name,
+                        oldMental: oldMental,
+                        mentalChange: -oldMental,
+                        pressure: s.pressure || 0
+                      });
+                    }
+                  }
+                  
+                  // 扣除80%资金
+                  const oldBudget = game.budget || 0;
+                  const deduction = Math.floor(oldBudget * 0.8);
+                  game.budget = Math.max(0, oldBudget - deduction);
+                  
+                  // 输出到游戏日志
+                  const log = (typeof window !== 'undefined' && window.log) ? window.log : console.log;
+                  
+                  log(`[魔女诅咒] 资金流失: ¥${oldBudget.toLocaleString()} → ¥${game.budget.toLocaleString()} (损失¥${deduction.toLocaleString()}, -80%)`);
+                  
+                  // 输出每个受影响学生的详情
+                  for(const affected of affectedStudents){
+                    log(`  ${affected.name}: 心理素质 ${affected.oldMental.toFixed(1)} → 0 (清零), 压力=${affected.pressure.toFixed(1)}, 本周压力增长×3`);
+                  }
+                  
+                  // 推送资金损失事件
+                  try{
+                    if(typeof window !== 'undefined' && window.pushEvent){
+                      window.pushEvent({
+                        name: '⚠️ 魔女诅咒 - 资金流失',
+                        description: `黑化的多头散发出强大的负面能量，导致资金大量流失！经费从 ¥${oldBudget.toLocaleString()} 降至 ¥${game.budget.toLocaleString()}（损失 ¥${deduction.toLocaleString()}）`,
+                        week: game.week
+                      });
+                    }
+                  }catch(e){}
+                  
+                  const summary = `⚠️ 魔女气场爆发！资金损失80%: ¥${oldBudget.toLocaleString()} → ¥${game.budget.toLocaleString()}；${affectedStudents.length}名学生心理素质清零，压力增长×3`;
+                  
+                  return summary;
+                }
+              }
+            }
+            
+            // 监听其他人的压力变化事件
+            if(eventName === 'others_pressure_change'){
+              const game = (typeof window !== 'undefined' && window.game) ? window.game : (ctx && ctx.game);
+              if(game && game._witch_active){
+                // 其他学生的压力增加200%（×3）
+                if(ctx && ctx.targetStudent && ctx.targetStudent !== student){
+                  if(typeof ctx.pressureIncrease === 'number'){
+                    ctx.pressureIncrease *= 3.0;
+                  }
+                }
+              }
+            }
+          }catch(e){ console.error('魔女 天赋错误', e); }
+          return null;
+        }
+      });
+
+      // 清理逻辑：当比赛结束时，恢复所有被天赋临时修改过的属性
+      // 监听 contest_finish 事件
+      this.registerTalent({
+        name: '__talent_cleanup__',
+        description: '内部：清理临时天赋效果',
+        color: '#9E9E9E',
+        prob: 0.0,
+        handler: function(student, eventName, ctx){
+          if(eventName !== 'contest_finish' && eventName !== 'mock_contest_finish') return null;
+          try{
+            if(student._talent_backup){
+              for(const k of Object.keys(student._talent_backup)){
+                const backup = student._talent_backup[k];
+                if(!backup) continue;
+                // 恢复尽可能存在的字段，但不要把 per-contest constmental 赋回到 student 顶层属性
+                for(const field of Object.keys(backup)){
+                  try{
+                    if(field === 'constmental'){
+                      // constmental 属于 student._talent_state 并且为赛中临时副本，清理时不需要恢复到顶层
+                      continue;
+                    }
+                    const val = backup[field];
+                    // Only restore finite numeric values or non-null/undefined values to avoid
+                    // overwriting valid properties with undefined/NaN.
+                    if(typeof val === 'number'){
+                      if(isFinite(val)) student[field] = val;
+                    } else {
+                      if(typeof val !== 'undefined' && val !== null) student[field] = val;
+                    }
+                  }catch(e){ /* ignore field restore errors */ }
+                }
+              }
+            }
+            // 清空临时存储
+            student._talent_backup = {};
+            student._talent_state = {};
+            return null;
+          }catch(e){ console.error('talent cleanup error', e); }
+          return null;
+        }
+      });
+    }
+  };
+
+  // 兼容旧的简单全局处理方式
+  if(typeof window !== 'undefined'){
+    window.TalentManager = TalentManager;
+    // 旧兼容：保留一个全局 handler 映射，供旧代码直接使用（但优先使用 TalentManager）
+    window._talentHandlers = window._talentHandlers || {};
+  }
+
+  global.TalentManager = TalentManager;
+})(window);
+

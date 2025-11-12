@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>结算 — OI 教练模拟器</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .ending-highlight {
+      color: #1976d2;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .ending-animate {
+      animation: pulse 2s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    
+    #end-summary h4 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    #end-summary table {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    #end-summary table th {
+      background: #f5f5f5 !important;
+    }
+    
+    .timeline-pin {
+      transition: transform 0.2s ease;
+    }
+    
+    .timeline-pin:hover {
+      transform: scale(1.2);
+    }
+    
+    .progress-bar {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+  </style>
+<!-- Clarity tracking removed -->
+  <!-- Cloudflare Web Analytics loader (conditional: only load if page load time <= 2s) -->
+  <script>
+    (function(){
+      function injectCF(){
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+        s.setAttribute('data-cf-beacon', '{"token": "cd3db41765ea4c17be0930b3f94e3c3a"}');
+        document.head.appendChild(s);
+      }
+      function shouldLoad(){
+        try{
+          var start = (performance.timing && performance.timing.navigationStart) || 0;
+          var elapsed = performance.now ? performance.now() : (Date.now() - start);
+          return elapsed <= 2000;
+        }catch(e){ return false; }
+      }
+      document.addEventListener('DOMContentLoaded', function(){ if(shouldLoad()) injectCF(); });
+    })();
+  </script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏆 赛季结算</h1>
+  </header>
+  <div class="panel" id="end-panel">
+    <h3>最终结果</h3>
+    <div id="end-summary" class="small muted">正在加载结算数据……</div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-ghost" id="end-back">回到开始</button>
+      <button class="btn" id="end-share" style="background:#2b6cb0;color:white;">分享结果</button>
+      <button class="btn" id="end-playagain">再玩一次</button>
+  <a class="btn" id="end-help" href="help.html" target="_blank" rel="noopener">通关困难？查看攻略</a>
+    </div>
+  </div>
+</div>
+<script src="lib/constants.js"></script>
+<script src="lib/utils.js"></script>
+<script src="lib/models.js"></script>
+<script src="lib/talent.js"></script>
+<script src="lib/share.js"></script>
+<script src="game.js"></script>
+<script src="render.js"></script>
+<script src="debug.js"></script>
+<script>
+  document.getElementById('end-back').onclick = ()=>{ window.location.href = 'start.html'; };
+  document.getElementById('end-playagain').onclick = ()=>{ 
+    try{
+      // 调试弹窗：在清理前显示当前 localStorage 中相关键的值（或其存在性）和调用堆栈，帮助定位是否被误清空
+      const before = {
+        oi_coach_save_exists: localStorage.getItem('oi_coach_save') !== null,
+        oi_coach_ending_reason: localStorage.getItem('oi_coach_ending_reason'),
+        oi_coach_ending: localStorage.getItem('oi_coach_ending')
+      };
+  console.debug('About to clear localStorage keys: oi_coach_save, oi_coach_ending_reason, oi_coach_ending; current:', before);
+    }catch(e){ /* ignore in case alerts break automated tests */ }
+    // 清理所有相关的localStorage数据
+    localStorage.removeItem('oi_coach_save'); 
+    localStorage.removeItem('oi_coach_ending_reason');
+    localStorage.removeItem('oi_coach_ending');
+  try{ console.debug('localStorage cleanup executed for oi_coach_save and related keys'); }catch(e){}
+    window.location.href = 'start.html'; 
+  };
+  
+  // 分享按钮事件
+  document.getElementById('end-share').onclick = () => {
+    try {
+      if (typeof ShareManager !== 'undefined' && ShareManager.showShareDialog) {
+        ShareManager.showShareDialog();
+      } else {
+        alert('分享功能加载失败，请刷新页面重试');
+      }
+    } catch (e) {
+      alert('分享失败：' + e.message);
+      console.error('Share button error:', e);
+    }
+  };
+  
+  // render summary if available
+  if(typeof renderEndSummary === 'function') renderEndSummary();
+</script>
+  <footer style="text-align:center;padding:12px 8px;color:#666;font-size:13px;border-top:1px solid #eee;margin-top:18px">
+    OI 教练模拟器 · 改版
+
+    <br>
+
+    Based on 开源项目 · 原作者 @Dreamers-seve · GitHub: <a href="https://github.com/seve42/OItrainer" target="_blank" rel="noopener">https://github.com/seve42/OItrainer</a>
+  </footer>
+  <!-- footer winter plan insertion (centered & styled) -->
+  <div class="disclaimer" role="note" aria-label="免责声明" style="margin-top:8px;margin-bottom:18px;font-size:13px;color:#444;">
+    免责声明：本游戏为虚构
+  </div>
+</body>
+</html>

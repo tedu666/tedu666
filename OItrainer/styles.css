@@ -1,0 +1,1148 @@
+:root{--bg:#f7f7f8;--card:#ffffff;--muted:#666;--accent:#2b6cb0}
+/* 全局允许横向滚动以避免在极窄视口下布局被强制换行/错位。
+   同时保留 .prevent-horizontal-collapse 作为可选类（向后兼容）。 */
+html, body {
+  overflow-x: auto;
+}
+
+.prevent-horizontal-collapse {
+  overflow-x: auto;
+}
+
+/* 给主容器设置一个保守的最小宽度，防止在极窄视口下组件互相覆盖或换行异常。
+  这个值可以根据需要调整（例如 640px 或 720px），这里采用 640px 作为保守起点。 */
+.container{min-width:640px}
+
+/* 如果你希望只在窄屏设备上启用滚动，可以在 HTML 上添加 .prevent-horizontal-collapse 类。
+  例如： <html class="prevent-horizontal-collapse"> 或 <body class="prevent-horizontal-collapse"> */
+
+body{font-family: "PingFang SC","Microsoft YaHei",Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:#222}
+.container{max-width:1100px;margin:20px auto;padding:16px}
+header{background:var(--card);border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{margin:0;font-size:18px}
+.topline{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.topline .small{white-space:nowrap}
+.topline #header-weather, .topline #header-next-competition{opacity:0.95}
+/* 经费低于阈值时的高亮样式 */
+.low-funds{ color: #c53030 !important; background: linear-gradient(90deg, rgba(229,62,62,0.04), rgba(255,255,255,0)); padding: 4px 8px; border-radius:6px; font-weight:800 }
+.panel{background:var(--card);border-radius:8px;padding:12px;margin-top:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1;min-width:240px}
+.small{font-size:13px;color:var(--muted)}
+.btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;display:inline-block;text-decoration:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid #ddd;color:#333;padding:6px 10px;border-radius:6px;cursor:pointer}
+ul.list{list-style:none;padding:0;margin:0}
+li.item{padding:6px 8px;border-bottom:1px dashed #eee;display:flex;justify-content:space-between;align-items:center}
+label.block{display:block;margin:6px 0;font-weight:600}
+input[type="number"], select, input[type="text"]{width:100%;padding:6px;border:1px solid #ddd;border-radius:6px}
+.muted{color:var(--muted);font-size:13px}
+.stat{font-weight:700}
+.facility-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* province selection grid */
+.prov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:4px}
+.prov-btn{background:var(--accent);color:#fff;border:none;padding:5px 6px;border-radius:4px;cursor:pointer;display:block;text-align:center;white-space:normal}
+.prov-btn.selected{background:#fff;color:var(--accent);border:2px solid rgba(43,108,176,0.18);box-shadow:0 4px 14px rgba(43,108,176,0.06);}
+/* option card (used in entertainment modal) */
+.option-card{transition:all 180ms ease;border:1px solid #e6e6e6;background:#fff}
+.option-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.04)}
+.option-card.selected{border-color:var(--accent);background:linear-gradient(180deg, rgba(43,108,176,0.04), rgba(43,108,176,0.02));box-shadow:none;transform:none}
+/* theme swatches */
+.theme-swatch{display:inline-block;width:16px;height:16px;border-radius:50%;cursor:pointer;margin-left:4px;border:1px solid #ccc;vertical-align:middle}
+body.theme-red{--accent:#e53e3e;--bg:#fff5f5;--card:#ffffff;--muted:#666}
+body.theme-green{--accent:#38a169;--bg:#f0fff4;--card:#ffffff;--muted:#666}
+body.theme-purple{--accent:#805ad5;--bg:#faf5ff;--card:#ffffff;--muted:#666}
+.facility{padding:8px;border-radius:6px;border:1px solid #eee;background:#fafafa;text-align:center}
+.fac-label{font-weight:700;margin-bottom:6px}
+.fac-action{margin-top:8px}
+.btn.upgrade{background:#38a169;color:#fff;padding:6px 8px;font-size:13px;border-radius:6px}
+.btn.upgrade.ghost{background:transparent;border:1px solid #ddd;color:#333}
+.modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999}
+.dialog{width:820px;max-width:96%;background:#fff;padding:18px;border-radius:10px;max-height:85vh;overflow:auto;position:relative}
+.dialog h3{margin-top:0}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+footer{margin-top:16px;text-align:center;color:var(--muted)}
+.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef6ff;color:#1b4f8a;font-size:12px;margin-left:6px}
+.warn{color:#b45309}
+.diff-tag{padding:3px 8px;border-radius:999px;font-weight:700;font-size:12px;margin-left:6px}
+/* 颜色按照要求：底色为对应颜色，字体颜色根据可读性调整 */
+.diff-beginner{background:#fff0f0;color:#c53030;border:1px solid rgba(197, 48, 48, 0.12)} /* 入门：红色字体 */
+.diff-popular-low{background:#fff7f0;color:#d97706;border:1px solid rgba(217,119,6,0.12)} /* 普及-：橙色字体 */
+.diff-popular-high{background:#fffbe6;color:#b77900;border:1px solid rgba(183,121,0,0.12)} /* 普及+提高：黄色字体 */
+.diff-advanced-low{background:#f0f8ff;color:#2563eb;border:1px solid rgba(37,99,235,0.12)} /* 提高+省选-：蓝色字体 */
+.diff-provincial{background:#faf5ff;color:#6b21a8;border:1px solid rgba(107,33,168,0.12)} /* 省选 / NOI-：紫色字体 */
+.diff-noi{background:#f5f5f5;color:#0f172a;border:1px solid rgba(15,23,42,0.06)} /* NOI/NOI+/CTSC：黑色字体 */
+
+/* 新增：七色难度语义类（红/橙/黄/绿/蓝/紫/黑） */
+.diff-red{background: #fff0f0; color: #c53030; border: 1px solid rgba(197,48,48,0.12)}
+.diff-orange{background: #fff7ed; color: #d97706; border: 1px solid rgba(217,119,6,0.12)}
+.diff-yellow{background: #fffbe6; color: #b77900; border: 1px solid rgba(183,121,0,0.12)}
+.diff-green{background: #f0fff4; color: #2f855a; border: 1px solid rgba(47,133,90,0.12)}
+.diff-blue{background: #f0f8ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.12)}
+.diff-purple{background: #faf5ff; color: #6b21a8; border: 1px solid rgba(107,33,168,0.12)}
+.diff-black{background: #f5f5f5; color: #0f172a; border: 1px solid rgba(15,23,42,0.06)}
+.status-row{display:flex;gap:12px;flex-wrap:wrap}
+/* ========== 优化后的学生卡片样式（紧凑横条布局） ========== */
+.student-box {
+  position: relative;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.student-box:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+  border-color: #cbd5e0;
+}
+
+/* 劝退按钮 - 紧凑设计 */
+.evict-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+  color: #fff;
+  border: none;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(229,62,62,0.2);
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.student-box:hover .evict-btn {
+  opacity: 1;
+}
+
+.evict-btn:hover {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 2px 6px rgba(229,62,62,0.3);
+  transform: scale(1.05);
+}
+
+.evict-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 学生卡片头部 - 紧凑横向布局 */
+.student-box .student-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 50px; /* 为劝退按钮留空间 */
+}
+
+.student-box .student-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.student-box .student-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 压力标签 - 紧凑设计 */
+.label-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #4a5568;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.label-pill.pressure-low {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #22543d !important; /* 绿色文字 */
+  padding: 0 4px !important;
+}
+
+.label-pill.pressure-mid {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #bfa100 !important; /* 黄色文字 */
+  padding: 0 4px !important;
+}
+
+.label-pill.pressure-high {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #c62828 !important; /* 红色文字 */
+  padding: 0 4px !important;
+}
+
+.label-pill.pressure-tendency {
+  background: #fff5f5 !important;
+  border-color: #feb2b2 !important;
+  color: #e53e3e !important; /* 深红色文字 */
+  padding: 2px 6px !important;
+  font-weight: 700 !important;
+}
+
+/* 生病状态警告 */
+.warn {
+  color: #e53e3e;
+  font-weight: 700;
+  font-size: 11px;
+  background: #fff5f5;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #feb2b2;
+}
+.score{font-weight:700}
+.compact{font-size:13px}
+.stars{color:#d97706}
+table{width:100%;border-collapse:collapse}
+th,td{padding:6px;border:1px solid #eee;text-align:center}
+.label-pill{display:inline-block;padding:0 4px;border-radius:4px;background:transparent;color:#111;font-size:13px}
+.label-pill.pressure-low{background:transparent;color:#22543d}
+.label-pill.pressure-mid{background:transparent;color:#bfa100}
+.label-pill.pressure-high{background:transparent;color:#c62828}
+.highlight-next-comp{background: #fffde7; color: #d84315; padding: 2px 6px; border-radius: 5px; font-weight: bold}
+.next-panel{margin-top:8px;padding:8px;border-radius:6px}
+/* 知识点徽章 - 紧凑横向布局 */
+.knowledge-badges {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+}
+
+.knowledge-badges .kb {
+  display: inline-flex;
+  align-items: center;
+  min-width: 26px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+  color: #2d3748;
+  font-weight: 700;
+  font-size: 10px;
+  text-align: center;
+  border: 1px solid #cbd5e0;
+  transition: all 0.12s ease;
+  cursor: help;
+  position: relative;
+}
+
+.knowledge-badges .kb:hover {
+  background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+  border-color: #4299e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(66, 153, 225, 0.12);
+  z-index: 1;
+}
+
+/* 知识点等级颜色 */
+.knowledge-badges .kb[data-grade="S"],
+.knowledge-badges .kb[data-grade="A"] {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+  color: #78350f;
+}
+
+.knowledge-badges .kb[data-grade="B"],
+.knowledge-badges .kb[data-grade="C"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #60a5fa;
+  color: #1e3a8a;
+}
+
+.knowledge-badges .kb[data-grade="D"],
+.knowledge-badges .kb[data-grade="E"] {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+.kb-small {
+  min-width: 22px;
+  padding: 2px 5px;
+  font-size: 10px;
+}
+
+/* 能力徽章：已使用 .knowledge-badges .kb 的紧凑样式，无需单独定义 */
+
+/* 能力指标分组 - 紧凑横向布局 */
+.ability-group {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.ability-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #4a5568;
+}
+
+.ability-item .label {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.ability-item .value {
+  font-weight: 700;
+  color: #2b6cb0;
+  background: #e6f2ff;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid #bee3f8;
+}
+
+/* 结局高亮与动画样式 */
+.ending-highlight{font-weight:800;color:#d84315;display:inline-block;padding:4px 8px;border-radius:6px}
+.ending-animate{animation:endingPulse 1.6s ease-in-out 1;}
+@keyframes endingPulse{
+	0%{ transform: scale(1); box-shadow: 0 0 0 rgba(216,67,21,0); }
+	30%{ transform: scale(1.08); box-shadow: 0 6px 18px rgba(216,67,21,0.12); }
+	60%{ transform: scale(0.98); box-shadow: 0 2px 8px rgba(216,67,21,0.06); }
+	100%{ transform: scale(1); box-shadow: 0 0 0 rgba(216,67,21,0); }
+}
+
+/* Action card vertical list */
+.action-cards{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.action-card{background:#fff;border:1px solid #eee;border-radius:8px;padding:10px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03);display:flex;flex-direction:column}
+.action-card:focus,.action-card:hover{box-shadow:0 4px 10px rgba(0,0,0,.06);outline:none}
+.action-card .card-title{font-weight:700;margin-bottom:6px}
+.action-card .card-desc{font-size:13px;color:var(--muted)}
+.action-card.empty{background:#f9fafb;border:1px dashed #eee;color:var(--muted)}
+
+/* 默认不显示空的预留事件卡片（JS 根据事件存在与否切换显示） */
+.action-card.empty { display: none; }
+.action-card.event-active{ display:flex; border:2px solid var(--accent); box-shadow:0 4px 12px rgba(43,108,176,0.08); background:var(--card); }
+.event-slot{margin-top:8px;padding:6px;background:#fff;border-radius:6px;border:1px solid #eee;font-size:13px}
+.event-slot p{margin:0}
+
+/* Make sure smaller save button aligns */
+.action-cards > div > .btn-ghost{margin-left:0}
+
+/* 突发事件卡片容器 - iOS风格滚动（去除提示文案与预览，只保留渐变） */
+#event-cards-container {
+  position: relative;
+  max-height: 420px; /* 固定最大高度，约3-3.5个卡片 */
+  overflow: hidden;
+  margin-top: 12px;
+  transition: max-height 0.3s ease;
+}
+
+/* 内部滚动包装器：滚动可用但滚动条彻底隐藏（仍支持鼠标/触摸滚动） */
+#event-cards-wrapper {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 420px;
+  padding-bottom: 8px; /* 少量空间避免最后一项被遮挡 */
+  scroll-behavior: smooth;
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* 完全隐藏 WebKit 浏览器的滚动条视觉 */
+#event-cards-wrapper::-webkit-scrollbar { display: none; }
+
+/* 事件卡片基础样式 */
+.event-card {
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--card);
+  box-shadow: 0 2px 6px rgba(43,108,176,0.06);
+  margin-bottom: 8px;
+  position: relative;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 底部折叠渐变遮罩 - 当有内容溢出时显示（保留），使用纯白色基底以保证与白色背景一致 */
+#event-cards-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  /* 由透明白到纯白的渐变，确保与页面白色背景 (#ffffff) 完全一致 */
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.5) 30%,
+    rgba(255,255,255,0.9) 70%,
+    rgba(255,255,255,1) 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+/* 当容器可滚动时显示渐变 */
+#event-cards-container.has-overflow::after {
+  opacity: 1;
+}
+
+/* 当滚动到底部时隐藏渐变 */
+#event-cards-container.scrolled-to-bottom::after {
+  opacity: 0 !important;
+}
+
+.event-card h4{margin:0 0 6px 0}
+.event-list{max-height:140px;overflow:auto;padding:6px;border-radius:6px;background:linear-gradient(180deg, rgba(0,0,0,0.01), transparent)}
+.event-item{padding:6px;border-bottom:1px dashed #eee;font-size:13px}
+.event-item:last-child{border-bottom:none}
+
+/* Improved event card text layout: summary + expandable detail */
+.event-card .card-title{font-weight:700;margin-bottom:6px}
+.event-card .card-desc{font-size:13px;color:var(--muted);display:block;white-space:normal;word-break:break-word;overflow:hidden;text-overflow:ellipsis;max-height:2.6em}
+.event-card .card-desc.expanded{max-height:none;overflow:visible}
+.event-card .event-detail{margin-top:8px;background:#f8fafc;border:1px solid #eef2f7;padding:8px;border-radius:6px;font-size:13px;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow:auto}
+.event-card .more-btn{display:inline-block;margin-top:8px;background:transparent;border:none;color:var(--accent);cursor:pointer;padding:4px 6px;font-size:13px}
+.event-card .more-btn:focus{outline:2px solid rgba(43,108,176,0.15)}
+
+/* 标记：需要选择但尚未选择的事件卡片（红色高亮，兼顾可访问性） */
+.event-required{border-color:#e53e3e !important; background:linear-gradient(180deg, #fff5f5, #fff9f9) !important; box-shadow:0 4px 12px rgba(229,62,62,0.08) !important}
+.event-required .card-title{position:relative}
+.event-required .required-tag{display:inline-block;margin-left:8px;padding:2px 6px;border-radius:12px;background:#ffecec;color:#c53030;font-size:12px;font-weight:700;border:1px solid rgba(197,48,48,0.08)}
+
+/* When description is very long, limit the collapsed view to 2 lines (using line-clamp where available) */
+.card-desc.clamp {
+  display: -webkit-box;
+  /* Add both standard and webkit-prefixed properties for broader compatibility */
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 事件选项按钮 */
+.event-options{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.event-choice-btn{
+  padding:6px 14px;
+  font-size:13px;
+  border:1px solid var(--accent);
+  background:linear-gradient(135deg, rgba(43,108,176,0.08), rgba(43,108,176,0.04));
+  color:var(--text);
+  border-radius:6px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.event-choice-btn:hover{
+  background:linear-gradient(135deg, rgba(43,108,176,0.15), rgba(43,108,176,0.08));
+  box-shadow:0 2px 6px rgba(43,108,176,0.15);
+  transform:translateY(-1px);
+}
+.event-choice-btn:active{
+  transform:translateY(0);
+  box-shadow:0 1px 3px rgba(43,108,176,0.1);
+}
+
+/* Competition-week mode: only show the '参加比赛' card */
+body.comp-week .action-cards .action-card:not(#comp-only-action) {
+	display: none;
+}
+
+/* Highlighted competition action card */
+.comp-highlight{border:2px solid var(--accent);background:linear-gradient(90deg, rgba(43,108,176,0.06), rgba(43,108,176,0.02));box-shadow:0 6px 18px rgba(43,108,176,0.12);}
+
+/* ========== 新比赛系统样式 ========== */
+.contest-live-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.contest-header {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.time-info {
+  font-size: 16px;
+}
+
+/* Guidance & emphasis for required selections */
+.highlight-required {
+  animation: highlightPulse 1.4s ease-in-out 2;
+  border: 2px dashed #fda4af !important;
+  box-shadow: 0 6px 18px rgba(229,62,62,0.08) !important;
+}
+
+@keyframes highlightPulse {
+  0% { box-shadow: 0 0 0 rgba(229,62,62,0); transform: translateY(0); }
+  30% { box-shadow: 0 10px 30px rgba(229,62,62,0.12); transform: translateY(-3px); }
+  60% { box-shadow: 0 4px 12px rgba(229,62,62,0.06); transform: translateY(0); }
+  100% { box-shadow: 0 0 0 rgba(229,62,62,0); transform: translateY(0); }
+}
+
+/* Shake animation to draw attention */
+.shake { animation: shakeIt 0.9s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shakeIt {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Stronger selected styles for task cards and intensity buttons */
+.task-card.selected { border-color: #3182ce !important; box-shadow: 0 8px 24px rgba(49,130,206,0.12); transform: translateY(-2px); }
+.option-btn.selected { background:#dee8ff !important; color:#fff !important; border:2px solid rgba(37,99,235,0.12); box-shadow:0 6px 18px rgba(37,99,235,0.08); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 20px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #38a169, #48bb78);
+  transition: width 0.3s ease;
+}
+
+.student-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+  /* 保证在大量面板重排时容器不会瞬间折叠为0高度导致空白 */
+  min-height: 80px;
+}
+
+.student-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  position: relative;
+  /* transform动画由JS控制 */
+  will-change: transform;
+  backface-visibility: hidden; /* 提升渲染稳定性 */
+}
+
+.student-name {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: #1a202c;
+}
+
+.student-score {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #4a5568;
+  transition: all 0.3s ease;
+}
+
+.student-score span {
+  font-weight: 700;
+  color: #2b6cb0;
+}
+
+.student-current-problem {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #718096;
+}
+
+.student-current-problem span {
+  font-weight: 600;
+  color: #d97706;
+}
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.problem-item {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 4px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.problem-item.unattempted {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.problem-item.partial {
+  background: #fef3c7;
+  border-color: #fbbf24;
+}
+
+.problem-item.solved {
+  background: #d1fae5;
+  border-color: #34d399;
+  font-weight: 700;
+}
+
+/* 题目状态更新动画 */
+@keyframes problemUpdate {
+  0% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.15) rotate(2deg);
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.5);
+  }
+  100% { 
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.problem-update-animation {
+  animation: problemUpdate 0.6s ease-in-out;
+}
+
+.problem-id {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #374151;
+}
+
+.problem-score {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.contest-controls {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.contest-controls .btn {
+  margin: 0 6px;
+  min-width: 80px;
+}
+
+/* 比赛结果表格 */
+.result-table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.result-table th {
+  background: #f3f4f6;
+  font-weight: 700;
+  color: #374151;
+}
+
+.result-table td:first-child {
+  font-weight: 700;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.result-table td:nth-child(3) {
+  font-weight: 700;
+  color: #059669;
+}
+
+.result-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Modal actions: repositioned to top-left to minimize mouse travel.
+  If modal content provides a .modal-actions block, JS will move it into
+  the .modal-action-panel placed at dialog top-left. Buttons are larger
+  and have a clear divider for aesthetics. A small guard ensures content
+  doesn't overlap the panel. */
+.dialog .modal-action-panel{position:absolute;right:14px;top:14px;display:flex;gap:8px;align-items:center;padding:10px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.06);box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:3}
+.dialog .modal-action-panel::after{content:'';position:absolute;right:100%;top:10px;height:calc(100% - 20px);width:1px;background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));transform:translateX(-10px)}
+.dialog .modal-action-panel .btn{padding:10px 16px;border-radius:8px;font-size:14px}
+.dialog .modal-action-panel .btn.btn-ghost{padding:8px 12px}
+.dialog .modal-action-panel .btn + .btn{margin-left:6px}
+.dialog .modal-action-guard{height:64px}
+
+/* fallback: keep bottom-based layout if .modal-actions exists outside .dialog */
+.modal-actions{display:flex;gap:8px;justify-content:flex-start;align-items:center;margin-top:12px}
+.modal-actions .btn{margin:0}
+.modal-actions .btn + .btn{margin-left:6px}
+
+/* 天赋标签样式 */
+.student-talents {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.talent-tag {
+  position: relative;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.talent-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 天赋提示框 */
+.talent-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  margin-bottom: 4px;
+  padding: 8px 12px;
+  background: #1f2937;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* start page sub-panels: unify visual style used for recruitment / pre-training */
+.sub-panel{margin-top:16px;padding:12px;border:1px solid #e6e6e6;border-radius:8px;background:linear-gradient(180deg,#ffffff,#fafafa)}
+.sub-panel h4{margin:0 0 8px 0}
+.sub-panel .section-body{margin-bottom:8px}
+
+/* collapsible panels: when collapsed, hide body and controls but keep header visible */
+.sub-panel.collapsible .collapsible-head{cursor:pointer;user-select:none}
+.sub-panel.collapsible .collapsible-head::after{content:'\25BC';float:right;transform:rotate(0deg);transition:transform 180ms ease}
+.sub-panel.collapsible.expanded .collapsible-head::after{transform:rotate(180deg)}
+.sub-panel.collapsible.collapsed .section-body,
+.sub-panel.collapsible.collapsed .btn,
+.sub-panel.collapsible.collapsed #talent-selection,
+.sub-panel.collapsible.collapsed #recruited-list,
+.sub-panel.collapsible.collapsed #training-log,
+.sub-panel.collapsible.collapsed #talent-grid,
+.sub-panel.collapsible.collapsed .talent-grid,
+.sub-panel.collapsible.collapsed .talent-card{
+  display:none !important;
+}
+.sub-panel.collapsible.collapsed {padding-bottom:8px}
+
+/* 通用折叠面板样式（用于外出集训等模态框中的折叠面板） */
+.collapsible.collapsed .collapsible-content{
+  display:none !important;
+}
+.collapsible .collapsible-head{
+  cursor:pointer;
+  user-select:none;
+}
+
+/* talent selection grid (flat cards instead of select dropdown) */
+.talent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+.talent-card{border:1px solid #eee;background:#fff;padding:8px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:flex-start;transition:all 150ms ease}
+.talent-card .title{font-weight:700;font-size:14px}
+.talent-card .desc{font-size:12px;color:var(--muted)}
+.talent-card .color-dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,0.06)}
+.talent-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.04)}
+.talent-card.selected{border-color:var(--accent);background:linear-gradient(180deg, rgba(43,108,176,0.04), rgba(43,108,176,0.02));box-shadow:none;transform:none}
+
+/* make modal-actions align nicely on start page */
+.modal-actions{justify-content:flex-end}
+
+/* 提示框箭头 */
+.talent-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1f2937;
+}
+
+/* 悬停时显示提示框 */
+.talent-tag:hover .talent-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* 恢复天赋标签颜色由内联样式或天赋定义控制。保留一个非强制性的默认外观（不使用 !important）作为回退。 */
+.talent-tag {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-color: rgba(30,41,59,0.06);
+  box-shadow: none;
+}
+
+/* ========== 学生卡片折叠与交互增强 ========== */
+/* 学生卡片折叠功能 */
+.student-box .collapse-toggle {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: transparent;
+  border: 1px solid #cbd5e0;
+  color: #718096;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.student-box .collapse-toggle:hover {
+  background: #edf2f7;
+  border-color: #a0aec0;
+  color: #2d3748;
+}
+
+.student-box.collapsed .student-details {
+  display: none;
+}
+
+.student-box.collapsed {
+  padding-bottom: 12px;
+}
+
+/* 添加收起状态的提示 */
+.student-box.collapsed::after {
+  content: '点击展开详情';
+  position: absolute;
+  bottom: 8px;
+  left: 16px;
+  font-size: 11px;
+  color: #a0aec0;
+  font-style: italic;
+}
+
+/* 学生卡片内容区域 */
+.student-box .student-details {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 分隔线样式 */
+.student-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent);
+  margin: 10px 0;
+}
+
+/* 学生卡片信息行 */
+.student-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.student-info-row .info-label {
+  font-weight: 600;
+  color: #4a5568;
+  min-width: 60px;
+}
+
+.student-info-row .info-value {
+  color: #2d3748;
+  flex: 1;
+}
+
+/* 旧的能力组样式已移除；能力现在作为知识徽章的一部分显示 */
+
+/* 紧凑模式样式优化 */
+.compact {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* 学生列表 - 保持垂直堆叠 */
+#student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* === 颜色规则：按等级 & Ux 阶段的语义色 === */
+/* 默认中性外观（无等级信息时使用） */
+.knowledge-badges .kb,
+.kb,
+.tag,
+.label-pill,
+.talent-tag {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-color: rgba(30,41,59,0.06);
+  box-shadow: none;
+}
+
+/* E -> A -> SSS 色阶（蓝 -> 绿 -> 金）
+   支持带 +/- 或多重 S（例如 D+、SS、SSS）匹配 */
+.knowledge-badges .kb[data-grade="E"], .kb[data-grade="E"] {
+  background: linear-gradient(135deg,#eff6ff 0%, #dbeafe 100%);
+  color: #1e3a8a;
+  border-color: rgba(37,99,235,0.14);
+}
+.knowledge-badges .kb[data-grade="E+"], .kb[data-grade="E+"] {
+  background: linear-gradient(135deg,#eff6ff 0%, #dbeafe 100%);
+  color: #1e3a8a;
+  border-color: rgba(37,99,235,0.14);
+}
+.knowledge-badges .kb[data-grade^="D"], .kb[data-grade^="D"] {
+  /* D, D+ 等：偏青绿色 */
+  background: linear-gradient(135deg,#e6f9fb 0%, #ccf0ef 100%);
+  color: #0f766e;
+  border-color: rgba(6,182,212,0.14);
+}
+.knowledge-badges .kb[data-grade^="D+"], .kb[data-grade^="D+"] {
+  /* D, D+ 等：偏青绿色 */
+  background: linear-gradient(135deg,#e6f9fb 0%, #ccf0ef 100%);
+  color: #0f766e;
+  border-color: rgba(6,182,212,0.14);
+}
+.knowledge-badges .kb[data-grade="C"], .kb[data-grade="C"] {
+  background: linear-gradient(135deg,#ecfdf5 0%, #bbf7d0 100%);
+  color: #166534;
+  border-color: rgba(16,163,127,0.12);
+}
+.knowledge-badges .kb[data-grade="C+"], .kb[data-grade="C+"] {
+  background: linear-gradient(135deg,#ecfdf5 0%, #bbf7d0 100%);
+  color: #166534;
+  border-color: rgba(16,163,127,0.12);
+}
+.knowledge-badges .kb[data-grade="B"], .kb[data-grade="B"] {
+  background: linear-gradient(135deg,#fff7ed 0%, #ffe7c2 100%);
+  color: #92400e;
+  border-color: rgba(217,119,6,0.12);
+}
+.knowledge-badges .kb[data-grade="B+"], .kb[data-grade="B+"] {
+  background: linear-gradient(135deg,#fff7ed 0%, #ffe7c2 100%);
+  color: #92400e;
+  border-color: rgba(217,119,6,0.12);
+}
+.knowledge-badges .kb[data-grade="A"], .kb[data-grade="A"] {
+  background: linear-gradient(135deg,#fffaf0 0%, #fff1cc 100%);
+  color: #7c4a02;
+  border-color: rgba(183,121,0,0.16);
+}
+.knowledge-badges .kb[data-grade="A+"], .kb[data-grade="A+"] {
+  background: linear-gradient(135deg,#fffaf0 0%, #fff1cc 100%);
+  color: #7c4a02;
+  border-color: rgba(183,121,0,0.16);
+}
+.knowledge-badges .kb[data-grade^="S"], .kb[data-grade^="S"] {
+  /* S, SS, SSS：金色系 */
+  background: linear-gradient(135deg,#fff8e1 0%, #ffefb3 100%);
+  color: #6b3e00;
+  border-color: rgba(183,121,0,0.18);
+}
+
+/* Ux 阶段：以 U 开头的等级使用固定高饱和度浅青色 */
+.knowledge-badges .kb[data-grade^="U"], .kb[data-grade^="U"] {
+  background: linear-gradient(135deg,#bffcfb 0%, #9ef6f0 100%);
+  color: #044e54;
+  border-color: rgba(3,166,166,0.18);
+}
+
+/* hover 保持轻微上浮，但不使用强烈色彩覆盖 */
+.knowledge-badges .kb:hover,
+.kb:hover,
+.talent-tag:hover,
+.tag:hover {
+  transform: translateY(-1px);
+}
+
+/* 注释掉：这个规则会覆盖难度标签的颜色，导致所有难度标签显示为灰色
+.diff-beginner, .diff-popular-low, .diff-popular-high, .diff-advanced-low, .diff-provincial, .diff-noi {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-color: rgba(30,41,59,0.06);
+}
+
+/* Disabled action card visual */
+.action-card.disabled{
+  opacity:0.45;
+  pointer-events:none;
+  filter:grayscale(40%);
+}
+
+/* Highlight pending event briefly */
+.highlight-pending{
+  box-shadow: 0 0 0 3px rgba(255,200,0,0.18); 
+  transition: box-shadow 0.25s ease-in-out;
+}
+*/
+
+/* 小尺寸徽章紧凑 */
+
+.knowledge-badges .kb, .kb-small { padding: 2px 6px; font-size: 10px; }
+
+
+
+/* Default: keep row horizontal and allow horizontal scrolling to prevent wrapping.
+   Side panel stays to the right; main panel shrinks but respects its min-width.
+*/
+.row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* Very small screens: stack vertically (mobile) */
+@media (max-width: 480px) {
+  .container { min-width: 0 !important; padding-left: 12px !important; padding-right: 12px !important; }
+  .row {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    gap: 12px !important;
+  }
+  .row > .col.panel {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    order: unset !important;
+  }
+  .facility-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  header { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  .topline { gap: 8px !important; }
+}
+
+/* 训话输入框样式 */
+#coach-speech-input {
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+
+#coach-speech-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+}
+
+#coach-speech-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+/* 保证输入框在各种容器和视口下不出界 */
+#coach-speech-input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* =========== 晋级状态标识样式 =========== */
+.qualification-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  opacity: 0.75;
+}
+
+.qualification-badge.qualified {
+  background: #f0f9f4;
+  color: #4a7c59;
+  border: 1px solid #d4e8dd;
+}
+
+.qualification-badge.qualified:hover {
+  opacity: 1;
+  background: #e6f4ea;
+  border-color: #b8dcc5;
+}
+
+.qualification-badge.not-qualified {
+  background: #fef5f5;
+  color: #9a5858;
+  border: 1px solid #f0d4d4;
+}
+
+.qualification-badge.not-qualified:hover {
+  opacity: 1;
+  background: #fdeaea;
+  border-color: #e8c1c1;
+}
+
+/* 外出集训学生卡片中的晋级标识（稍微小一点） */
+.student-card .qualification-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+
+
+
+
+
+
+
