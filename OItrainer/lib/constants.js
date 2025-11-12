@@ -215,7 +215,7 @@ const MOCK_CONTEST_GAIN_MULTIPLIER_PURCHASED = 1.8;
 
 // 网赛类型配置（替代原有的难度级别）
 const ONLINE_CONTEST_TYPES = [
-  {name: "力扣周赛", numProblems: 4, difficulty: 130, displayName: "力扣周赛", maxScore: 4, problemScores: [1, 1, 1, 1], subtasksPerProblem: [1, 1, 1, 1]},
+  {name: "力扣周赛", numProblems: 4, difficulty: 135, displayName: "力扣周赛", maxScore: 4, problemScores: [1, 1, 1, 1], subtasksPerProblem: [1, 1, 1, 1]},
   {name: "Atcoder-ABC", numProblems: 7, difficulty: 120, displayName: "Atcoder ABC"},
   {name: "Atcoder-ARC", numProblems: 5, difficulty: 230, displayName: "Atcoder ARC"},
   {name: "Atcoder-AGC", numProblems: 4, difficulty: 370, displayName: "Atcoder AGC"},
