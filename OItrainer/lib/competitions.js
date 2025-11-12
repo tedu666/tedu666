@@ -36,6 +36,7 @@
     '力扣周赛': 60, 
     '梦熊周赛': 240, 
     '洛谷月赛': 240, 
+    "测试-耐久赛": 2000,
   };
 
   const TICK_INTERVAL = 5; // 每个tick代表5分钟
@@ -1396,6 +1397,12 @@
       return [0.3, 2.3, 1.2, 0.7, 1.8, 0.9, 0.5, 1.6, 1.0, 1.1, 0.4, 1.3, 0.4, 1.0, 1.5];
     }
     
+    if(contestType === '测试-耐久赛'){
+      let factor = [];
+      for(let i = 0; i < numProblems; i++) factor.push(0.1 + 0.1 * i);
+      return factor;
+    }
+
     // 默认返回均匀分布
     const factors = [];
     for(let i = 0; i < numProblems; i++){
