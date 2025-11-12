@@ -207,7 +207,7 @@
   this.register({
     id: 'gold_coach_visit',
     name: '金牌教练来访',
-  description: '知名教练莅临指导，学生能力提升，压力降低',
+    description: '知名教练莅临指导，学生能力提升，压力降低',
         check: c => {
           if (!(c.game && c.game.province_name)) return false;
           let prov = c.game.province_name;
@@ -429,7 +429,7 @@
         name: '经费审计',
         description: '经费审计暂停高消费活动，并可能损失少量经费',
         check: c => {
-          if(!(c.game.budget > 200000)) return false;
+          if(!(c.game.budget > 1000000)) return false;
           let p = 0.03;
           try{
             const hasBadLuck = Array.isArray(c.game.students) && c.game.students.some(s => s && s.active !== false && s.talents && typeof s.talents.has === 'function' && s.talents.has('扫把星'));
@@ -1206,7 +1206,7 @@
       document.addEventListener('coach-speech', (e) => {
         const { text, hash } = e.detail || {};
 
-  try{ if (log) log(`coach-speech received: text='${String(text).slice(0,200)}' hash='${String(hash)}'`); }catch(_){}
+        try{ if (log) log(`coach-speech received: text='${String(text).slice(0,200)}' hash='${String(hash)}'`); }catch(_){}
 
         // 目标哈希
         const RENLIANG1 = 'f86a5c0dbcc6d2cf0d0b162e6b84c5a54f1774e334128e8a3563bb6f3d3c695a'; // 

@@ -29,8 +29,6 @@ class Student {
     this.knowledge_math = Math.max(0, Math.round(normal(knowledgeMathMean, knowledgeStddev)));
     this.knowledge_dp = Math.max(0, Math.round(normal(knowledgeDpMean, knowledgeStddev)));
 
-    console.log(normal(knowledgeDpMean, knowledgeStddev))
-
     this.pressure = 20; 
     this.comfort = 30;
     
