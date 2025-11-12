@@ -38,7 +38,7 @@
     '洛谷月赛': 240, 
   };
 
-  const TICK_INTERVAL = 10; // 每个tick代表5分钟
+  const TICK_INTERVAL = 5; // 每个tick代表5分钟
 
   /* ========== 部分分（Subtask）生成 ========== */
   /**
