@@ -35,8 +35,8 @@ const COMPETITION_SCHEDULE = [
   // 第一轮：3,5,7,11,14  第二轮：17,19,21,25,28
   // 支持 problemScores 数组来指定每道题的满分（可选，不指定则平均分配）
   // 支持 subtasksPerProblem 数组来指定每道题的子任务数量（可选，不指定则随机3-5档）
-  {week:9, name:"CSP-S1", difficulty:250, maxScore:100, numProblems:3, problemScores:[30, 40, 30], subtasksPerProblem:[15, 20, 30]},
-  {week:17, name:"CSP-S2", difficulty:195, maxScore:400, numProblems:4, subtasksPerProblem:[20, 25, 20, 25]},
+  {week:9, name:"CSP-S1", difficulty:195, maxScore:100, numProblems:3, problemScores:[30, 40, 30], subtasksPerProblem:[15, 20, 30]},
+  {week:17, name:"CSP-S2", difficulty:250, maxScore:400, numProblems:4, subtasksPerProblem:[20, 25, 20, 25]},
   {week:25, name:"NOIP", difficulty:255, maxScore:400, numProblems:4, subtasksPerProblem:[20, 25, 20, 25]},
   {week:40, name:"省选", difficulty:410, maxScore:600, numProblems:6, subtasksPerProblem:[20, 25, 20, 25, 20, 25]},
   {week:52, name:"NOI", difficulty:520, maxScore:700, numProblems:7, subtasksPerProblem:[100, 10, 25, 20, 20, 25, 20]},
