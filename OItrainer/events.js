@@ -759,7 +759,7 @@
             // compute retention cost based on student ability (scale using getAbilityAvg)
             let abilityAvg = (typeof stud.getAbilityAvg === 'function') ? Number(stud.getAbilityAvg()) : (Number(stud.thinking||0) + Number(stud.coding||0))/2;
             abilityAvg = Math.max(0, Math.min(300, abilityAvg));
-            const cost = Math.round(100000 + (abilityAvg/300.0) * 300000); // 100k - 1M
+            const cost = Math.round(100000 + (abilityAvg / 300.0) * 30000); // 100k - 1M
 
             // retention success probability depends on reputation and student's mental
             const rep = (c.game && typeof c.game.reputation === 'number') ? Math.max(0, Math.min(100, c.game.reputation)) : 50;
@@ -875,13 +875,13 @@
         description: '学校财政紧张，削减了OI队的预算',
         check: c => {
           // 每天25%的概率触发
-          return Math.random() < 0.125;
+          return Math.random() < 0.02 && c.game.budget > 200000;
         },
         run: c => {
           if (!c.game || typeof c.game.budget !== 'number') return null;
-          
+
           const oldBudget = c.game.budget;
-          const newBudget = Math.floor(oldBudget * 0.7);
+          const newBudget = Math.floor(oldBudget * 0.94);
           const reduction = oldBudget - newBudget;
           
           c.game.budget = newBudget;

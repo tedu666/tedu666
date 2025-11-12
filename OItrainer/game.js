@@ -691,8 +691,10 @@ function outingTrainingWithSelection(difficulty_choice, province_choice, selecte
     let ability_min = ability_base * ability_mult;
     let ability_max = ability_base * ability_mult * 2.0;
 
-    let scoreThreshold = 200;
+    let scoreThreshold = 100;
     let mismatch = (hiddenScore < scoreThreshold);
+
+    console.log(hiddenScore, scoreThreshold);
 
     let knowledge_modifier = 1.0;
     let ability_modifier = 1.0;

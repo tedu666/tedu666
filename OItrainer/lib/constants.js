@@ -13,7 +13,7 @@ const ABILITY_DECAY_THRESHOLD = 400;
 /* 属性上限 */
 const MAX_THINKING = 1000;      // 思维能力上限
 const MAX_CODING = 1000;        // 编码能力上限
-const MAX_MENTAL = 1000;        // 心理素质上限
+const MAX_MENTAL = 100;        // 心理素质上限
 const MAX_PRESSURE = 1000;      // 压力上限
 const MAX_COMFORT = 1000;       // 舒适度上限
 /* 压力/恢复 */
@@ -23,9 +23,9 @@ const ALPHA1 = 28.0;
 /* 忘却 */
 const KNOWLEDGE_FORGET_RATE = 0.998;
 /* 省份基础 */
-const STRONG_PROVINCE_BUDGET = 250000;
-const NORMAL_PROVINCE_BUDGET = 200000;
-const WEAK_PROVINCE_BUDGET = 100000;
+const STRONG_PROVINCE_BUDGET = 350000;
+const NORMAL_PROVINCE_BUDGET = 250000;
+const WEAK_PROVINCE_BUDGET = 150000;
 const STRONG_PROVINCE_TRAINING_QUALITY = 1.2;
 const NORMAL_PROVINCE_TRAINING_QUALITY = 1.0;
 const WEAK_PROVINCE_TRAINING_QUALITY = 0.7;
