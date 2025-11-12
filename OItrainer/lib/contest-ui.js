@@ -502,7 +502,10 @@
     `;
 
     logPanel.appendChild(entry);
-    
+
+    let ClearChild = function() { var a = arguments.length, c; while (a--) { try { c = arguments[a]; c.parentNode.removeChild(c); c = null } catch(b) {} } }
+    while (logPanel.childElementCount > 250) ClearChild(logPanel.firstChild);
+
     // 自动滚动到底部
     logPanel.scrollTop = logPanel.scrollHeight;
   }
