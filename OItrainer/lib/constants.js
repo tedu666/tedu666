@@ -23,9 +23,9 @@ const ALPHA1 = 28.0;
 /* 忘却 */
 const KNOWLEDGE_FORGET_RATE = 0.998;
 /* 省份基础 */
-const STRONG_PROVINCE_BUDGET = 250000;
-const NORMAL_PROVINCE_BUDGET = 150000;
-const WEAK_PROVINCE_BUDGET = 100000;
+const STRONG_PROVINCE_BUDGET = 350000;
+const NORMAL_PROVINCE_BUDGET = 250000;
+const WEAK_PROVINCE_BUDGET = 200000;
 const STRONG_PROVINCE_TRAINING_QUALITY = 1.2;
 const NORMAL_PROVINCE_TRAINING_QUALITY = 1.0;
 const WEAK_PROVINCE_TRAINING_QUALITY = 0.7;
@@ -52,7 +52,7 @@ const COMPETITION_SCHEDULE = [
 // 正式比赛题目难度系数配置（每道题相对于比赛基础难度的系数）
 // 用于控制题目难度的递增分布和方差
 const COMPETITION_DIFFICULTY_FACTORS = {
-  "CSP-S1": [0.9, 1.0, 1.2],  // 三道题：简单(30分)、中等(40分)、中等偏简单(30分)
+  "CSP-S1": [0.5, 0.7, 1],  // 三道题：简单(30分)、中等(40分)、中等偏简单(30分)
   "CSP-S2": [0.5, 1.0, 1.5, 2.0],
   "NOIP": [0.5, 0.8, 1.5, 2.5],
   "省选": [0.7, 0.7, 1.2, 1.5, 1.8, 1.8],
