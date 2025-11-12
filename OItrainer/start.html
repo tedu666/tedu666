@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>开始 — OI 教练模拟器</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* 启动蒙版样式 */
+    .oi-start-mask{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      background:linear-gradient(180deg, rgba(10,25,47,0.95), rgba(22,32,54,0.95)), url('assets/start-bg.jpg') center/cover no-repeat;
+      color: #fff;
+      padding:20px;
+      box-sizing:border-box;
+      flex-direction:column;
+    }
+    .oi-start-mask .mask-content{
+      max-width:880px;
+      text-align:center;
+      backdrop-filter: blur(2px);
+    }
+    .oi-start-mask h2{
+      font-size:34px;
+      margin:0 0 12px 0;
+      text-shadow:0 2px 8px rgba(0,0,0,0.6);
+    }
+    .oi-start-mask p{
+      margin:0 0 18px 0;
+      color:rgba(255,255,255,0.9);
+      font-size:16px;
+    }
+    .oi-start-mask .mask-actions{margin-top:8px}
+    .oi-start-mask .btn{min-width:150px;padding:10px 16px;font-size:16px;border-radius:6px}
+    .oi-start-mask .btn-start{background:#38a169;border:none;color:white}
+    .oi-start-mask .btn-skip{background:transparent;border:1px solid rgba(255,255,255,0.2);color:white;margin-left:8px}
+    .disclaimer{
+      font-size:12px;
+      color: rgba(51,51,51,0.9);
+      margin-top:12px;
+      line-height:1.6;
+      text-align:left;
+      background: rgba(240,240,240,0.9);
+      padding:10px 12px;
+      border-radius:8px;
+      max-width:960px;
+      margin-left:auto;
+      margin-right:auto;
+      box-sizing:border-box;
+      opacity:0.98;
+    }
+  </style>
+<!-- Clarity tracking removed -->
+  <!-- Cloudflare Web Analytics loader (conditional: only load if page load time <= 2s) -->
+  <script>
+    (function(){
+      function injectCF(){
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+        s.setAttribute('data-cf-beacon', '{"token": "cd3db41765ea4c17be0930b3f94e3c3a"}');
+        document.head.appendChild(s);
+      }
+      function shouldLoad(){
+        try{
+          var start = (performance.timing && performance.timing.navigationStart) || 0;
+          var elapsed = performance.now ? performance.now() : (Date.now() - start);
+          return elapsed <= 2000;
+        }catch(e){ return false; }
+      }
+      document.addEventListener('DOMContentLoaded', function(){ if(shouldLoad()) injectCF(); });
+    })();
+  </script>
+</head>
+<body>
+  <!-- 启动蒙版：加载时完全覆盖页面，点击开始后隐藏 -->
+  <div id="oiStartMask" class="oi-start-mask" role="dialog" aria-label="游戏开始">
+    <div class="mask-content">
+      <h2>OI 教练模拟器</h2>
+      <h3 class="oi-start-subtitle" style="font-size:16px;margin:6px 0 12px;color:rgba(255,255,255,0.95);font-weight:400;line-height:1.9;"></h3>
+        高二省选，你被追忆创飞无缘省队。<br><br>
+        一觉醒来，你发现你坐在机房前，成为了你们学校信息学竞赛的总教练。<br><br>
+        回想起之前构造题没checker，模拟赛没大样例，一个月没有半天假期的训练生活。<br><br>
+        你决定要改变这一切。
+  </h3>
+  <p></p>
+      <div class="mask-actions">
+       <button id="oiMaskSkipBtn" class="btn btn-skip">进入游戏</button>
+      </div>
+    </div>
+  </div>
+<div class="container">
+  <header>
+    <h1>OI 教练模拟器 — 开始</h1>
+  </header>
+  <div class="panel">
+    <h3>新游戏设置</h3>
+    
+    <label class="block">选择难度</label>
+    <!-- 平铺式难度选择卡（保留隐藏 select 用于兼容旧逻辑） -->
+    <select id="start-diff" style="display:none">
+      <option value="1">简单 - 适合初次体验的人</option>
+      <option value="2" selected>普通 - 标准游戏体验</option>
+      <option value="3">困难 - 适合寻求挑战的人</option>
+    </select>
+    <div id="start-diff-grid" class="diff-grid" style="display:flex;gap:10px;margin-top:8px"></div>
+    <div id="diff-note" class="small muted" style="margin-top:6px"></div>
+
+    <label class="block" style="margin-top:10px">选择省份</label>
+    <div class="small muted" style="margin-bottom:6px">不同省份影响初始经费和训练质量。<strong>强省</strong>资源丰富<strong>弱省</strong>具有挑战性。</div>
+    <div id="start-prov-grid" class="prov-grid"></div>
+
+    <label class="block" style="margin-top:10px">学生人数 (3-20)</label>
+    <div class="small muted" style="margin-bottom:6px">更多学生意味着更多机遇，也会带来更多的经费开支</div>
+    <input id="start-stu" type="number" min="3" max="20" value="5" />
+
+    <!-- 原招生/学前培养 UI 已移除。下面仅展示可用天赋列表 -->
+    <div class="sub-panel collapsible collapsed" id="talent-only-panel" style="margin-top:12px">
+      <h4>游戏核心概念</h4>
+      <div class="small muted" style="line-height:1.6;margin-bottom:10px">
+        <p><strong>目标</strong>：带领学生在两个赛季内冲击NOI金牌，入选国家集训队，进军IOI</p>
+        <p><strong>学生属性</strong>：思维、编程、心理三项基础能力 + 五大知识点（数据结构、图论、字符串、数学、DP）</p>
+        <p><strong>经费管理</strong>：升级设施、参加集训都需要经费，需合理规划</p>
+        <p><strong>压力系统</strong>：高压训练会增加压力，压力过高可能导致退队</p>
+        <p><strong>比赛链</strong>：CSP-S1 → CSP-S2 → NOIP → 省选 → NOI，必须通过前一场才能参加下一场</p>
+      </div>
+  <h4 class="collapsible-head" style="margin-top:16px">天赋预览</h4>
+  <div class="small muted" style="margin-bottom:6px">学生在训练中有概率获得天赋，天赋会影响比赛表现和训练效果</div>
+      <div id="talent-grid" class="talent-grid"></div>
+      <!-- 保留隐藏 select 以便与旧逻辑兼容（仅用于存储/表单同步） -->
+      <select id="train-talent" style="display:none"></select>
+    </div>
+
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn btn-ghost" id="start-help">查看详细帮助</button>
+      <button class="btn" id="daily-challenge-btn" style="background:#667eea;color:white;">📅 今日挑战</button>
+      <button class="btn" id="start-button">开始游戏 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script src="events.js"></script>
+<script src="lib/constants.js"></script>
+<script src="lib/utils.js"></script>
+<script src="lib/models.js"></script>
+<script src="lib/talent.js"></script>
+<script src="game.js"></script>
+<script src="render.js"></script>
+<script src="debug.js"></script>
+<script>
+
+  // 移除对招生/学前培养状态的维护；仅提供渲染天赋网格的功能
+  function renderTalentGrid(){
+    const grid = document.getElementById('talent-grid');
+    const hiddenSelect = document.getElementById('train-talent');
+    if(!grid || !hiddenSelect) return;
+    grid.innerHTML = '';
+    hiddenSelect.innerHTML = '';
+    if(typeof window === 'undefined' || !window.TalentManager) return;
+    const talents = window.TalentManager.getRegistered();
+    talents.forEach(name => {
+      const info = window.TalentManager.getTalentInfo(name) || {};
+      // populate hidden select
+      const opt = document.createElement('option'); opt.value = name; opt.textContent = name; hiddenSelect.appendChild(opt);
+
+      // create card
+      const card = document.createElement('div'); card.className = 'talent-card'; card.dataset.val = name;
+      const top = document.createElement('div');
+      const dot = document.createElement('span'); dot.className = 'color-dot'; dot.style.background = (info.color || '#2b6cb0');
+      const title = document.createElement('span'); title.className = 'title'; title.textContent = name;
+      top.appendChild(dot); top.appendChild(title);
+      const desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = info.description || '';
+      card.appendChild(top); card.appendChild(desc);
+
+      card.addEventListener('click', ()=>{
+        // 单选高亮，仅用于展示/选择
+        grid.querySelectorAll('.talent-card.selected').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        hiddenSelect.value = name;
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // 页面加载后渲染天赋列表：优先在 TalentManager 已注册天赋时立即渲染，
+  // 否则在 window.load 后再渲染，并提供短轮询作为回退，确保在 registerDefaultTalents 之后渲染。
+  function ensureRenderTalentGrid(){
+    try{
+      if(typeof window !== 'undefined' && window.TalentManager && typeof window.TalentManager.getRegistered === 'function'){
+        const reg = window.TalentManager.getRegistered() || [];
+        if(reg.length > 0){ renderTalentGrid(); return true; }
+      }
+    }catch(e){}
+    return false;
+  }
+
+  if(!ensureRenderTalentGrid()){
+    // 在 load 事件后再尝试（script.js 在 window.onload 中会调用 registerDefaultTalents）
+    window.addEventListener('load', ()=>{ setTimeout(()=>{ renderTalentGrid(); }, 50); });
+
+    // 作为额外保险，短轮询直到 TalentManager 出现或超时
+    let _tg_tries = 0;
+    const _tg_interval = setInterval(()=>{
+      _tg_tries += 1;
+      if(ensureRenderTalentGrid() || _tg_tries > 12) clearInterval(_tg_interval);
+    }, 200);
+  }
+
+    // Render difficulty as tiled options and sync with hidden select (#start-diff)
+    function renderDiffGrid(){
+      const defs = [
+        {v:1,label:'简单',desc:'适合初次体验的人'},
+        {v:2,label:'普通',desc:'标准游戏体验'},
+        {v:3,label:'专家',desc:'适合寻求挑战的人'}
+      ];
+      const grid = document.getElementById('start-diff-grid');
+      const hidden = document.getElementById('start-diff');
+      const note = document.getElementById('diff-note');
+      if(!grid || !hidden) return;
+      grid.innerHTML = '';
+      defs.forEach(d => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+        card.dataset.val = d.v;
+        card.style.cursor = 'pointer';
+        card.style.padding = '10px 12px';
+        card.style.border = '1px solid #e6e6e6';
+        card.style.borderRadius = '8px';
+        card.style.minWidth = '110px';
+        card.style.textAlign = 'center';
+        card.innerHTML = `<div style="font-weight:600;margin-bottom:6px">${d.label}</div><div class="small muted">${d.desc}</div>`;
+        card.addEventListener('click', ()=>{
+          grid.querySelectorAll('.option-card.selected').forEach(c=>c.classList.remove('selected'));
+          card.classList.add('selected');
+          // sync hidden select
+          hidden.value = ''+d.v;
+          // show note under grid
+          if(note) note.textContent = d.label + ' — ' + d.desc;
+        });
+        grid.appendChild(card);
+      });
+
+      // mark initial selection based on select value
+      const initial = hidden.value || '2';
+      const chosen = grid.querySelector(`.option-card[data-val='${initial}']`);
+      if(chosen) chosen.classList.add('selected');
+      if(note){ const c = grid.querySelector('.option-card.selected'); note.textContent = c ? (c.querySelector('div').textContent + ' — ' + c.querySelector('.small').textContent) : ''; }
+    }
+
+    try{ renderDiffGrid(); }catch(e){ console.error('渲染难度网格失败', e); }
+
+  // render province buttons using PROVINCES from script.js (保留页面其他功能的兼容性)
+  if(typeof renderStartPageUI !== 'undefined'){
+    renderStartPageUI && renderStartPageUI();
+    setTimeout(() => {
+      // 保留帮助与开始按钮行为
+      document.getElementById('start-help').onclick = ()=>{ window.open('help.html','_blank'); };
+      document.getElementById('start-button').onclick = ()=>{ startFromStartPage && startFromStartPage(); };
+      
+      // 今日挑战按钮
+      document.getElementById('daily-challenge-btn').onclick = ()=>{ 
+        if(typeof getDailyChallengeParams === 'function'){
+          const params = getDailyChallengeParams();
+          // 显示今日挑战信息
+          const provinceName = (typeof PROVINCES !== 'undefined' && PROVINCES[params.provinceId]) 
+            ? PROVINCES[params.provinceId].name 
+            : '未知省份';
+          
+          if(confirm(`📅 今日挑战（${params.displayDate}）\n\n省份：${provinceName}\n难度：普通\n种子：${params.seed}\n\n所有玩家今天都将使用相同的初始条件！\n\n确认开始今日挑战？`)){
+            // 设置今日挑战标记
+            try {
+              sessionStorage.setItem('oi_game_active_session', 'true');
+              sessionStorage.setItem('oi_daily_challenge', 'true');
+              sessionStorage.setItem('oi_daily_challenge_date', params.date);
+            } catch(e) {
+              console.error('无法设置 sessionStorage:', e);
+            }
+            
+            // 跳转到游戏页面，带上今日挑战参数
+            const url = `game.html?new=1&daily=1&d=${params.difficulty}&p=${params.provinceId}&c=5&seed=${params.seed}`;
+            window.location.href = url;
+          }
+        } else {
+          alert('今日挑战功能加载失败，请刷新页面重试');
+        }
+      };
+    }, 100);
+  }
+
+    // 初始化可折叠面板：默认折叠对点招生与学前培养，点击标题切换
+  (function(){
+    function togglePanel(panel, expand){
+      if(expand){
+        panel.classList.remove('collapsed');
+        panel.classList.add('expanded');
+      } else {
+        panel.classList.remove('expanded');
+        panel.classList.add('collapsed');
+      }
+    }
+
+    document.querySelectorAll('.sub-panel.collapsible').forEach(panel => {
+      const head = panel.querySelector('.collapsible-head');
+      // ensure initial state: keep collapsed if class present
+      if(panel.classList.contains('collapsed')){
+        togglePanel(panel, false);
+      } else {
+        togglePanel(panel, true);
+      }
+
+      head && head.addEventListener('click', ()=>{
+        const isCollapsed = panel.classList.contains('collapsed');
+        togglePanel(panel, isCollapsed);
+
+        // 如果展开，尝试渲染面板内的延迟内容（例如天赋网格）
+        try{
+          if(!isCollapsed){
+            // 如果面板包含天赋网格，则渲染
+            if(panel.querySelector && panel.querySelector('#talent-grid')){
+              if(typeof renderTalentGrid === 'function') renderTalentGrid();
+            }
+            // 兼容旧的 train-panel 行为
+            if(panel.id === 'train-panel'){
+              if(typeof populateTalentSelect === 'function') try{ populateTalentSelect(); }catch(e){}
+            }
+          }
+        }catch(e){}
+      });
+    });
+  })();
+</script>
+<script>
+  (function(){
+    // 等待 DOM 就绪（页面脚本已加载）
+    function hideMask(){
+      try{
+        const mask = document.getElementById('oiStartMask');
+        if(!mask) return;
+        mask.style.transition = 'opacity 220ms ease';
+        mask.style.opacity = '0';
+        setTimeout(()=>{ mask.parentNode && mask.parentNode.removeChild(mask); }, 260);
+      }catch(e){ console.error('隐藏启动蒙版失败', e); }
+    }
+
+    window.addEventListener('load', ()=>{
+      const startBtn = document.getElementById('oiMaskStartBtn');
+      const skipBtn = document.getElementById('oiMaskSkipBtn');
+      const pageStartBtn = document.getElementById('start-button');
+
+      startBtn && startBtn.addEventListener('click', ()=>{
+        // 隐藏蒙版，然后触发页面的开始逻辑（若存在）
+        hideMask();
+        try{ if(typeof startFromStartPage === 'function') startFromStartPage(); }
+        catch(e){}
+      });
+
+      skipBtn && skipBtn.addEventListener('click', ()=>{ hideMask(); });
+
+      // 如果用户在蒙版存在时点击页面原有的开始按钮（不应可见），确保也能正常工作
+      pageStartBtn && pageStartBtn.addEventListener('click', ()=>{ hideMask(); });
+    });
+  })();
+</script>
+<footer style="text-align:center;padding:12px 8px;color:#666;font-size:13px;border-top:1px solid #eee;margin-top:18px">
+  OI 教练模拟器 · 改版
+
+  <br>
+
+  Based on 开源项目 · 原作者 @Dreamers-seve · GitHub: <a href="https://github.com/seve42/OItrainer" target="_blank" rel="noopener">https://github.com/seve42/OItrainer</a>
+</footer>
+ 
+  <div class="disclaimer" role="note" aria-label="免责声明" style="margin-top:8px;margin-bottom:18px;font-size:13px;color:#444;">
+    免责声明：本游戏为虚构
+  </div>
+</body>
+</html>
