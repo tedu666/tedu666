@@ -454,7 +454,8 @@ const TASK_POOL = [
   { name: '[NOI2016] 贪吃蛇', difficulty: 201, boosts: [{ type: '数学', amount: 45 }, { type: '图论', amount: 21 }, { type: '动态规划', amount: 19 }] },
   { name: '[CF] Algebraic Topology', difficulty: 189, boosts: [{ type: '数学', amount: 43 }, { type: '图论', amount: 19 }] },
   { name: '[USACO Platinum] Planck Scale', difficulty: 180, boosts: [{ type: '动态规划', amount: 41 }, { type: '数学', amount: 18 }] },
-  { name: '[JOI2018] 時空の歪み', difficulty: 186, boosts: [{ type: '图论', amount: 42 }, { type: '动态规划', amount: 19 }, { type: '数据结构', amount: 17 }] }
+  { name: '[JOI2018] 時空の歪み', difficulty: 186, boosts: [{ type: '图论', amount: 42 }, { type: '动态规划', amount: 19 }, { type: '数据结构', amount: 17 }] }, 
+  { name: '[IOI2026] 激烈的对战', difficulty: 300, boosts: [{ type: '数学', amount: 1145 }, { type: '动态规划', amount: 1145 }, { type: '图论', amount: 1145 }, { type: '数据结构', amount: 1145 }, { type: '字符串', amount: 1145 }] }
 ];
 
 /**
