@@ -226,7 +226,7 @@ const ONLINE_CONTEST_TYPES = [
   {name: "梦熊周赛", numProblems: 4, difficulty: 300, displayName: "梦熊周赛"},
   {name: "Ucup", numProblems: 13, difficulty: 370, displayName: "Ucup", maxScore: 13, problemScores: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], subtasksPerProblem: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]},
   {name: "ACM", numProblems: 15, difficulty: 300, displayName: "ACM", maxScore: 15, problemScores: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], subtasksPerProblem: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]},
-  {name: "测试-耐久赛", numProblems: 50, difficulty: 400, displayName: "测试-耐久赛"},
+  {name: "测试-耐久赛", numProblems: 50, difficulty: 450, displayName: "测试-耐久赛"},
 ];
 
 // 保留旧常量以兼容性（已废弃）

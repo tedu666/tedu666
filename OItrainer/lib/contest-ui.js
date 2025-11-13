@@ -80,10 +80,10 @@
 
     modalRoot.innerHTML = html;
 
-  // 抑制事件弹窗在比赛实时弹窗打开时打断（备份并覆盖 showEventModal）
-  const originalShowEventModal = window.showEventModal;
-  window.__contest_live_modal_active = true;
-  window.showEventModal = function(evt){ try{ if(window.pushEvent) window.pushEvent(evt); }catch(e){} };
+    // 抑制事件弹窗在比赛实时弹窗打开时打断（备份并覆盖 showEventModal）
+    const originalShowEventModal = window.showEventModal;
+    window.__contest_live_modal_active = true;
+    window.showEventModal = function(evt){ try{ if(window.pushEvent) window.pushEvent(evt); }catch(e){} };
 
     // 初始化学生面板
     renderStudentPanels(simulator);
@@ -104,8 +104,14 @@
       resumeBtn.style.display = 'none';
       pauseBtn.style.display = 'inline-block';
       simulator.isRunning = true;
-      setTimeout(() => simulator.runTick(), 1000);
+      setTimeout(() => simulator.runTick(), simulator.TickTime);
     });
+
+    const Key_CTRL_Func_0 = (event) => { if (simulator.TickTime != 20) simulator.TickTime = 20, simulator.runTick(); simulator.TickTime = 20; }
+    const Key_CTRL_Func_1 = (event) => { simulator.TickTime = 1000, simulator.runTick(); }
+
+    document.addEventListener('keydown', Key_CTRL_Func_0);
+    document.addEventListener('keyup', Key_CTRL_Func_1);
 
     skipBtn.addEventListener('click', () => {
       // 快进10轮（如果剩余不足10轮则为剩余轮数）
@@ -141,7 +147,9 @@
     });
 
     finishBtn.addEventListener('click', () => {
-      simulator.finish();
+      simulator.finish(); console.log("Fuck");
+      document.removeEventListener("keydown", Key_CTRL_Func_0);
+      document.removeEventListener("keyup", Key_CTRL_Func_1);
     });
 
     // 注册tick更新回调

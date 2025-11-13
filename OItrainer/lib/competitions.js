@@ -186,6 +186,7 @@
       this.currentTick = 0;
       this.maxTicks = Math.floor(contestConfig.duration / TICK_INTERVAL);
       this.isRunning = false;
+      this.TickTime = 1000; // 单次时间
       this.tickCallbacks = []; // GUI更新回调
       this.finishCallbacks = [];
       this.logs = []; // 比赛日志：记录技能发动、重要事件等
@@ -291,7 +292,7 @@
 
       // 继续下一tick（1秒后）
       if(this.isRunning){
-        setTimeout(() => this.runTick(), 1000);
+        setTimeout(() => this.runTick(), this.TickTime);
       }
     }
 
@@ -1399,7 +1400,7 @@
     
     if(contestType === '测试-耐久赛'){
       let factor = [];
-      for(let i = 0; i < numProblems; i++) factor.push(0.1 + 0.1 * i);
+      for(let i = 0; i < numProblems; i++) factor.push(0.1 + 0.15 * i);
       return factor;
     }
 
