@@ -304,8 +304,6 @@ function renderEventCards(){
 
     card.innerHTML = cardHTML;
     wrapper.appendChild(card);
-    
-    if(++shown >= 6) break;
   }
   
   // 检查是否有溢出内容
