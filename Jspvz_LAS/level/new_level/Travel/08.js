@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_3.png",
 	LevelName: "EX-8 护时者",
 	LvlEName: "EX_New_Pool_8",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Nice_Graveyard",
 	CanSelectCard: 1,
 	MusicMode: 1,
 	SunNum: 250,
@@ -41,10 +41,10 @@ oS.Init({
 		SummonNewBlock("本关目标: 让僵尸平均死亡间隔时间大于目标时间", start_game);
 	},
 	InitLawnMower: function() {
-		CustomSpecial(oLawnCleaner_New, 1, -1);
-		CustomSpecial(oLawnCleaner_New, 2, -1);
-		CustomSpecial(oLawnCleaner_New, 5, -1);
-		CustomSpecial(oLawnCleaner_New, 6, -1);
+		CustomSpecial(oLawnCleaner_New, 1, -1),	CustomSpecial(oLawnCleaner_New, 2, -1);
+		CustomSpecial(oLawnCleaner_New, 5, -1), CustomSpecial(oLawnCleaner_New, 6, -1);
+
+		for (let i = 1, j; i <= oS.R; ++i) j = oGd.$[i + "_-1_1"], j && oEf.Animate($(j.id), [{"left": "-100px"}, {"left": $(j.id).style.left + "px"}], 1.2, "ease-out");
 	},
 	Summon_Start_Func: function(){
 		let id, id2, j = oLilyPad.prototype, i = 1;
@@ -88,7 +88,7 @@ oS.Init({
 
 			oS.Summon_Start_Func();
 
-			NewEle("DivTeach", "div", "pointer-events:none;", {innerHTML: "本关目标: 让僵尸平均死亡间隔时间大于目标时间！"}, EDMove);
+			NewEle("DivTeach", "div", "line-height:45px;pointer-events:none;", {innerHTML: "本关目标: 让僵尸平均死亡间隔时间大于目标时间！"}, EDMove);
 			oSym.addTask(750, function() {ClearChild($("DivTeach"));}, []);
 		});
 
@@ -113,10 +113,10 @@ oS.Init({
 	}
 }, {
 	AZ: [[oZombie, 1, 2], [oZombie2, 1, 3], [oZombie3, 1, 4], [oPoleVaultingZombie, 2, 5], [oConeheadZombie, 2, 1], [oBucketheadZombie, 2, 1], [oNewspaperZombie, 2, 8], [oScreenDoorZombie, 2, 10, [10]], [oFootballZombie, 2, 15, [1]], [oDancingZombie, 1, 20], [oDuckyTubeZombie1, 2, 3], [oDuckyTubeZombie2, 1, 6], [oDuckyTubeZombie3, 1, 9], [oDolphinRiderZombie, 1, 17, [10]], [oSnorkelZombie, 1, 26, [20]], [oZomboni, 1, 24, [10]], [oJackinTheBoxZombie, 1, 28]],
-	FlagNum: 30,
+	FlagNum: 30, FlagMaxWaitTime: 2440, // 最多等待 24.5 秒再出下一波僵尸
 	FlagToSumNum: {
 		a1: [   1, 3, 5, 7,  9, 10, 13, 15, 16, 17, 18, 19, 20, 22, 24, 26, 27, 28,  29],
-		a2: [6, 1, 2, 4, 7, 18,  2,  3,  5, 14, 18, 20, 50, 11, 18, 20, 33,  0, 40, 400]
+		a2: [6, 1, 3, 5, 8, 21,  3,  4,  6, 15, 19, 21, 54, 13, 20, 22, 35,  0, 42, 200]
 	},
 	FlagToMonitor: {
 		9: [ShowLargeWave, 0],
@@ -125,7 +125,7 @@ oS.Init({
 	},
 	FlagToEnd: function() {
  		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDMove);
-		NewImg("imgSF", "new_skin/Images/Card/MelonPult.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oMelonPult_Pro, 0);}});
+		NewImg("imgSF", "new_skin/Images/Card/MelonPult.gif", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oMelonPult_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 
 		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
@@ -167,6 +167,14 @@ oS.Init({
 			else func && func();
 		}, []);
 	},
+	SetArrBlockText: function (Arr, f, r1 = "点击开始游戏", r2 = "浏览下一页") {
+		let A = 0, len = Arr.length, Q = () => {
+			if (A == len) return f && f();
+			SummonNewBlock(Arr[A], () => {
+				++A, Q();
+			}, (A + 1 == len) ? r1 : r2);
+		}; Q(0);
+	}, 
 	SummonNewBlock: function(a, f) {
 		SetHidden($("dLoginDataHTML")), oSym.Stop();
 		$("dMsgFailed").innerHTML = a + '<p><p><span style="color:#10AE08">点击开始游戏</span>';

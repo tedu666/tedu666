@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-5 捍卫者",
 	LvlEName: "EX_Protect_Brain_5",
-	StartGameMusic: "Glorious_Morning",/*"nice_graveyard"*/
+	StartGameMusic: "Glorious_Morning",/*"Nice_Graveyard"*/
 	CanSelectCard: 1,
 	MusicMode: 1,
 	DKind: 0,
@@ -84,7 +84,7 @@ oS.Init({
 	},
 	FlagToEnd: function() {
 		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDMove);
-		NewImg("imgSF", "new_skin/images/Card/Cabbage.webp", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCabbage_Pro, 0);}});
+		NewImg("imgSF", "new_skin/images/Card/Cabbage.gif", "height:120px;left:627px;top:325px;clip:rect(auto,auto,60px,auto)", EDMove, {onclick: function() {GetNewCard(this, oCabbage_Pro, 0);}});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:290px;left:636px", EDMove);
 		// NewImg("imgSF", "images/interface/trophy.png", "left:43.5%;top:220px", EDAll, {onclick: function() {SelectModal(0);PlayAudio("winmusic");}});
 		// NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll);

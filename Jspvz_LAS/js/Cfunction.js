@@ -1,6 +1,8 @@
-﻿var MAX_PLT_INDEX = 4, MIN_PLT_INDEX;
+﻿var MAX_PLT_INDEX = 4;
 var __Normal_Start_Room__ = 0, __ONLINE_ALLOW_FRESH__ = true;
-var __Open_Async_Picture__ = false; //开启动画异步
+var __Open_Async_Picture__ = false; // 开启动画异步
+
+const EPS = 1e-9;
 
 var $User = function() {
 	var b = navigator.platform,
@@ -114,22 +116,19 @@ oSym = {
 	addTask: function(b, c, a) {
 		this["AddTaskQ"]["push"](new TimerObj({ T: this["Now"] + b, f: c, ar: a }, "T")); // 加入等待队列里
 		return this
-	}
+	}, 
+	NowSpeed: { "valueOf": () => (10 / oSym.TimeStep * oSym.NowStep) }, 
 },
 oS = {
 	UrlLvList: {}, //记录哪些关卡是网络关卡，下次读取直接判断
-	W: 880,
-	H: 600,
-	C: 9,
-	LawnMowerX: 70,
-	Lvl: 0,
-	MaxSunNum: 9990,
+	W: 880, H: 600, C: 9, Lvl: 0,
+	LawnMowerX: 70, MaxSunNum: 9990, 
 	GlobalVariables: {},
 	LvlVariables: {},
 	SelfVariables: [],
 	LvlClearFunc: null,
 	Init: function(e, g, b, d) {
-		var c, a = window;
+		var c, a = window; oGT.OnTrigger("Enter-Level");
 
 		e.AutoPlayMusic != false && (e.LoadMusic ? (PlayMusic(e.LoadMusic), NewAudio({
 			source: "Look up at the Sky",
@@ -178,6 +177,7 @@ oS = {
 		this.NormalFlagZombieTask = 150;
 		this.BigFlagZombieTask = 30;
 		this.Cheat_Mode = false; // 作弊模式
+		this.CollectData = true;
 		for (c in e) {
 			this.SelfVariables.push(c);
 			this[c] = e[c]
@@ -210,65 +210,52 @@ oS = {
 		b.innerHTML = '<span style="font-weight:bold">游戏小贴士:</span><span>' + a[Math.floor(Math.random() * a.length)] + "</span>"
 	},
 	LoadProgress: function(r, l, a, t, b) {
-		SetVisible($("dFlagMeter"));
-		SetHidden($("imgGQJC"));
-		var p = oS,
-		j = [],
-		i = p.PicArr,
-		k = p.PName,
-		s = p.ZName,
-		w = 0,
-		u = GetX(11),
-		g = oGd.$LF,
-		c = oGd.$ZF,
-		d = oS.R + 1,
-		x = $("sFlagMeterTitleF"),
-		y = $("dFlagMeterTitle"),
-		z = $("dFlagMeter"), 
-		e = p.LoadImage,
-		h = p.CheckImg,
-		f = p.InitPn,
-		m,
-		q;
-		NewImg(0, "images/interface/brain.png", "", $Pn.oBrains = NewEle(0, "div", "position:absolute"));
-		switch (p.Coord) {
-		case 2:
-			NewImg(0, "images/interface/PoolCleaner.png", "", $Pn.oPoolCleaner = NewEle(0, "div", "position:absolute"));
-		case 1:
-			NewImg(0, "images/interface/LawnCleaner.png", "", $Pn.oLawnCleaner = NewEle(0, "div", "position:absolute"));
-			break
+		SetVisible($("dFlagMeter")), SetHidden($("imgGQJC"));
+		let LoadingObjArr = [], k = [], s = []; // 初始化僵尸单位使用数组
+		let dTitleF = $("sFlagMeterTitleF"), dTitle = $("dFlagMeterTitle"), dMeter = $("dFlagMeter");
+		let PicArr = oS.PicArr, u = GetX(11), d = oS.R + 1, q;
+
+		NewImg(0, "images/interface/brain.png", "", $Pn.oBrains = NewEle(0, "div", "position:absolute")); // 预生成脑子
+
+		switch (oS.Coord) { // 不用 break 是因为泳池一定有陆地小推车
+			case 200: NewImg(0, "images/New_interface/LawnMower_body.png", "", $Pn.oLawnCleaner = NewEle(0, "div", "position:absolute"));
+			case 2: NewImg(0, "images/interface/PoolCleaner.png", "", $Pn.oPoolCleaner = NewEle(0, "div", "position:absolute"));
+			case 1: NewImg(0, "images/interface/LawnCleaner.png", "", $Pn.oLawnCleaner = NewEle(0, "div", "position:absolute"));
+			break;
 		}
+
+		LoadingObjArr = LoadingObjArr.concat(oS.PName, oS.ZName); // 整理两个数组
+		for (let i of LoadingObjArr) [k, s][(i.prototype.name == "Zombies") * 1].push(i); // 给植物僵尸分好类
+		if (Object.keys(oS.LargeWaveFlag).length && !s.includes(oFlagZombie)) s[s.length] = oS.FlagZombie || oFlagZombie; // 加入旗帜僵尸
+
+		r = 0; /* r = k.length; */ // 这里暂时不做加载植物选择，减少流量带宽
 		while (r--) {
 			a = (l = k[r].prototype).PicArr.slice(0);
-			Array.prototype.push.apply(i, a);
+			Array.prototype.push.apply(PicArr, a);
 			t = l.AudioArr, b = t.length;
 			while (b--) NewAudio({ source: t[b] });
 		}
-		for (r in oS.LargeWaveFlag) {
-			s[s.length] = oS.FlagZombie || oFlagZombie;
-			break
-		}
+
 		r = s.length;
 		while (r--) {
-			Array.prototype.push.apply(i, (l = (q = s[r]).prototype).PicArr.slice(0));
+			Array.prototype.push.apply(PicArr, (l = (q = s[r]).prototype).PicArr.slice(0));
 			t = l.AudioArr, b = t.length;
 			while (b--) NewAudio({ source: t[b] });
-			l.Init.call(q, u, l, c, d);
+			l.Init.call(q, u, l, oGd.$ZF, d);
 		}
-		p.PicNum = w += i.length;
-		r = i.length;
-		z.style["pointer-events"] = "auto";
-		y.setAttribute("title", "如果长时间没有加载完毕或者不想再等待预读可以尝试点击跳过预读直接进入游戏");
-		y.style.cursor = "pointer";
-		y.onclick = function() {
+
+		oS.PicNum = PicArr.length, r = PicArr.length;
+
+		dMeter.style["pointer-events"] = "auto";
+		dTitle.setAttribute("title", "如果长时间没有加载完毕或者不想再等待预读可以尝试点击跳过预读直接进入游戏");
+		dTitle.style.cursor = "pointer";
+		dTitle.onclick = function() {
 			oS.MustAllReady = false;
 			oS.LoadReady(oS)
 		};
-		while (r--) {
-			e(i[r], h)
-		}
-		r = j.length;
-		oS.LoadAudio()
+
+		while (r--) oS.LoadImage(PicArr[r], oS.CheckImg);		
+		oS.LoadAudio();
 	},
 	LoadAudio: function() {
 		var b = oS.AudioArr,
@@ -347,6 +334,7 @@ oS = {
 		}
 		SetNone($("dLvlLink"));
 		ClearChild($("dTips"));
+		ClearChild($("dTitle"));
 		oSym.NowStep = $User.Visitor.NowStep;
 		oSym.TimeStep = $User.Visitor.TimeStep;
 		c.onclick = null;
@@ -471,7 +459,7 @@ oS = {
 },
 oCoord = {
 	1 : function() {
-		oS.R = 5;
+		oS.R = 5, oS.ZombieIntoTop = 400, oHL.Init([]);
 		ChosePlantX = function(a) {
 			return Compare(GetC(a), 1, oS.C, GetX)
 		};
@@ -499,7 +487,9 @@ oCoord = {
 				8 : 747,
 				9 : 827,
 				10 : 865,
-				11 : 950
+				11 : 950, 
+				12 : 1080, 
+				13 : 1180, 
 			})
 		};
 		GetY = function(a) {
@@ -519,7 +509,7 @@ oCoord = {
 				2 : [181, 280],
 				3 : [281, 385],
 				4 : [386, 475],
-				5 : [476, 600]
+				5 : [476, 580]
 			})
 		};
 		GetX1X2 = function(a) {
@@ -539,16 +529,15 @@ oCoord = {
 				10 : [855, 934],
 				11 : [950, 1030]
 			})
-		}; ! oS.InitLawnMower && (oS.InitLawnMower = function() {
-			var a = 6;
-			while (--a) {
-				CustomSpecial(oLawnCleaner, a, -1)
-			}
+		};
+		GetRound = function () { return 0; };
+		! oS.InitLawnMower && (oS.InitLawnMower = function() {
+			var a = 6; while (--a) CustomSpecial(oLawnCleaner, a, -1)
 		});
 		oS.GifHTML = ""; oS.HaveFog && oGd.MakeFog();
 	},
 	2 : function() {
-		oS.R = 6;
+		oS.R = 6, oS.ZombieIntoTop = 400, oHL.Init([]);
 		ChosePlantX = function(a) {
 			return Compare(GetC(a), 1, oS.C, GetX)
 		};
@@ -576,7 +565,9 @@ oCoord = {
 				8 : 747,
 				9 : 827,
 				10 : 865,
-				11 : 950
+				11 : 950,
+				12 : 1080, 
+				13 : 1180, 
 			})
 		};
 		GetY = function(a) {
@@ -618,7 +609,9 @@ oCoord = {
 				10 : [855, 934],
 				11 : [950, 1030]
 			})
-		}; ! oS.InitLawnMower && (oS.InitLawnMower = function() {
+		}; 
+		GetRound = function () { return 0; };
+		! oS.InitLawnMower && (oS.InitLawnMower = function() {
 			CustomSpecial(oLawnCleaner, 1, -1);
 			CustomSpecial(oLawnCleaner, 2, -1);
 			CustomSpecial(oPoolCleaner, 3, -1);
@@ -629,18 +622,18 @@ oCoord = {
 		oS.GifHTML = '<img style="position:absolute;left:253px;top:278px" src="images/interface/background' + (oS.DKind ? 3 : 4) + '_2.gif">'; oS.HaveFog && oGd.MakeFog();
 	},
 	200 : function() {
-		oS.R = 6;
+		oS.R = 6, oS.ZombieIntoTop = 400, oHL.Init([]);
 		ChosePlantX = function(a) {
 			return Compare(GetC(a), 1, oS.C, GetX)
 		};
 		ChosePlantY = function(a) {
-			return $SSml(a, [86, 171, 254, 338, 440, 542], [[75, 0], [161, 1], [254, 2], [338, 3], [430, 4], [524, 5], [593, 6]])
+			return $SSml(a, [86, 171, 254, 338, 440, 532], [[75, 0], [161, 1], [254, 2], [338, 3], [430, 4], [524, 5], [593, 6]])
 		};
 		GetC = function(a) {
 			return $SSml(a, [ - 50, 100, 140, 220, 295, 379, 460, 540, 625, 695, 775, 855, 935], [ - 2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 		};
 		GetR = function(a) {
-			return $SSml(a, [86, 171, 254, 338, 440, 542], [0, 1, 2, 3, 4, 5, 6])
+			return $SSml(a, [86, 171, 254, 338, 440, 532], [0, 1, 2, 3, 4, 5, 6])
 		};
 		GetX = function(a) {
 			return $SEql(a, {
@@ -657,7 +650,9 @@ oCoord = {
 				8 : 747,
 				9 : 827,
 				10 : 865,
-				11 : 950
+				11 : 950,
+				12 : 1080, 
+				13 : 1180, 
 			})
 		};
 		GetY = function(a) {
@@ -667,7 +662,7 @@ oCoord = {
 				2 : 243,
 				3 : 335,
 				4 : 420,
-				5 : 532,
+				5 : 524,
 				6 : 597
 			})
 		};
@@ -678,8 +673,8 @@ oCoord = {
 				2 : [171, 253],
 				3 : [254, 337],
 				4 : [338, 439],
-				5 : [440, 541],
-				6 : [542, 600]
+				5 : [440, 531],
+				6 : [532, 600]
 			})
 		};
 		GetX1X2 = function(a) {
@@ -699,7 +694,9 @@ oCoord = {
 				10 : [855, 934],
 				11 : [950, 1030]
 			})
-		}; ! oS.InitLawnMower && (oS.InitLawnMower = function() {
+		}; 
+		GetRound = function () { return 0; };
+		! oS.InitLawnMower && (oS.InitLawnMower = function() {
 			CustomSpecial(oLawnCleaner, 1, -1);
 			CustomSpecial(oLawnCleaner, 2, -1);
 			CustomSpecial(oPoolCleaner, 3, -1);
@@ -708,11 +705,199 @@ oCoord = {
 			CustomSpecial(oLawnCleaner, 6, -1)
 		});
 		oS.GifHTML = '<img style="position:absolute;left:253px;top:278px" src="images/interface/background' + (oS.DKind ? 3 : 4) + '_2.gif">'; oS.HaveFog && oGd.MakeFog();
-	}
+	}, 
+
+	// 屋顶地形，目前暂时使用 Pora 的接口，未来开发 3D 关卡模型后再替换接口调用
+	3: function () {
+		oS.R = 5, oS.ZombieIntoTop = 200, oHL.Init([[0, -107.5, 150], [0.25, -145, 580], [0, 0, Infinity]]);
+		// oS.R = 5, oS.ZombieIntoTop = 400, oHL.Init([[0, -112.75, 130], [0.275, -148.5, 540], [0, 0, Infinity]]);
+
+		ChosePlantX = function (a) {
+			return Compare(GetC(a), 1, oS.C, GetX);
+		};
+		ChosePlantY = function (a, b = 11) {
+			// b MUST BE THE COLUMN, NOT THE X COORDINATE
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SSml(
+				a, [89 + d, 172 + d, 259 + d, 340 + d, 424 + d],
+				[[75 + d, 0], [155 + d, 1], [240 + d, 2], [325 + d, 3], [410 + d, 4], [495 + d, 5]]
+			);
+		};
+		GetC = function (a) {
+			return $SSml(
+				a, [-50, 100, 140, 220, 295, 379, 460, 540, 625, 695, 775, 855, 935],
+				[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+			);
+		};
+		GetR = function (a, b = Infinity) {
+			// b MUST BE THE COLUMN, NOT THE X COORDINATE
+			let _ = 0, d = 0; if (b != Infinity) _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SSml(a, [90 + d, 172 + d, 259 + d, 340 + d, 424 + d, 530 + d], [0, 1, 2, 3, 4, 5, 6]);
+		};
+		GetX = function (a) {
+			return $SEql(a, {
+				"-2": -50,
+				"-1": 100,
+				0: 140,
+				1: 187,
+				2: 267,
+				3: 347,
+				4: 427,
+				5: 507,
+				6: 587,
+				7: 667,
+				8: 747,
+				9: 827,
+				10: 865,
+				11: 950,
+				12 : 1080, 
+				13 : 1180, 
+			});
+		};
+		GetY = function (a, b = 11) {
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SEql(a, {
+				0: 75 + d,
+				1: 155 + d,
+				2: 240 + d,
+				3: 325 + d,
+				4: 410 + d,
+				5: 495 + d,
+			});
+		};
+		GetY1Y2 = function (a, b = 11) {
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SEql(a, {
+				0: [0 + d, 89 + d],
+				1: [90 + d, 171 + d],
+				2: [172 + d, 258 + d],
+				3: [259 + d, 339 + d],
+				4: [340 + d, 423 + d],
+				5: [424 + d, 520 + d],
+			});
+		};
+		GetX1X2 = function (a) {
+			return $SEql(a, {
+				"-2": [-100, -49],
+				"-1": [-50, 99],
+				0: [100, 139],
+				1: [140, 219],
+				2: [220, 294],
+				3: [295, 378],
+				4: [379, 459],
+				5: [460, 539],
+				6: [540, 624],
+				7: [625, 694],
+				8: [695, 774],
+				9: [775, 854],
+				10: [855, 934],
+				11: [950, 1030],
+			});
+		};
+		GetRound = function (X) { return oHL.QueryPoint(X); };
+		!oS.InitLawnMower && (oS.InitLawnMower = function () {
+				var a = 6; while (--a) CustomSpecial(oRoofCleaner, a, -1);
+			});
+		oS.GifHTML = "";
+	},
+
+
+	// 辉针城地形
+	"th14": function () {
+		oS.R = 5, oS.ZombieIntoTop = 400, oHL.Init([[0, 80, 150], [-0.2, 110, 550], [0, 0, Infinity]]);
+
+		ChosePlantX = function (a) {
+			return Compare(GetC(a), 1, oS.C, GetX);
+		};
+		ChosePlantY = function (a, b = 11) {
+			// b MUST BE THE COLUMN, NOT THE X COORDINATE
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SSml(
+				a, [159 + d, 239 + d, 319 + d, 399 + d, 479 + d],
+				[[155 + d, 0], [235 + d, 1], [315 + d, 2], [395 + d, 3], [475 + d, 4], [555 + d, 5]]
+			);
+		};
+		GetC = function (a) {
+			return $SSml(
+				a, [-50, 100, 150, 230, 310, 390, 470, 550, 630, 710, 790, 870, 940],
+				[-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+			);
+		};
+		GetR = function (a, b = Infinity) {
+			// b MUST BE THE COLUMN, NOT THE X COORDINATE
+			let _ = 0, d = 0; if (b != Infinity) _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SSml(a, [159 + d, 239 + d, 319 + d, 399 + d, 479 + d, 560 + d], [0, 1, 2, 3, 4, 5, 6]);
+		};
+		GetX = function (a) {
+			return $SEql(a, {
+				"-2": -50,
+				"-1": 110,
+				0: 150,
+				1: 190,
+				2: 270,
+				3: 350,
+				4: 430,
+				5: 510,
+				6: 590,
+				7: 670,
+				8: 750,
+				9: 830,
+				10: 865,
+				11: 950,
+				12 : 1080, 
+				13 : 1180, 
+			});
+		};
+		GetY = function (a, b = 11) {
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SEql(a, {
+				0: 155 + d,
+				1: 235 + d,
+				2: 315 + d,
+				3: 395 + d,
+				4: 475 + d,
+				5: 555 + d,
+			});
+		};
+		GetY1Y2 = function (a, b = 11) {
+			let _ = GetX1X2(b), d = -oHL.QueryPoint((_[0] + _[1]) / 2);
+			return $SEql(a, {
+				0: [0 + d, 159 + d],
+				1: [160 + d, 239 + d],
+				2: [240 + d, 319 + d],
+				3: [320 + d, 399 + d],
+				4: [400 + d, 479 + d],
+				5: [480 + d, 560 + d],
+			});
+		};
+		GetX1X2 = function (a) {
+			return $SEql(a, {
+				"-2": [-100, -49],
+				"-1": [-50, 109],
+				0: [110, 149],
+				1: [150, 229],
+				2: [230, 309],
+				3: [310, 389],
+				4: [390, 469],
+				5: [470, 549],
+				6: [550, 629],
+				7: [630, 709],
+				8: [710, 789],
+				9: [790, 869],
+				10: [870, 939],
+				11: [940, 1030],
+			});
+		};
+		GetRound = function (X) { return oHL.QueryPoint(X); };
+		!oS.InitLawnMower && (oS.InitLawnMower = function () {
+				var a = 6; while (--a) CustomSpecial(oRoofCleaner, a, -1);
+			});
+		oS.GifHTML = "";
+	},
 },
 oP = {
 	Init: function(a) {
-		var r = this;
+		var r = this; r.__CanChangeFlag = true; // 防止僵尸数减到 0 后刷波
 		r.NumZombies = r.FlagZombies = 0, r.FlagMaxWaitTime = 1990, r.FlagZombieWaitTime = 500, r.ZTimeStep = 10, r.BTimeStep = 2, r.AutoStopGame = true; // FlagMaxWaitTime: 两波之间最大间隔; FlagZombieWaitTime: 两波之间最小间隔; ZTimeStep: 僵尸移动的间隔; BTimeStep: 子弹移动间隔(NowStep * BTimeStep); AutoStopGame: 是否暂停游戏
 		if (a) {
 			var l;
@@ -748,8 +933,9 @@ oP = {
 			}
 		}
 		a && a.FlagNum ? (r.FlagHeadStep = (145 / (a.FlagNum - 1)), r.MonPrgs = function (_) {
-			var u = oP, j, i = u.FlagZombies, s, t, f = $User.Visitor, _;
-			if (!--u.NumZombies) {
+			var u = oP, j, i = u.FlagZombies, s, t, f = $User.Visitor;
+			if (!--u.NumZombies && u.__CanChangeFlag) {
+				u.__CanChangeFlag = false;
 				if (i < u.FlagNum) {
 					u.ReadyFlag = ++i, oSym.addTask(oP.FlagZombieWaitTime, u.FlagPrgs, []);
 					(_ = $SEql(i - 1, u.FlagToMonitor)) && oSym.addTask(oP.FlagZombieWaitTime - 300, function (g) { !g[1] && (g[0](), g[1] = 1) }, [_]); /* 提前触发大波 */ 
@@ -893,6 +1079,43 @@ oP = {
 		}
 		this.AppearUP(k, m, e)
 	},
+	// 盗贼僵尸天降僵尸机制
+	SetTimeoutSkyZombie: function(L, R, Num, Z) {
+		let $RR = (L, R) => Math.floor(L + Math.random() * (R - L + 1));
+		let ZArr = [], ZHTMLArr = []; oP.NumZombies += Num;
+		// 生成僵尸
+		for (let I = 1; I <= Num; ++I) {
+			let _R = $RR(1, oS.R), _C = $RR(L, R);
+			let nZ = new Z[$RR(0, Z.length - 1)];
+			let ZHTML = nZ.CustomBirth(_R, _C, 100, "auto");
+			ZArr.push(nZ), ZHTMLArr.push(ZHTML);
+		}
+
+		PlayAudio("bungee_scream");
+
+		// 插入僵尸，并天降
+		oSym.addTask(60, () => {
+			asyncInnerHTML(ZHTMLArr.join(""), function(h, ZList) {
+				EDPZ.appendChild(h);
+				for (let o of ZList) {
+					let Ele = $(o.id), EleShadow = Ele.childNodes[0], EleBody = Ele.childNodes[1];
+					let TargetTop = parseInt(Ele.style.top), R = o.R;
+					let BungeeEle = NewImg(0, "images/Zombies/BungeeZombieFly.png", "z-index: " + (3 * R) + ";left:" + (o.ZX - 80) + "px;top:" + (TargetTop + o.height - 2030) + "px", EDPZ);
+					o.Birth.call(o), SetBlock(Ele), EleBody.style.top = -900 + "px", EleShadow.style.opacity = 0;
+
+					// 盗贼僵尸反弹过程
+					oEf.Animate(BungeeEle, {"top": (TargetTop + o.height - 1030) + "px"}, 1, "linear", () => { oEf.Animate(BungeeEle, {"top": (TargetTop + o.height - 2030) + "px"}, 1, "linear", ClearChild); });
+					oEf.Animate(EleShadow, {"opacity": 1}, 1, "linear");
+					oEf.Animate(EleBody, {"top": "0px"}, 1, "linear", () => {
+						if (!false) return; // 预留，保护伞
+						o.Speed = o.OSpeed = 0;
+						oEf.Animate(EleShadow, {"opacity": 0}, 1, "linear");
+						oEf.Animate(EleBody, {"top": -900 + "px"}, 1, "linear", () => { o.DisappearDie(); });
+					});
+				}
+			}, ZArr);
+		});
+	}, 
 	AppearUP: function(a, c, b) {
 		oP.NumZombies += b;
 		asyncInnerHTML(a.join(""),
@@ -939,7 +1162,7 @@ oP = {
 		f)
 	},
 	FlagPrgs: function() {
-		if (oP.DefFlagPrgs) return oP.DefFlagPrgs();
+		if (oP.DefFlagPrgs) return oP.DefFlagPrgs(); oP.__CanChangeFlag = true;
 		var f = oP, c = f.FlagZombies, e = f.FlagToSumNum, a = 139 - c * f.FlagHeadStep, d = $SSml(c, e.a1, e.a2), b;
 		f.FlagNum > (c = ++f.FlagZombies) ? ($("imgFlagHead").style.left = a + "px", $("imgFlagMeterFull").style.clip = "rect(0,157px,21px," + (a + 11) + "px)", (b = $SEql(c, f.FlagToMonitor)) && oSym.addTask(oP.FlagMaxWaitTime - 300,
 		function(g) { ! g[1] && (g[0](), g[1] = 1)
@@ -1144,7 +1367,7 @@ oZ = {
 		for (let l = len - 1; l >= 0; --l) {
 			O = Arr[l], AttackedLX = O.AttackedLX, AttackedRX = O.AttackedRX; // 解包
 			if (AttackedRX < LX) break; // 边界条件
-			if (AttackedLX < RX && O.HP > 0 && O.Altitude == Altitude && CtkFunc(O)) return O; // 返回
+			if (AttackedLX < RX && O.PZ && O.HP > 0 && O.Altitude == Altitude && CtkFunc(O)) return O; // 返回
 		}
 		return null;
 	}, 
@@ -1280,7 +1503,7 @@ oT = {
 	}
 },
 oGT = {
-	KeyList: new Set(["ZombieBirth", "ZombieDie", "PlantBirth", "PlantDie", "Enter-Level", "Exit-Level", "InitoGT", "BulletBirth"]), 
+	KeyList: new Set(["ZombieBirth", "ZombieInjured", "ZombieDie", "PlantBirth", "PlantDie", "Enter-Level", "Exit-Level", "InitoGT", "BulletBirth"]), 
 	TriggerList: new Map(), 
 	Init: function () {
 		let self = this, KList = self.KeyList;
@@ -1290,6 +1513,8 @@ oGT = {
 		self.On("PlantDie", (...Arr) => Trigger_Plants_Die(...Arr));
 		self.On("ZombieBirth", (...Arr) => Trigger_Zombies_Birth(...Arr));
 		self.On("ZombieDie", (...Arr) => Trigger_Zombies_Die(...Arr));
+
+		if (oS.CollectData) oDataCollector.InitCollector(); // 游戏数据统计
 	}, 
 	On: function (TriggerName, Func = () => {}, Once = false) {
 		let self = this, List = self.TriggerList.get(TriggerName); 
@@ -1302,12 +1527,45 @@ oGT = {
 		for (let l = List.length; --l >= 0; null) if (List[l].Delete) List.splice(l, 1);
 	}
 }, 
+oHL = {
+	// PlaneList: [[k, b, R], ...]   =>   f(x) = kx + b, x ∈ (R[i - 1], R[i]]
+	LineList: [], 
+	Init: function (Lines = []) {
+		let self = this, Arr = Lines.concat(); Arr.push([0, 0, -Infinity]), Arr.push([0, 0, Infinity]);
+		Arr.sort((A, B) => A[2] - B[2]), self.LineList = Arr;
+	}, 
+	QueryPoint: function (X) {
+		let self = this, Arr = self["LineList"], Len = Arr["length"];
+		let L = 0, R = Len - 1, Mid;
+		while (L < R) {
+			Mid = (L + R) >> 1;
+			if (Arr[Mid][2] < X) L = Mid + 1; 
+			else R = Mid;
+		}
+		return Arr[L][0] * X + Arr[L][1];
+	}, 
+	// Query Max Point in [X1, X2]
+	QueryLine: function (X1, X2, Mode = "max") {
+		let f = ({ "max": Math.max, "min": Math.min })[Mode.toLowerCase()];
+		let self = this, Arr = self["LineList"], Len = Arr["length"];
+		let L = 0, R = Len - 1, Mid, Ret = f();
+		while (L < R) {
+			Mid = (L + R) >> 1;
+			if (Arr[Mid][2] < X1) L = Mid + 1; 
+			else R = Mid;
+		}
+		Ret = f(Ret, Arr[L][0] * X1 + Arr[L][1]);
+		if (X2 <= Arr[L][2]) return f(Ret, Arr[L][0] * X2 + Arr[L][1]);
+		while (Arr[++L][2] < X2) Ret = f(Ret, Arr[L][0] * Arr[L][2] + Arr[L][1], Arr[L][0] * Arr[L - 1][2] + Arr[L][1]);
+		return f(Ret, Arr[L][0] * X2 + Arr[L][1]);
+	}
+}, 
 asyncInnerHTML = function(d, c, a) {
 	var b = $n("div"),
 	e = document.createDocumentFragment();
 	b.innerHTML = d; (function(g) {
 		var f = arguments.callee;
-		g--?(e.appendChild(b.firstChild), setTimeout(function() {
+		g-- ? (e.appendChild(b.firstChild), setTimeout(function() {
 			f(g)
 		},
 		0)) : c(e, a)
@@ -1329,12 +1587,13 @@ WhichMouseButton = function(a) {
 },
 GroundOnmousedown = function(i) {
 	i = window.event || i;
-	var a = i.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft,
+	var a = (i.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft) - oScreen.FightingLeft, 
 	k = i.clientY + EBody.scrollTop || EElement.scrollTop,
 	g = ChosePlantX(a),
-	h = ChosePlantY(k),
+	h = ChosePlantY(k, g[1]),
+	_ = GetRound(((A = GetX1X2(g[1])) => (A[0] + A[1]) / 2)()), 
 	d = g[0],
-	c = h[0],
+	c = h[0] + _,
 	f = h[1],
 	b = g[1],
 	j = GetAP(a, k, f, b);
@@ -1349,21 +1608,18 @@ GetAP = function(a, h, d, c) {
 	var f, i = oGd.$,
 	e, g = [],
 	b;
-	for (f = 0; f < MAX_PLT_INDEX; g.push(e = i[d + "_" + c + "_" + f++]), e && !(a < e.pixelLeft || a > e.pixelRight || h < e.pixelTop || h > e.pixelBottom) && (b = e)) {}
+	for (f = 0; f < MAX_PLT_INDEX; g.push(e = i[d + "_" + c + "_" + f++]), e && !(a < e.pixelLeft || a > e.pixelRight || h < (e.pixelTop + e.ImageJudgeTop) || h > (e.pixelBottom - e.ImageJudgeBottom)) && (b = e)) {}
 	return [g, b]
 },
 GroundOnkeydown = function(b) {
-	var a;
-	if ((a = (b || event).keyCode) == 27) {
+	var a = (b || event).keyCode;
+	if (a == 27) {
 		switch (oS.Chose) {
-		case 1:
-			CancelPlant();
-			break;
-		case - 1 : CancelShovel()
+			case 1: CancelPlant(); break;
+			case -1 : CancelShovel(); break;
 		}
-		return (false)
-	} else { ! oS.Chose && KeyBoardGrowPlant(a)
-	}
+	} else if (a == 69) oSym.Timer ? (PauseGame($("dMenu0"), "回到游戏"), PlayAudio("pause")) : (ResetGame($("dMenu0")), PlayAudio("buttonclick"));
+	else if (!oS.Chose) KeyBoardGrowPlant(a);
 },
 KeyBoardGrowPlant = function(b, a) {
 	a = a || 0;
@@ -1377,11 +1633,11 @@ KeyBoardGrowPlant = function(b, a) {
 GroundOnmousemove = function() {},
 GroundOnmousemove1 = function(j) {
 	j = window.event || j;
-	var d = j.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft,
+	var d = (j.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft) - oScreen.FightingLeft,
 	b = j.clientY + EBody.scrollTop || EElement.scrollTop,
 	k = oS.ChoseCard,
 	h = ChosePlantX(d),
-	i = ChosePlantY(b),
+	i = ChosePlantY(b, h[1]), 
 	f = h[0],
 	c = i[0],
 	g = i[1],
@@ -1389,22 +1645,22 @@ GroundOnmousemove1 = function(j) {
 	m = GetAP(d, b, g, a);
 	var l = ArCard[k].PName.prototype;
 	SetStyle($("MovePlant"), {
-		left: d - 0.5 * (l.beAttackedPointL + l.beAttackedPointR) + "px",
+		left: (d - 0.5 * (l.beAttackedPointL + l.beAttackedPointR) + oScreen.FightingLeft) + "px",
 		top: b + 20 - l.height + l.GetDY(g, a, m[0]) + "px"
 	});
 	l.CanGrow(m[0], g, a) && Trigger_Ctk_Plt(m[0], g, a, l) ? SetStyle($("MovePlantAlpha"), {
 		visibility: "visible",
-		left: f + l.GetDX() + "px",
-		top: c - l.height + l.GetDY(g, a, m[0]) + "px"
+		left: (f + l.GetDX() + oScreen.FightingLeft) + "px",
+		top: (c - l.height + l.GetDY(g, a, m[0])) + "px"
 	}) : SetHidden($("MovePlantAlpha"))
 },
 GroundOnmousemove2 = function(k) {
 	k = window.event || k;
-	var d = k.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft,
+	var d = (k.clientX - EDAlloffsetLeft + EBody.scrollLeft || EElement.scrollLeft) - oScreen.FightingLeft,
 	b = k.clientY + EBody.scrollTop || EElement.scrollTop,
 	m = oS.ChoseCard,
 	h = ChosePlantX(d),
-	i = ChosePlantY(b),
+	i = ChosePlantY(b, h[1]),
 	f = h[0],
 	c = i[0],
 	g = i[1],
@@ -1415,7 +1671,7 @@ GroundOnmousemove2 = function(k) {
 	p = oS.MPID;
 	p != l && (p && $(p) && SetAlpha($(p).childNodes[1], 100, 1), (oS.MPID = l) && SetAlpha($(l).childNodes[1], 60, 0.6));
 	SetStyle($("tShovel"), {
-		left: d - 15 + "px",
+		left: (d - 15 + oScreen.FightingLeft) + "px",
 		top: b - 16 + "px"
 	})
 },
@@ -1430,7 +1686,7 @@ DisplayZombie = function() {
 	e = [],
 	a;
 	while (b--) {
-		d[b][0].prototype.CanDiaplay == 0 && d.splice(b, 1)
+		d[b][0].prototype.CanDisplay == 0 && d.splice(b, 1)
 	}
 	c = b = d.length;
 	while (c--) {
@@ -1480,7 +1736,7 @@ InitPCard = function() {
 InitHandBookPCard = function() {
 	PlayAudio("gravebutton");
 	var d = "",
-	g, f, e = [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oCabbage, oFlowerPot, oCoffeeBean, oGarlic, oMelonPult, oGatlingPea, oTwinSunflower, oGloomShroom, oSpikerock, oCabbage_Pro, oMelonPult_Pro, oCattail],
+	g, f, e = [oPeashooter, oSunFlower, oCherryBomb, oWallNut, oPotatoMine, oSnowPea, oChomper, oRepeater, oPuffShroom, oSunShroom, oFumeShroom, oGraveBuster, oHypnoShroom, oScaredyShroom, oIceShroom, oDoomShroom, oLilyPad, oSquash, oThreepeater, oTangleKelp, oJalapeno, oSpikeweed, oTorchwood, oTallNut, oSeaShroom, oPlantern, oCactus, oBlover, oSplitPea, oStarfruit, oPumpkinHead, oCabbage, oFlowerPot, oCoffeeBean, oGarlic, oMelonPult, oGatlingPea, oTwinSunflower, oGloomShroom, oSpikerock, oCabbage_Pro, oMelonPult_Pro, oWinterMelon_Pro, oCattail],
 	a = e.length,
 	b = 0,
 	c;
@@ -1652,10 +1908,9 @@ LetsGO = function() {
 	oS.StartTime = oSym.Now
 },
 ViewPlantTitle = function(b) {
-	var f = $("dTitle"),
-	e = ArCard[b],
-	c = e.PName.prototype,
-	a = c.CName; ! c.CardKind && (a += "<br>冷却时间:" + c.coolTime + "秒<br>" + c.Tooltip, !e.CDReady && (a += '<br><span style="color:#F00">正在重新装填中...</span>')); ! e.SunReady && (a += '<br><span style="color:#F00">阳光不足!</span>');
+	var f = $("dTitle"), e = ArCard[b], c = e.PName.prototype, a = c.CName; 
+	(!c.CardKind || c.ShowTooltip) && (a += "<br>冷却时间:" + c.coolTime + "秒<br>" + c.Tooltip, !e.CDReady && (a += '<br><span style="color:#F00">正在重新装填中...</span>')); 
+	!e.SunReady && (a += '<br><span style="color:#F00">阳光不足!</span>');
 	f.innerHTML = a;
 	SetStyle(f, {
 		top: 60 * b + "px",
@@ -1780,8 +2035,8 @@ GrowPlant = function(l, d, c, e, b) {
 		else !oS.Cheat_Mode && (innerText(ESSunNum, oS.SunNum -= k.SunNum), i && (f.CDReady = 0, DoCoolTimer(j, k.coolTime))); 
 
 		oSym.addTask(20, SetHidden, [SetStyle(g != 2 ? $("imgGrowSoil") : $("imgGrowSpray"), {
-			left: d - 30 + "px",
-			top: c - 30 + "px",
+			left: (d - 30 + oScreen.FightingLeft) + "px",
+			top: (c - 30 - GetRound(d)) + "px",
 			zIndex: 3 * e + 1,
 			visibility: "visible"
 		})]);
@@ -1791,7 +2046,8 @@ GrowPlant = function(l, d, c, e, b) {
 
 //20231009种子雨（原创移植）
 AppearCard = function (h, f, e, a, t) { // x, y, 植物id, 移动卡槽类型, 消失时间（默认 15s）
-	var b, d, g = "dCard" + Math.random(), c = "opacity:1;width:100px;height:120px;cursor:pointer;clip:rect(auto,auto,60px,auto);left:" + h + "px;top:-1000", t = t || 1500;
+	h += oScreen.FightingLeft; // 偏移
+	var b, d, g = "dCard" + Math.random(), c = "opacity:1;width:100px;height:120px;cursor:pointer;clip:rect(auto,auto,60px,auto);left:" + h + "px;top:-1000", t = t || 1500; 
 
 	if (a) d = 0, oSym.addTask(1, MoveDropCard, [g, f, t]); // 从天而降，反之抛物线掉落
 	else d = f - 15 - 20, c += ";top:" + d + "px", oSym.addTask(1, DisappearCard, [g, t]), oSym.addTask(1,function(q,p,n,j,l,k,m,i){if(ArCard[q]&&$(q)){SetStyle($(q),{left:(p=p+j*k)+"px",top:(n=n+Number(l[0]))+"px"});l.shift();--m;m>0&&((l.length==0)&&(l=[8,16,24,32]),oSym.addTask(i,arguments.callee,[q,p,n,j,l,k,m,++i]))}},[g,h,d,Math.floor(Math.random()*4),[-32,-24,-16,-8],[-1,1][Math.floor(Math.random()*2)],8,2]); // 开始记时，确定抛物线，与阳光部分相似故压缩
@@ -1818,8 +2074,8 @@ AppearCard = function (h, f, e, a, t) { // x, y, 植物id, 移动卡槽类型, �
 },
 
 
-AutoProduceSun = function(a) {
-	AppearSun(GetX(Math.floor(1 + Math.random() * oS.C)), GetY(Math.floor(1 + Math.random() * oS.R)), a, 1);
+AutoProduceSun = function(a, _) {
+	AppearSun(GetX(_ = Math.floor(1 + Math.random() * oS.C)), GetY(Math.floor(1 + Math.random() * oS.R), _), a, 1);
 	oSym.addTask(Math.floor(9 + Math.random() * 3) * 100, AutoProduceSun, [a])
 },
 AppearSun = function(h, f, e, a) {
@@ -2108,21 +2364,20 @@ ShowLoginDiv = function() {
 },
 SelectModal = function(g, Is_Url = false) {
 	AllAudioStop(), StopMusic();
-	HiddenLevel();
-	HiddenMiniGame(1);
-	HiddenRiddleGame(1);
-	HiddenTravelGame(1);
+	HiddenLevel(), HiddenMiniGame(1);
+	HiddenRiddleGame(1), HiddenTravelGame(1);
 	SetNone($("dShowMsgLogin"));
 	PausedAudioArr = [];
 	g == undefined && (g = $User.Visitor.Progress);
-	if (g > 35) {
+	if ((g > 35 && g < 41) || g > 41) {
 		alert("本关卡暂未开放！");
 		SelectModal(__Normal_Start_Room__);
 		return
 	}
 
 	oS.LvlClearFunc && oS.LvlClearFunc();
-	oGT.OnTrigger("Exit-Level"), oEf.Init();
+	document.body.onkeydown = null;
+	oGT.OnTrigger("Exit-Level"), oEf.Init(), oScreen.Init();
 
 	var b = oS.GlobalVariables,
 	c = oS.LvlVariables,
@@ -2180,13 +2435,22 @@ AppearTombstones = function(n, e, m, def = () => true) {
 		for (f = 0; f < MAX_PLT_INDEX; f++) { (l = s[p + "_" + f]) && l.Die()
 		}
 		k.splice(g, 1);
-		a = NewEle("dTombstones" + h + "_" + b, "div", "position:absolute;width:86px;height:91px;left:" + (GetX(b) - 43) + "px;top:" + (GetY(h) - 91) + "px", 0, EDMove);
+
+		a = NewEle("dTombstones" + h + "_" + b, "div", "overflow:hidden;position:absolute;width:86px;height:91px;left:" + (GetX(b) - 43) + "px;top:" + (GetY(h, b) - 91) + "px;z-index:2;", 0, EDMove);
+		// 动画效果，必须放在这里
+		oEf.Animate(a, [{
+			top: GetY(h, b) + "px", 
+			height: "0px"
+		}, {
+			top: (GetY(h, b) - 91) + "px", 
+			height: "91px"
+		}], 0.5, "ease-out");
+
 		h = Math.floor(Math.random() * 4);
 		b = Math.floor(Math.random() * 2);
 		var c; (a.appendChild(c = (NewEle("", "div", "background-position:-" + 86 * h + "px -" + 91 * b + "px", {
 			className: "Tom1"
-		},
-		a)).cloneNode(false))).className = "Tom2"
+		}, a)).cloneNode(false))).className = "Tom2";
 	}
 },
 ResetGame = function(b) {
@@ -2203,8 +2467,8 @@ PauseGame = function(c, a) {
 	AllAudioPaused();
 	b.Stop();
 	innerText(c, "回到游戏");
-	$("dMenu1").onclick = null; ! a && SetBlock($("dSurface"), $("dPause"));
-	$("dPauseAD").innerHTML = $User.Client.PC && oS.CenterContent ? '<object width="320" height="240" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0"><param name="allowScriptAccess" value="always" /><param name="allowFullScreen" value="false" /><param name="movie" value="images/link/flash.swf" /><param name="quality" value="high" /><param name="FlashVars" value="pubid=ca-games-pub-9213374815406375&channels=8885000954&contentid=%e9%9a%8f%e4%be%bf%e5%86%99&adType=graphical_fullscreen&adWidth=320&adHeight=240&descriptionUrl=http%3a%2f%2fwww.4399.com&ad_ul=zh_CN" /><embed width="320" height="240" allowscriptaccess="always" allowfullscreen="false" src="images/link/flash.swf?pubid=ca-games-pub-9213374815406375&channels=8885000954&contentid=%e9%9a%8f%e4%be%bf%e5%86%99&adType=graphical_fullscreen&adWidth=320&adHeight=240&descriptionUrl=http%3a%2f%2fwww.4399.com&ad_ul=zh_CN" quality="high" bgcolor="#ffffff" align="middle" type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer_cn" /></object>': '<img src="images/Zombies/NewspaperZombie/1.gif">'
+	$("dMenu1").onclick = null; !a && SetBlock($("dSurface"), $("dPause"));
+	$("dPauseAD").innerHTML = $User.Client.PC && '<img src="images/Zombies/NewspaperZombie/1.gif">';
 },
 ClickMenu = function() {
 	oSym.Timer && (AllAudioPaused(), PlayAudio("pause"), oSym.Stop(), SetBlock($("dSurface")), innerText($("dMenu0"), "回到游戏"), ShowOptions())
@@ -2310,6 +2574,9 @@ $ = function(a) {
 $n = function(a) {
 	return document.createElement(a)
 },
+$isNull = function (o) {
+	return (o === void 0) || (o === null);
+}, 
 ClearChild = function() {
 	var a = arguments.length,
 	c;

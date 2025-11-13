@@ -1,3 +1,6 @@
+let __Prohibit_Audio__ = (Store.get("__JSPVZ_KAC_ProhibitAudio_") == "Off") ? true : false; // false | true 不静音、静音两种模式;
+let __LocalHTML5_Audio__ = (Store.get("__JSPVZ_KAC_LocalHTML5Audio_") == "false") ? false : true; // true | false 两种模式;
+
 /*
 基于 Howler.js 的音频
 
@@ -17,6 +20,7 @@ sound.stop(soundId);
 sound.pause(soundId);
 
 */
+
 var MusicLine = { // 音乐音效特殊异步数设置（即该音频最多可同时放几个
 	"default": 16, // 默认 16
 	"jackinthebox": 1, "zamboni": 1, "dancer": 1, "ballooninflate": 5, "explosion": 5,  // 小丑、冰车、舞王只允许一个，气球和爆炸声则是五个
@@ -146,7 +150,7 @@ NewAudio = function(b, jn = {}) { // 新音效
 		volume: volume, // 声音
 		line: line, // 通道数
 		preload: false, 
-		html5: true, // 开启html5模式
+		html5: __LocalHTML5_Audio__, // 开启html5模式
 		AudioName: src, // 音乐id
 	}, jn);
 
@@ -199,10 +203,10 @@ AllAudioMuteCanceled = function() { // 取消静音
 
 
 var NewURLAudio = function(b, jn = {}) {
-	let src = b.url, id = b.audioname || src, autoplay = b.autoplay, loop = b.loop, volume = b.volume, line = b.mline || $SEql(id, MusicLine), html5 = (b.html5 === false) ? false : true, seek = (b.seek >= 0) ? b.seek : (void 0);
-	if (oAudio[id]) return oAudio[id];
+	let srcArr = b.srcArr, src = srcArr?.[0] ?? b.url, id = b.audioname ?? src, autoplay = b.autoplay, loop = b.loop, volume = b.volume, line = b.mline || $SEql(id, MusicLine), html5 = (b.html5 === false) ? false : true, seek = (b.seek >= 0) ? b.seek : (void 0);
+	if (oAudio[id]) return oAudio[id].Sound.load(), oAudio[id];
 	let Json = __Template_ReSet_Object__({ // 确定好 json
-		src: [src], // 列表
+		src: srcArr ?? [src], // 列表
 		loop: loop, // 循环
 		volume: volume, // 声音
 		line: line, // 通道数
@@ -222,3 +226,52 @@ var CheckSilence = function(a) { // 声音
 	var b = a.checked ? 1 : 0;
 	addCookie("JSPVZSilence", oS.Silence = b), b ? AllAudioMuted() : AllAudioMuteCanceled();
 };
+
+
+// 静音相关
+((o) => {
+	if (!__Prohibit_Audio__) return; // 没有静音，不管
+
+	let func = () => {}, BlankAudio = new Howl({ src: [""] });
+
+	o["HowlAudio"] = class { 
+		Sound = void 0; Onload = false; PLines = null; Lines = null; MaxLine = 16; LastPlay = null; MinPlay = 5; AudioName = null;
+		constructor (Json) { let self = this, MLine = 0; self["Sound"] = BlankAudio, self["Lines"] = [], self["PLines"] = []; };
+		isUrl(Str) {};
+		freshline () {};
+		load () {};
+		unload () {};
+		play (Cofig = {}) {};
+		stop (a, ID) {};
+		pause (Bool, ID) {};
+		pausecancel () {};
+		volume (Value, ID) {};
+		muted (Bool) {};
+		loop (Bool) {};
+		currentTime (Time, ID) {};
+		set (Key, Value, ID) {};
+	};
+
+	o["NewMusic"] = func;
+	o["PauseMusic"] = func;
+	o["PlayMusic"] = func;
+	o["PlayAudio"] = func;
+	o["PauseAudio"] = func;
+	o["StopMusic"] = func;
+	o["StopAudio"] = func;
+	o["AllAudioStop"] = func;
+	o["AllAudioPaused"] = func;
+	o["AllAudioPauseCanceled"] = func;
+	o["AllAudioMuted"] = func;
+	o["AllAudioMuteCanceled"] = func;
+	o["NewAudio"] = function(b, jn = {}) { // 新音效
+		let src = b.source;
+		if (oAudio[src]) return oAudio[src]; 
+		return oAudio[src] = new HowlAudio({}); 
+	}, o["NewURLAudio"] = function(b, jn = {}) {
+		let srcArr = b.srcArr, src = srcArr?.[0] ?? b.url, id = b.audioname ?? src;
+		if (oAudio[id]) return oAudio[id].Sound.load(), oAudio[id];
+		return oAudio[id] = new HowlAudio({});
+	};
+
+})(window);

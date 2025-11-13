@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-3 寻路者",
 	LvlEName: "EX_Protect_Brain_3",
-	StartGameMusic: "Glorious_Morning",/*"nice_graveyard"*/
+	StartGameMusic: "Glorious_Morning",/*"Nice_Graveyard"*/
 	CanSelectCard: 1,
 	MusicMode: 1,
 	DKind: 0,

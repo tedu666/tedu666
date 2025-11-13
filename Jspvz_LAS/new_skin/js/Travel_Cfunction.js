@@ -73,14 +73,14 @@ var Set_Next_Page_EXModeList = function(DNum = 0, Nd = 0){
 };
 
 var Win_Travel = function(NowLevel = 1, NxtLevel = 2, ret = 0){
-	try{
+	try {
 		(!TravelInfo.IsTravel && (TravelInfo.IsTravel = {}));
 		TravelInfo.IsTravel[NowLevel] = true; for(let i in TravelInfo.IsTravel) ret++;
 		TravelInfo.NowTravel = Math.max(TravelInfo.NowTravel |= 0, NxtLevel |= 0);
 		TravelInfo.IsTravelNum = ret;
 		Save_EX();
 		Set_Next_Page_EXModeList(0, 1);
-	}catch (b){
+	} catch (b) {
 		console.error(b)
 	};
 };
@@ -99,13 +99,12 @@ var Def_LvlList = function(ID, SHOW, SLvl1, SLvl2, Letter, L2){
 var HiddenTravelGame = function(a) { 
 	!a && PlayAudio("tap");
 	SetNone($("dTravelSmallContainer"));
-	PauseAudio("pure_snows"), AllAudioPauseCanceled();
+	PauseAudio("Pure_Snows"), AllAudioPauseCanceled();
 };
 var ShowTravelGame = function(a) {
-	AllAudioPaused(), !a && PlayAudio("tap"), PlayAudio("pure_snows"); //gravebutton
+	AllAudioPaused(), !a && PlayAudio("tap"), PlayAudio("Pure_Snows"); //gravebutton
 	SetBlock($("dTravelSmallContainer"));
 };
-
 
 
 
@@ -120,11 +119,17 @@ function NormalLevelInit_EX(){
 	EXLevelList.push(GetLevelTable('new_level/Travel/08', '护时者', 'new_skin/Level_View/New_Pool.png'));
 	EXLevelList.push(GetLevelTable('new_level/Travel/09', '珍惜者', 'new_skin/Level_View/New_Pool.png'));
 	EXLevelList.push(GetLevelTable('new_level/Travel/10', '勇闯者', 'new_skin/Level_View/New_Pool.png'));
-	NewURLAudio({url: "new_skin/Sounds/nice_graveyard.mp3", audioname: "nice_graveyard", loop: true});
-	NewURLAudio({url: "new_skin/Sounds/pure snows.mp3", audioname: "pure_snows", loop: true});
-	NewURLAudio({url: "new_skin/Sounds/Waterflame - Glorious Morning.mp3", audioname: "Glorious_Morning", loop: true});
-	NewURLAudio({url: "new_skin/Sounds/True_Admin.mp3", audioname: "True_Admin"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](12.0, Id), self["play"](Id); } });
-	NewURLAudio({url: "new_skin/Sounds/2.75.mp3", audioname: "2.75"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](10.05, Id), self["play"](Id); } });
+	EXLevelList.push(GetLevelTable('new_level/Travel/11', '禁区', 'new_skin/Level_View/New_Pool_Dark.png'));
+	EXLevelList.push(GetLevelTable('new_level/Travel/12', '远征', 'new_skin/Level_View/New_Pool_Dark.png'));
+
+	NewURLAudio({url: "music/Nice_Graveyard.mp3", audioname: "Nice_Graveyard", loop: true});
+	NewURLAudio({url: "music/pure snows.mp3", audioname: "Pure_Snows", loop: true});
+	NewURLAudio({url: "music/Waterflame - Glorious Morning.mp3", audioname: "Glorious_Morning", loop: true});
+	NewURLAudio({url: "music/True_Admin.mp3", audioname: "True_Admin"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](12.0, Id), self["play"](Id); } });
+	NewURLAudio({url: "music/2.75.mp3", audioname: "2.75"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](10.05, Id), self["play"](Id); } });
+	NewURLAudio({url: "music/Cherry_Blossoms.mp3", audioname: "Cherry_Blossoms"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](13.60, Id), self["play"](Id); } });
+	NewURLAudio({url: "music/GrazeTheRoof.mp3", audioname: "GrazeTheRoof"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](107.70, Id), self["play"](Id); } });
+	NewURLAudio({url: "music/th13.mp3", audioname: "th13"}, { buffer: true, preload: true, onend: function (Id) { let self = this; self["seek"](96.05, Id), self["play"](Id); } });
 };
 
 
@@ -167,7 +172,36 @@ var InitHandBookTRCard = function() {
 var Set_Change_EXModeList = function(){
 	EXGAME_LIST_TYPE = !EXGAME_LIST_TYPE;
 	$("minigame_Change_Mode2").innerText = (EXGAME_LIST_TYPE ? "拓展关卡" : "在线关卡");
-	SetBlock(EXGAME_LIST_TYPE ? $("dTravelChange") : $("dTravelUnlock"));
-	SetNone(!EXGAME_LIST_TYPE ? $("dTravelChange") : $("dTravelUnlock"));
+	if (EXGAME_LIST_TYPE) SetBlock($("dTravelChange")), SetNone($("dTravelUnlock"), $("dTravelAchievement"));
+	else SetBlock($("dTravelUnlock"), $("dTravelAchievement")), SetNone($("dTravelChange"));
 	Set_Next_Page_EXModeList(0);
 }
+
+
+var oTRAchieve = {
+	AchieveList: new Map([
+		["EX1-Boom", {
+	    	EName: "EX1-Boom", 
+	    	CName: "爆破专家", 
+	    	Intro: "在EX1中只使用阳光植物和一次性植物通关"
+		}], 
+		["EX1-SunLess", {
+	    	EName: "EX1-SunLess", 
+	    	CName: "节能减排", 
+	    	Intro: "在EX1中携带总价值不超过200阳光的卡通关"
+		}], 
+		["EX2-NoWall", {
+	    	EName: "EX2-NoWall", 
+	    	CName: "马奇诺防线", 
+	    	Intro: "在EX2中不使用植坚果类植物通关"
+		}], 
+		["EX2-NoPea", {
+			EName: "EX2-NoPea", 
+			CName: "绝对防御", 
+			Intro: "在EX2中不使用机枪射手通关"			
+		}], 
+		["EX3-Less", {
+
+		}]
+	])
+};

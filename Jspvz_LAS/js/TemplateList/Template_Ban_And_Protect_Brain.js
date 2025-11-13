@@ -2,11 +2,12 @@ let ___Template__Summon_Ban_Block___ = function(r, c){
 	let Img = "new_skin/Images/InterFace/Ban.png", height = 77, width = 74;
 	let id = "dBan_" + Math.random(), rc = r + "_" + c;
 
-	let wid = Math.max(GetX(c) - GetX(c - 1), width + 10), hei = (GetY(r) - GetY(r - 1)) - 15;
-	let left = GetX(c) - width / 2 - (wid - width), top = GetY(r) - height - (hei - height);
+	let wid = Math.max(GetX1X2(c)[1] - GetX1X2(c)[0], width + 10), hei = (GetY1Y2(r)[1] - GetY1Y2(r)[0]);
+	let left = GetX1X2(c)[0], top = GetY1Y2(r)[0];
 
-	NewImg(id, Img, "top:" + top + "px;left:" + left + "px;width:" + wid + ";height:" + hei, EDMove);
+	let Ele = NewImg(id, Img, "top:" + top + "px;left:" + left + "px;width:" + wid + ";height:" + hei, EDMove);
 	oGd.$Creator_Def[rc] = {id: id, r: r, c: c};
+	return Ele;
 };
 
 
@@ -99,6 +100,7 @@ let ___Template_Protect_Brain___ = {
 
 			//上下移动
 			Eletop = Number(b.Ele.style.top.split('px')[0]) - b.RSpeed, b.Ele.style.top = Eletop + 'px';
+			b.ActualTop = Eletop;
 			ctk_arrive_grid(b, toArr, Reduce, Eletop, b.ZX + point);
 			ctk_change_r(b, Eletop);
 			ctk_final_set(b); //设置最后的操作，比如回退设定值

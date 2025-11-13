@@ -1,27 +1,42 @@
-let __BulletImg_Mode__ = "Canvas"; // "Dom" | "Animate" | "Canvas" 三种不同展示方式
+let __BulletImg_Mode__ = "Canvas"; // "Dom" | "Animate" | "Canvas" 三种不同子弹绘制方式
+let __BulletImg_Canvas_Mode__ = "All"; // "All" | "Only" 两种不同的画布绘制模式
+
+{
+	let __BulletImg_ModeList__ = ["Canvas", "Dom", "Animate"], __BulletImg_UserSetting__ = Store.get("__JSPVZ_KAC_BulletShowMode_");
+	let __BulletImg_CanvasStyleList__ = ["All", "Only"], __BulletImg_CanvasUserStyle__ = Store.get("__JSPVZ_KAC_BulletCanvasStyle_");
+	if (__BulletImg_ModeList__.includes(__BulletImg_UserSetting__)) __BulletImg_Mode__ = __BulletImg_UserSetting__;
+	if (__BulletImg_CanvasStyleList__.includes(__BulletImg_CanvasUserStyle__)) __BulletImg_Canvas_Mode__ = __BulletImg_CanvasUserStyle__;
+}
 
 var oBu = {
-	BList: {}, BKeys: [], DList: [], InitList: [], CanvasList: {}, NowData: 0, 
+	BList: {}, BKeys: [], DList: [], InitList: [], CanvasList: {}, NowDate: 0, 
 	Init: function () { 
 		let self = this; self["BList"] = {}, self["BKeys"] = {}, self["DList"] = [], self["InitList"] = []; 
 		for (let O in self["CanvasList"]) self["CanvasList"][O]["__Delete__"]();
-		for (let R = 0; R <= oS["R"] + 1; ++R) {
-			self["CanvasList"][R] = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: R * 3 + 2, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
-			self["CanvasList"][R + "_Shadow"] = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: R * 3, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
+		if (__BulletImg_Canvas_Mode__ == "Only") {
+			let CanvasEle = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: oS["R"] * 3 + 2, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
+			let ShadowEle = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: 3, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
+			for (let R = 0; R <= oS["R"] + 1; ++R) self["CanvasList"][R] = CanvasEle, self["CanvasList"][R + "_Shadow"] = ShadowEle;
+		} else {
+			for (let R = 0; R <= oS["R"] + 1; ++R) {
+				self["CanvasList"][R] = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: R * 3 + 2, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
+				self["CanvasList"][R + "_Shadow"] = new oEffect({ Dev_Style: { width: 1500, height: 800, zIndex: R * 3, top: "-100px", left: "-100px" }, Width: 1500, Height: 800 }, EDPZ);
+			}
 		}
 	}, 
 	Get_ID: function () { return "_" + Math["random"](); }, 
 	Del: function (Did) { let self = this; self["DList"]["push"](Did); }, 
-	Add: function (Obj, dTime) { let self = this; self["BList"][Obj["ID"]] = Obj, self["InitList"]["push"]([dTime, Obj]); oGT.OnTrigger("BulletBirth", Obj) }, 
+	Add: function (Obj, dTime) { let self = this; self["BList"][Obj["ID"]] = Obj, self["InitList"]["push"]([dTime, Obj]); oGT.OnTrigger("BulletBirth", Obj); }, 
 	ReBindingCanvas: function () { // 重新把所有的画布绑定 
 		let self = this, CanvasList = self["CanvasList"]; 
 		for (let Q in CanvasList) CanvasList[Q]["ReBinding"](); 
 	}, 
 	TraversalOf: function (Tick = 1) { // 批量处理子弹移动
 		let self = this, BList = self["BList"], DList = self["DList"], InitList = self["InitList"], CanvasList = self["CanvasList"];
-		self["NowData"] = new Date();
+		self["NowDate"] = new Date();
 		for (let INObj of InitList) if (oSym.Now - INObj[0] > 0) INObj[1]["Fresh"](oSym.Now - INObj[0]); self["InitList"]["length"] = 0; // 调整初始时的偏移
-		for (let Q in CanvasList) CanvasList[Q]["Clear_Canvas"]();
+		if (__BulletImg_Canvas_Mode__ == "Only") CanvasList["1"]["Clear_Canvas"](), CanvasList["1_Shadow"]["Clear_Canvas"]();
+		else for (let Q in CanvasList) CanvasList[Q]["Clear_Canvas"]();
 		for (let K in BList) BList[K]["Fresh"](Tick); // 刷新
 		for (let D of DList) delete self["BList"][D]; self["DList"]["length"] = 0; // 清除子弹
 	}
@@ -41,7 +56,7 @@ var CBullets = NewO({
 	Async_Picture: function () { let self = this; if (!self["Open_Async_Picture"]) return; self["PicArr"] = self["PicArr"]["map"]((D) => D && !/base64/["test"](D) ? self["RandomPic"](D) : D); }, // 图片异步处理，沿用植物的函数进行优化
 	RandomPic: function (l) { let link = l + (l["indexOf"]('?') != -1 ? "&" : "?") + Math["random"](); return link; }, // 下次也可以对这两部分进行优化
 	CheckOutLimit: (A, B) => B[0] > A || B[1] < A, // 判断数 A 是否在 [B[0], B[1]] 外
-	CheckOut: (O) => O["CheckOutLimit"](O["Pos"][0], O["Border"][0]) || O["CheckOutLimit"](O["Pos"][1], O["Border"][1]) || O["CheckOutLimit"](O["Pos"][2], O["Border"][2]), // 判断是否出界
+	CheckOut: (O) => O["CheckOutLimit"](O["Pos"][0], O["Border"][0]) || O["CheckOutLimit"](O["Pos"][1], [oHL.QueryPoint(O["Pos"][0]), O["Border"][1][1]]) || O["CheckOutLimit"](O["Pos"][2], O["Border"][2]), // 判断是否出界
 	Destroy: function () { 
 		let self = this; // 如果是画布模式，则没有必要清除
 		if (__BulletImg_Mode__ != "Canvas") ClearChild(self["Ele"], self["Shadow"]);
@@ -73,13 +88,13 @@ var CBullets = NewO({
 		if (__BulletImg_Mode__ == "Canvas") {
 			let R = Number(self["RegularR"] ?? self["R"]), Ctx_Img = oBu["CanvasList"][R]["Ctx"], Ctx_Sha = oBu["CanvasList"][R + "_Shadow"]["Ctx"];
 			let DX = self["ImgPos"][0] - self["HalfWid"] - self["ImgLeftMove"], DY = self["ImgPos"][1] - self["HalfHei"];
-			let DWid = 100, DHei = 100, Time = (oBu["NowData"] - self["CreateTime"][0]) / 1000;
+			let DWid = 100, DHei = 100, Time = (oBu["NowDate"] - self["CreateTime"][0]) / 1000;
 
 			oPTGif["DrawImage"](Ctx_Img, oPTG_Store["Get"](self["EleURL"], Time), DX + DWid, DY + DHei, self["ImgScale"][0], self["ImgScale"][1], self["ImgAngle"], self["EleURL"]);
-			oPTGif["DrawImage"](Ctx_Sha, oPTG_Store["Get"]("Bullet_Shadow", Time), self["ImgPos"][0] - 29 / 2 + DWid, self["Pos"][2] - self["HalfHei"] + DHei + 30);
+			oPTGif["DrawImage"](Ctx_Sha, oPTG_Store["Get"]("Bullet_Shadow", Time), self["ImgPos"][0] - 29 / 2 + DWid, self["Pos"][2] - self["HalfHei"] + DHei + 30 - oHL.QueryPoint(self["Pos"][0]));
 		} else {
 			let EleStyle = "translate(" + (self["ImgPos"][0] - self["SpawnPos"][0] - self["HalfWid"] - self["ImgLeftMove"]) + "px, " + (self["ImgPos"][1] - (self["SpawnPos"][2] - self["SpawnPos"][1]) - self["HalfHei"]) + "px) scale(" + self["ImgScale"][0] + "," + self["ImgScale"][1] + ") rotate(" + self["ImgAngle"] + "deg)";
-			let ShaStyle = "translate(" + (self["ImgPos"][0] - self["SpawnPos"][0] - 29 / 2) + "px, " + (self["Pos"][2] - self["SpawnPos"][2] - self["HalfHei"]) + "px)";
+			let ShaStyle = "translate(" + (self["ImgPos"][0] - self["SpawnPos"][0] - 29 / 2) + "px, " + (self["Pos"][2] - self["SpawnPos"][2] - self["HalfHei"] - oHL.QueryPoint(self["Pos"][0])) + "px)";
 
 			if (__BulletImg_Mode__ == "Animate") {
 				oEf.Animate(Ele, { transform: EleStyle }, Tick / 100, "linear");
@@ -95,17 +110,17 @@ var CBullets = NewO({
 
 	}, 
 	Birth: function (DSetting = {}) { // 定义子弹生成规律
-		let self = this, { PicArr = self["PicArr"] ?? [], X = 0, Y = 0, Z = 0, RegularR, zIndex, dPreID = self["EName"], Attack = self["Attack"] ?? 20, NormalGif = self["NormalGif"], SplashGif = self["SplashGif"], Speed = [0, 0, 0], Assign } = DSetting;
+		let self = this, O = self, { PicArr = self["PicArr"] ?? [], X = 0, Y = 0, Z = 0, RegularR, zIndex, dPreID = self["EName"], Attack = self["Attack"] ?? 20, NormalGif = self["NormalGif"], SplashGif = self["SplashGif"], Speed = [0, 0, 0], Assign } = DSetting;
 		self["ID"] = ID = dPreID + oBu["Get_ID"](), self["CreateTime"] = [new Date(), oSym.Now];
 		self["Attack"] = Attack, self["PicArr"] = PicArr, self["Async_Picture"](), self["CopyArr"]();
 		self["Pos"] = [X, Y, Z], self["SpawnPos"] = [X, Y, Z], self["RegularR"] = RegularR, self["Speed"] = Speed, self["DataAdjust"](); // 设置坐标以及图片坐标、当前行等操作
 		self["LstPos"][0] = self["Pos"]["concat"](), self["LstPos"][1] = self["Pos"]["concat"](); // 备份初始数据
 		self["zIndex"] = zIndex ?? (3 * self["R"] + 2), self["NormalGif"] = NormalGif, self["SplashGif"] = SplashGif; // 设置图片优先级
 		self["EleURL"] = self["PicArr"][self["NormalGif"]]; // 设置图片地址
-	
+
 		if (__BulletImg_Mode__ != "Canvas") { // 画布模式特判
 			self["Ele"] = NewImg(ID, self["PicArr"][self["NormalGif"]], "left:" + self["ImgPos"][0] + "px; top:" + self["ImgPos"][1] + "px; z-index:" + self["zIndex"] + "; will-change:transform;", (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置图片
-			self["Shadow"] = NewEle(ID + "_Shadow", "div", "z-index:1; opacity:0.5; background-size:29px; background-repeat:no-repeat; width:29px; top:" + (self["Pos"][2] + 30) + "px; left:" + self["Pos"][0] + "px; will-change:transform;", { className: "Shadow" }, (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置影子
+			self["Shadow"] = NewEle(ID + "_Shadow", "div", "z-index:1; opacity:0.5; background-size:29px; background-repeat:no-repeat; width:29px; top:" + (self["Pos"][2] + 30 - oHL.QueryPoint(O["Pos"][0])) + "px; left:" + self["Pos"][0] + "px; will-change:transform;", { className: "Shadow" }, (__BulletImg_Mode__ == "Canvas" ? null: EDPZ)); // 设置影子
 		} else {
 			self["Ele"] = self["Shadow"] = { "src": self["PicArr"][self["NormalGif"]] };
 		}
@@ -117,7 +132,7 @@ var CBullets = NewO({
 oPeaBullet = InheritO(CBullets, {
 	EName: "oPeaBullet", 
 	PicArr: ["images/Plants/PeaBulletHit.gif", "images/Plants/PB-10.gif", "images/Plants/PB00.gif", "images/Plants/PB10.gif"], NormalGif: 2, SplashGif: 0,
-	Speed: [0, 0, 0], Weight: [0, 0.1, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
+	Speed: [0, 0, 0], Weight: [0, 0, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
 	PeaProperty: 0, Width: 56, Height: 34, HalfWid: null, HalfHei: null, Direction: 0, // 图片等位置信息
 	Attack: 20, NormalAttack: 20, ImgLeftMove: 12, BirthSpeed: 5, LastTorch: [null, null], // 豌豆图片对齐偏移量、 初始速度默认、 上次被加热的格子
 	Altitude: 1, // 子弹高度，陆地子弹还是天上子弹
@@ -156,10 +171,12 @@ oPeaBullet = InheritO(CBullets, {
 	}, 
 	MoveSpecial: function (Tick) { // 用于除了纯移动外的其他内容，比如检测僵尸
 		let self = this, ID = self["ID"], R = Number(self["RegularR"] ?? self["R"]), C = self["C"], Direction = (self["Speed"][0] >= 0 ? 0 : 1), PeaProperty = self["PeaProperty"];
-		let Torch = oGd["$Torch"], MoveArr = self["GetIntervalPos"](), Zombie = oZ["getFirstZombie"](...MoveArr, self["Altitude"]);
+		let Torch = oGd["$Torch"], MoveArr = self["GetIntervalPos"](), Zombie = oZ["getFirstZombie"](...MoveArr, self["Altitude"], (f) => (f.PHeight <= self["Pos"][1] && self["Pos"][1] <= f.PHeight + f.height - f.DivingDepth - (f.HeadTargetPosition[f.isAttacking] || f.HeadTargetPosition[0]).y && self["SpecialCheckZombie"](f)));
+		if (self["LastTorch"][0] != null && self["LastTorch"][1] != null && (self["LastTorch"][0] != R || self["LastTorch"][1] != C)) self["LastTorch"] = [null, null];
 		if (Torch[R + "_" + C] && (self["LastTorch"][0] != R || self["LastTorch"][1] != C)) self["LastTorch"] = [R, C], self["ChangePea"](1, true); // 点燃
 		if (Zombie && Zombie["Altitude"] == self["Altitude"]) Zombie[["getSnowPea", "getPea", "getFirePea"][PeaProperty + 1]](Zombie, self["Attack"], Direction), self["Die"](); // 击中僵尸的情况
 	}, 
+	SpecialCheckZombie: function (Z) { return true; }, 
 	Move: function (Tick) { // 判断打到的僵尸的部分需要优化，又或者说可以直接在 oBu 处理好每行僵尸的查询
 		let self = this, ID = self["ID"], R = Number(self["RegularR"] ?? self["R"]), C = self["C"], Direction = (self["Speed"][0] >= 0 ? 0 : 1);
 		if (!self["WasDestroy"]) { // 移动，利用等差数列化简
@@ -175,7 +192,8 @@ oPeaBullet = InheritO(CBullets, {
 	}, 
 	Die: function (Reason) {
 		let self = this, O = self, ID = self["ID"] + "_Splash", Ele;
-		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], O["Border"][1])) return self["Destroy"]();
+		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], [oHL.QueryPoint(O["Pos"][0]), O["Border"][1][1]])) return self["Destroy"]();
+		else if (Reason == "Out_Limit") PlayAudio("splat" + Math["floor"](1 + Math["random"]() * 3));
 		if (self["SplashGif"] != null) Ele = NewImg(ID, self["PicArr"][self["SplashGif"]], "left:" + (self["ImgPos"][0]) + "px; top:" + (self["ImgPos"][1] - 30) + "px; z-index:" + self["zIndex"] + "; width:46px; height:60px; position:absolute;", EDPZ);
 		oSym["addTask"](10, ClearChild, [Ele]), self["Destroy"]();
 	}, 
@@ -189,7 +207,7 @@ oPeaBullet = InheritO(CBullets, {
 oNormalBullet = InheritO(CBullets, { // 常规无任何效果的子弹、不带方向影响图片转弯的子弹
 	EName: "oNormalBullet", 
 	PicArr: ["images/Plants/PeaBulletHit.gif", "images/Plants/PB00.gif"], NormalGif: 1, SplashGif: 0,
-	Speed: [0, 0, 0], Weight: [0, 0.15, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
+	Speed: [0, 0, 0], Weight: [0, 0, 0], Gravity: [0, 0, 0], // 速度、重力等施力情况
 	Width: 56, Height: 34, HalfWid: null, HalfHei: null, Direction: 0, CanChangeDire: true, // 图片等位置信息
 	Attack: 20, AbsLeftMove: 0, ImgLeftMove: 0, // 攻击伤害等
 	Altitude: 1, // 子弹高度，陆地子弹还是天上子弹
@@ -207,13 +225,15 @@ oNormalBullet = InheritO(CBullets, { // 常规无任何效果的子弹、不带�
 	}, 
 	MoveSpecial: function (Tick) {
 		let self = this, ID = self["ID"], R = Number(self["RegularR"] ?? self["R"]), C = self["C"], Direction = (self["Speed"][0] >= 0 ? 0 : 1);
-		let MoveArr = self["GetIntervalPos"](), Zombie = oZ["getFirstZombie"](...MoveArr, self["Altitude"]);
+		let MoveArr = self["GetIntervalPos"](), Zombie = oZ["getFirstZombie"](...MoveArr, self["Altitude"], (f) => (f.PHeight <= self["Pos"][1] && self["Pos"][1] <= f.PHeight + f.height - f.DivingDepth - (f.HeadTargetPosition[f.isAttacking] || f.HeadTargetPosition[0]).y && self["SpecialCheckZombie"](f)));
 		if (Zombie && Zombie["Altitude"] == self["Altitude"]) self["HitZombie"](Zombie, self["Attack"], Direction) && self["Die"](); // 击中僵尸并确认销毁的情况
 	}, 
+	SpecialCheckZombie: oPeaBullet.prototype.SpecialCheckZombie, // 代码复用
 	Move: oPeaBullet.prototype.Move, // 代码复用
 	Die: function (Reason) {
 		let self = this, O = self, ID = self["ID"] + "_Splash", Ele;
-		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], O["Border"][1])) return self["Destroy"]();
+		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], [oHL.QueryPoint(O["Pos"][0]), O["Border"][1][1]])) return self["Destroy"]();
+		else if (Reason == "Out_Limit") PlayAudio("splat" + Math["floor"](1 + Math["random"]() * 3));
 		if (self["SplashGif"] != null) Ele = NewImg(ID, self["PicArr"][self["SplashGif"]], "left:" + (self["ImgPos"][0]) + "px; top:" + (self["ImgPos"][1] - 30) + "px; z-index:" + self["zIndex"] + "; width:46px; height:60px; position:absolute;", EDPZ);
 		oSym["addTask"](10, ClearChild, [Ele]), self["Destroy"]();
 	}, 
@@ -266,7 +286,7 @@ oThrownBullet = InheritO(oNormalBullet, { // 适用于单目标打击的投手�
 		let Z = TaskZombie, Head = Z.HeadTargetPosition, HeadPos = Head[Z.isAttacking] || Head[0]; // 僵尸和僵尸头部坐标
 		let zY = parseInt(TaskZombie.Ele.style.top) + TaskZombie.DivingDepth + HeadPos.y; // 僵尸绝对纵坐标
 
-		if (self["ImgPos"][0] >= parseInt(TaskZombie.Ele.style.left) + HeadPos.x && self["ImgPos"][1] >= zY) self["HitZombie"](TaskZombie, self["Attack"], self) && self["Die"](); // 击中僵尸并确认销毁的情况
+		if (self["ImgPos"][0] >= parseInt(TaskZombie.Ele.style.left) + HeadPos.x && self["ImgPos"][1] + self["HalfHei"] / 2 >= zY) self["HitZombie"](TaskZombie, self["Attack"], self) && self["Die"](); // 击中僵尸并确认销毁的情况
 	}, 
 	Move: oPeaBullet.prototype.Move, // 代码复用
 	BeThown: function (Angle, Dis) { // 以 x正半轴为方向 y正半轴 Angle° 扔出速度为 Dis 的自己，计算 X、Y 坐标所需要的速度
@@ -274,7 +294,7 @@ oThrownBullet = InheritO(oNormalBullet, { // 适用于单目标打击的投手�
 	}, 
 	Die: function (Reason) { // 模块化
 		let self = this, O = self, ID = self["ID"] + "_Splash", Ele;
-		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], O["Border"][1])) return self["Destroy"]();
+		if (Reason == "Out_Limit" && !O["CheckOutLimit"](O["Pos"][1], [oHL.QueryPoint(O["Pos"][0]), O["Border"][1][1]])) return self["Destroy"]();
 		if (Reason == "Out_Limit") self["NormalHitAudio"] && PlayAudio(self["NormalHitAudio"]); // 如果是出界导致的，播放音频
 		if (self["SplashGif"] != null) Ele = NewImg(ID, self["PicArr"][self["SplashGif"]] + "?" + Math.random(), "left:" + (self["ImgPos"][0] - self["SplashMoveLeft"]) + "px; top:" + (self["ImgPos"][1] - self["SplashMoveTop"]) + "px; z-index:" + self["zIndex"] + "; width:46px; height:60px; position:absolute;", EDPZ);
 		oSym["addTask"](self["SplashTime"], ClearChild, [Ele]), self["Destroy"]();
@@ -282,7 +302,7 @@ oThrownBullet = InheritO(oNormalBullet, { // 适用于单目标打击的投手�
 
 	// 根据点与点的关系计算出速度以及加速度
 	GetZombieFunc: function (TaskZombie, MaxY, Time) { // 计算从这里到目标僵尸，经过最大值 MaxY 对应的函数解析式
-		let self = this, X = self["ImgPos"][0], Y = self["ImgPos"][1];
+		let self = this, X = self["ImgPos"][0], Y = self["ImgPos"][1] + self["HalfHei"] / 2;
 		if (TaskZombie == null) return [-0.002, 0.002 * 700];
 		let Z = TaskZombie, Head = Z.HeadTargetPosition, HeadPos = Head[Z.isAttacking] || Head[0]; // 僵尸和僵尸头部坐标
 		let zSpeed = !TaskZombie.isAttacking * TaskZombie.Speed * (TaskZombie.WalkDirection == 0 ? 1 : -1); // 是否攻击 * 速度 * 方向
@@ -302,7 +322,7 @@ oThrownBullet = InheritO(oNormalBullet, { // 适用于单目标打击的投手�
 				- X3 ^ 2 / 4Y2 * b ^ 2 + X3 * b - Y3 = 0
 				可知 a = X3 ^ 2 / 4Y2, b = X3, c = -Y3 根据公式法求出结果
 			*/
-			let A = 0, B = 0, Y2 = MaxY, X3 = dX, Y3 = zY;
+			let A = 0, B = 0, Y2 = MaxY, X3 = dX, Y3 = zY, Xsgn = ((dX < 0) ? (-1) : (1)); X3 *= Xsgn;
 			let a = - X3 * X3 / 4 / Y2, b = X3, c = -Y3, dlt = Math.sqrt(b * b - 4 * a * c);
 			B = (- b - dlt) / (2 * a), A = - B * B / 4 / Y2;
 			return [A, B];

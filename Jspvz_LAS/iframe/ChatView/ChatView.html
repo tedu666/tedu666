@@ -53,7 +53,7 @@
 		GetCommand: (Data) => { let Arr = Data["toString"]()["split"]("||"); oCommand[Arr[0]] && oCommand[Arr[0]](Arr); OwnCommand["LogData"](Data); },
 		DecodeStr: (Str, l = Infinity) => unescape(Str)["substr"](0, l)["replace"](/</g, "&lt;")["replace"](/>/g, "&gt;"), 
 		MakeNewChat: (Name = "", Val = "", Col = "#005", System = false) => { // 制造新消息
-			let ret = NewEle(0, 'div', 'white-space:pre-wrap;margin-top:5px;float:left;position:relative;width:100%;min-height:20px;line-height:17.5px;word-break:break-all;', {'innerHTML': '<span style="font-family:幼圆;color:#005">' + (new Date()).format("hh:mm:ss") + '</span> <span style="font-weight:bold;color:' + Col + '">' + Name + ':</span> ' + Val}, $("dbody"));
+			let ret = NewEle(0, 'div', 'white-space: pre-wrap; margin-top: 5px; float: left; position: relative; width: 100%; min-height: 20px; line-height: 17.5px; word-break: break-all; line-break: anywhere; position: relative; width: calc(100% - 1em); text-indent: -1em;margin-left: 1em;', {'innerHTML': '<span style="font-family:幼圆;color:#005">' + (new Date()).format("hh:mm:ss") + '</span> <span style="font-weight:bold;color:' + Col + '">' + Name + ':</span> ' + Val}, $("dbody"));
 			$("dbody")["scrollTop"] = 1e10; // 滚动到底部，待改
 			return ret;
 		}, 

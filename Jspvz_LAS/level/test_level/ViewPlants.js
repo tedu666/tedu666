@@ -49,7 +49,7 @@
 			for(i in oS.TaskPlants){
 				let AlphaPlants = oS.TaskPlants[i],j = AlphaPlants.i.prototype,x = AlphaPlants.l[0],y = AlphaPlants.l[1];
 				oS.TaskPlantsMap[[x,y,AlphaPlants.i.prototype.PKind]] = AlphaPlants.i;
-				NewImg("PlantAlpha_"+y+"_"+x+"_"+AlphaPlants.i.prototype.PKind, j.PicArr[j.StaticGif], "visibility:visible;filter:alpha(opacity=40);opacity:0.4;z-index:19;left:" + (GetX(x) - j.width/2) + "px;top:" + (GetY(y) - j.height - 10) + "px;" , EDAll);
+				NewImg("PlantAlpha_"+y+"_"+x+"_"+AlphaPlants.i.prototype.PKind, j.PicArr[j.StaticGif], "visibility:visible;filter:alpha(opacity=40);opacity:0.4;z-index:19;left:" + (GetX(x) - j.width/2) + "px;top:" + (GetY(y) - j.height - 10) + "px;" , EDMove);
 			};
 			LevelDefFuc();
 			for(item in oS.AutoSelectCardName){

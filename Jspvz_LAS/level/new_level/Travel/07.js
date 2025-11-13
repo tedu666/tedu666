@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_3.png",
 	LevelName: "EX-7 追赶者",
 	LvlEName: "EX_New_Pool_7",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Nice_Graveyard",
 	CanSelectCard: 1,
 	MusicMode: 1,
 	SunNum: 450,
@@ -13,7 +13,7 @@ oS.Init({
     Coord: 200,
 	LF: [0, 1, 1, 2, 2, 1, 1],
 	Is_End: false,
-	LevelProduce: "泳池关，目标：	1.必须在 25 分钟内通关; 2.阳光数不得大于 1000; 3.游戏结束时阳光数不得低于 750; 4.不得拥有超过 15 株植物;\n特性: 这一波僵尸不打完几乎不会出现下一波。",
+	LevelProduce: "泳池关，目标：	1.必须在 20 分钟内通关; 2.阳光数不得大于 1000; 3.游戏结束时阳光数不得低于 750; 4.不得拥有超过 15 株植物;\n特性: 这一波僵尸不打完几乎不会出现下一波。",
 	LargeWaveFlag: {
 		10: $("imgFlag3"),
 		20: $("imgFlag2"),
@@ -28,13 +28,13 @@ oS.Init({
 		$("tGround").innerHTML = oS.GifHTML = '<img style="position:absolute;left:256px;top:266px;clip:rect(5px,720px,163px,5px);filter:alpha(opacity=1);opacity:1;" src="images/New_interface/pool.gif">';
 		NewEle("Div_TimeTask", "div", "display:none;z-index:5;top:10px; left:315px; position:absolute;width:355px;height:35px;background:#000000BB;border-radius:12.5px;opacity:1;cursor:pointer;", {onclick: function(){PauseGamesShowBlock();}}, EDMove);
 		NewEle("dTitle_Task", "span", "white-space:pre;display:block;z-index:127;position:absolute;left:12.5px;top:6px;font-size:20px;font-weight:500;font-family:Regular,Briannetod,微软雅黑,Verdana,Tahoma;color:#FFF;pointer-events:none;opacity:1;", "", $("Div_TimeTask"));
-		SummonNewBlock("<font size=\"4\" style=\"line-height:2.25\">关卡目标: 1.必须在 25 分钟内通关<br>2.阳光数不得大于 1000<br>3.游戏结束时阳光数不得低于 750<br>4.不得拥有超过 15 株植物<br><br></font>", start_game);
+		SummonNewBlock("<font size=\"4\" style=\"line-height:2.25\">关卡目标: 1.必须在 20 分钟内通关<br>2.阳光数不得大于 1000<br>3.游戏结束时阳光数不得低于 750<br>4.不得拥有超过 15 株植物<br><br></font>", start_game);
 	},
 	InitLawnMower: function() {
-		CustomSpecial(oLawnCleaner_New, 1, -1);
-		CustomSpecial(oLawnCleaner_New, 2, -1);
-		CustomSpecial(oLawnCleaner_New, 5, -1);
-		CustomSpecial(oLawnCleaner_New, 6, -1);
+		CustomSpecial(oLawnCleaner_New, 1, -1), CustomSpecial(oLawnCleaner_New, 2, -1);
+		CustomSpecial(oLawnCleaner_New, 5, -1), CustomSpecial(oLawnCleaner_New, 6, -1);
+
+		for (let i = 1, j; i <= oS.R; ++i) j = oGd.$[i + "_-1_1"], j && oEf.Animate($(j.id), [{"left": "-100px"}, {"left": $(j.id).style.left + "px"}], 1.2, "ease-out");
 	},
 	Summon_Start_Func: function(){
 		let id, id2, j = oLilyPad.prototype, i = 1;
@@ -86,7 +86,7 @@ oS.Init({
 
 			oS.Summon_Start_Func();
 
-			NewEle("DivTeach", "div", "pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关目标！"}, EDMove);
+			NewEle("DivTeach", "div", "line-height:45px;pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关目标！"}, EDMove);
 			oSym.addTask(250, function() {ClearChild($("DivTeach"));}, []);
 		});
 	},
@@ -97,7 +97,7 @@ oS.Init({
 	FlagNum: 30,
 	FlagToSumNum: {
 		a1: [    1, 3, 5, 7,  9, 10, 13, 15, 16, 17, 18,  19, 20, 22,  24,  26,  27,  28,  29],
-		a2: [11, 5, 6, 8, 9, 39, 13, 17, 24, 30, 37, 46, 150, 59, 83, 109, 139, 160, 190, 600]
+		a2: [11, 5, 6, 8, 9, 39, 13, 17, 24, 30, 37, 46, 150, 59, 83, 109, 139, 150, 160, 300]
 	},
 	FlagToMonitor: {
 		9: [ShowLargeWave, 0],
@@ -132,7 +132,7 @@ oS.Init({
 		"Task_FlagEndSun": 750,
 		"Task_Sun": 1000,
 		"Task_Plant": 15,
-		"Task_Time": 25 * 60 * 100
+		"Task_Time": 20 * 60 * 100
 	},
 	DefFuc: (() => {
 		let fuc = (x) => {
@@ -161,6 +161,14 @@ oS.Init({
 			else func && func();
 		}, []);
 	},
+	SetArrBlockText: function (Arr, f, r1 = "点击开始游戏", r2 = "浏览下一页") {
+		let A = 0, len = Arr.length, Q = () => {
+			if (A == len) return f && f();
+			SummonNewBlock(Arr[A], () => {
+				++A, Q();
+			}, (A + 1 == len) ? r1 : r2);
+		}; Q(0);
+	}, 
 	SummonNewBlock: function(a, f, r) {
 		SetHidden($("dLoginDataHTML")), oSym.Stop();
 		$("dMsgFailed").innerHTML = a + '<p><p><span style="color:#15B70C">' + (r ? r : '点击开始游戏') +  '</span>';
@@ -174,7 +182,7 @@ oS.Init({
 	},
 	PauseGamesShowBlock: function() {
 		if (oSym.Timer == null) return false;
-		console.log("暂停了游戏"), AllAudioPaused(), PlayAudio("tap"), SummonNewBlock("<font size=\"4\" style=\"line-height:2.25\">关卡目标: 1.必须在 25 分钟内通关<br>2.阳光数不得大于 1000<br>3.游戏结束时阳光数不得低于 750<br>4.不得拥有超过 15 株植物<br><br></font>", AllAudioPauseCanceled, "点击继续游戏");
+		console.log("暂停了游戏"), AllAudioPaused(), PlayAudio("tap"), SummonNewBlock("<font size=\"4\" style=\"line-height:2.25\">关卡目标: 1.必须在 20 分钟内通关<br>2.阳光数不得大于 1000<br>3.游戏结束时阳光数不得低于 750<br>4.不得拥有超过 15 株植物<br><br></font>", AllAudioPauseCanceled, "点击继续游戏");
 	}
 });
 
@@ -183,7 +191,7 @@ oS.Init({
 /*
 追赶者
 关卡目标：
-	1.必须在 25 分钟内通关
+	1.必须在 20 分钟内通关
 	2.阳光数不得大于 1000
 	3.游戏结束时阳光数不得低于 750
 	4.不得拥有超过 15 株植物

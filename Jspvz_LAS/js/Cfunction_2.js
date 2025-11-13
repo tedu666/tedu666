@@ -40,21 +40,25 @@ var NormalLevelInit = function(){
 var Show_MINI_LIST = function(){
 	NormalLevelInit(), LevelList.nowpage = 1;
 	LevelList.Title = "迷 你 游 戏", LevelList.Title2 = "小游戏";
-	LevelList.push(GetLevelTable('new_level/survival_day', '生存模式（白天）', 'new_skin/Level_View/Survival_Day.png'));
 	LevelList.push(GetLevelTable('new_level/PovertyOfTheSoil_2', '贫瘠之地2', 'new_skin/Level_View/PovertyOfTheSoil_2.png'));
 	LevelList.push(GetLevelTable('new_level/ViewStar', '观星', 'new_skin/Level_View/ViewStar.jpg'));
 	LevelList.push(GetLevelTable('new_level/CardRain', '种子雨', 'new_skin/Level_View/CardRain.png'));
 	LevelList.push(GetLevelTable('new_level/LayDown', '你敢放下它么', 'new_skin/Level_View/LayDwon.png'));
+	LevelList.push(GetLevelTable('new_level/ReGravity', '力压的常寻乎超', 'new_skin/Level_View/ReGravity.png'));
 
 	Set_Next_Page_Minigames(0, true);
 };
 
 var NormalBetaLevelInit = function(){
+	BetaLevelList.push(GetLevelTable('test_level/survival/survival_day', '生存模式（白天）', 'new_skin/Level_View/Survival_Day.png'));
+	BetaLevelList.push(GetLevelTable('test_level/survival/survival_pool_inf', '泳池无尽', 'new_skin/Level_View/Survival_Day.png'));
 	BetaLevelList.push(GetLevelTable('test_level/ViewPlants', '不靠谱的阵形', 'new_skin/Level_View/ViewPlants.png'));
 	BetaLevelList.push(GetLevelTable('test_level/CardRemake', '卡槽轮班', 'new_skin/Level_View/CardRemake.png'));
 	BetaLevelList.push(GetLevelTable('test_level/Protect_Brain', '超乎寻常的战役', 'new_skin/Level_View/Protect_Brain.png'));
 	BetaLevelList.push(GetLevelTable('test_level/third_party_level/HELP', '*绝望*', 'new_skin/Level_View/Third_ZombossW.png')); // 第三方关卡 - 白鹤亮翅提供
 	BetaLevelList.push(GetLevelTable('test_level/Test', '子弹测试', 'new_skin/Level_View/CardRain.png'));
+	BetaLevelList.push(GetLevelTable('test_level/RoofTest', '屋顶测试', 'new_skin/Level_View/CardRain.png'));
+	BetaLevelList.push(GetLevelTable('test_level/Th14Test', '辉针城测试', 'new_skin/Level_View/ReGravity.png'));
 };
 
 var Init_Beta_Level = function(){
@@ -120,6 +124,8 @@ var NormalLevelInit_RIDDLE = function(){
 	RiddleLevelList.push(GetLevelTable('new_level/ImZombie/ImZombie_Water_1', '清爽夏日', 'images/interface/woshijiangshi.png'));
 	RiddleLevelList.push(GetLevelTable('new_level/ImZombie/ImZombie_Water_2', '巡航导弹', 'images/interface/woshijiangshi.png'));
 	RiddleLevelList.push(GetLevelTable('new_level/ImZombie/ImZombie_Water_3', '泳池奇遇', 'images/interface/woshijiangshi.png'));
+	RiddleLevelList.push(GetLevelTable('new_level/ImZombie/ImZombie_Water_4', '盲盒', 'images/interface/woshijiangshi.png'));
+	RiddleLevelList.push(GetLevelTable('new_level/ImZombie/ImZombie_Th14_1', '避高就低', 'new_skin/Level_View/ReGravity.png'));
 //	RiddleLevelList.push(GetNullTable(), GetNullTable(), GetNullTable());
 };
 
@@ -273,6 +279,7 @@ var oLocalVar = { // 处理所有关卡的变量的
 	}, 
 	SaveVar: function () {
 		let self = this, Name = self.StoreName, Var = self.LevelVars;
+		for (let O in Var) Var[O] = Object.assign((Store.get(Name) ?? {})[O] ?? {}, Var[O]);
 		Store.set(Name, Object.assign(Store.get(Name) ?? {}, Var));
 	}
 };
@@ -282,10 +289,50 @@ var Unlock_TRLevel = async () => { // 一键解锁所有拓展关关卡
 	let Result = await __AddConfirmPromise("输入 “EXUnlock” 确认解锁", "EXUnlock", $("dSurfaceBack"));
 	if (!Result) return; // 如果不确认，则返回
 
-	for (let Lvl = 1; Lvl <= 10; ++Lvl) Win_Travel(Lvl, Lvl + 1); // 解锁关卡到最新关
+	for (let Lvl = 1; Lvl <= 12; ++Lvl) Win_Travel(Lvl, Lvl + 1); // 解锁关卡到最新关
 
-	let Ex10Data = oLocalVar.GetObj("EX_End_Pool_10"); // 获取 EX10 数据并解锁
-	Ex10Data["MaxPlay"] = 3, Ex10Data["MaxVaseLvl"] = "10000000", Ex10Data["NowVaseLvl"] = "01";
+	let Ex10Data = oLocalVar.GetObj("EX_End_Pool_10"); Ex10Data["MaxPlay"] = 3, Ex10Data["MaxVaseLvl"] = "10000000", Ex10Data["NowVaseLvl"] = "01"; // 获取 EX10 数据并解锁
+	let Ex11Data = oLocalVar.GetObj("EX_Pool_11"); Ex11Data["MaxPlay"] = 2; // 获取 EX11 数据并解锁
+	let Ex12Data = oLocalVar.GetObj("EX_Pool_12"); Ex12Data["MaxPlay"] = 3; // 获取 EX12 数据并解锁
 
-	oLocalVar["SaveVar"]() // 保存
+	oLocalVar["SaveVar"](); // 保存
+};
+
+
+var oDataCollector = { // 负责统计游戏数据，并保存在本地
+	DataStoreName: "GameDataCollector", 
+	GetData: function (Key, NormalVal = 0) { // 获取某关键字数据
+		let self = oDataCollector, ret = oLocalVar.GetObj(self["DataStoreName"]);
+		return ret[Key] ??= NormalVal, oLocalVar.SaveVar(), ret[Key];
+	}, 
+	ModifyData: function (Key, Value) { // 修改某关键字数据
+		let self = oDataCollector, ret = oLocalVar.GetObj(self["DataStoreName"]);
+		return ret[Key] = Value, oLocalVar.SaveVar(), ret[Key];
+	}, 
+	DataList: {
+		"KilledZombie": function () {
+			let self = oDataCollector, Key = "KilledZombie";
+			oGT.On("ZombieDie", () => self.ModifyData(Key, self.GetData(Key) + 1));
+		}, 
+		"InjuredDamage": function () {
+			let self = oDataCollector, Key = "InjuredDamage";
+			oGT.On("ZombieInjured", (Z, d) => self.ModifyData(Key, self.GetData(Key) + d));
+		}, 
+		"EnterLevelNum": function () {
+			let self = oDataCollector, Key = "EnterLevelNum";
+			oGT.On("Enter-Level", () => self.ModifyData(Key, self.GetData(Key) + 1));
+		}, 
+		"ExitLevelNum": function () {
+			let self = oDataCollector, Key = "ExitLevelNum";
+			oGT.On("Exit-Level", () => self.ModifyData(Key, self.GetData(Key) + 1));
+		}, 
+		"PlantBirth": function() {
+			let self = oDataCollector, Key = "PlantBirth";
+			oGT.On("PlantBirth", () => self.ModifyData(Key, self.GetData(Key) + 1));			
+		}
+	}, 
+	InitCollector: function () {
+		let self = oDataCollector;
+		for (let o in self["DataList"]) self["DataList"][o]();
+	}
 };

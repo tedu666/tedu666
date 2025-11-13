@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_3.png",
 	LevelName: "EX-6 博弈者",
 	LvlEName: "EX_New_Pool_6",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Nice_Graveyard",
 	CanSelectCard: 1,
 	MusicMode: 1,
 	SunNum: 250,
@@ -63,7 +63,7 @@ oS.Init({
 
 			oS.Summon_Start_Func();
 
-			NewEle("DivTeach", "div", "pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关信息！"}, EDMove);
+			NewEle("DivTeach", "div", "line-height:45px;pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关信息！"}, EDMove);
 			oSym.addTask(250, function() {ClearChild($("DivTeach"));}, []);
 		});
 	},
@@ -93,16 +93,7 @@ oS.Init({
 		Win_Travel(6, 7);
 	}
 },{
-	GameLevelData: {
-		"Plants_Num": 0,
-		"Sum_Num": 0,
-		"Can_Use_Time": Infinity,
-		"Start_Time": 0,
-		"Task_FlagEndSun": 750,
-		"Task_Sun": 1000,
-		"Task_Plant": 15,
-		"Task_Time": 25 * 60 * 100
-	},
+	GameLevelData: {},
 	DefFuc: (() => {
 		let fuc = (x) => {
 			if (x > 0.5) return Math.sqrt(1 - Math.pow(2 * (x - 0.5), 2));
@@ -126,6 +117,14 @@ oS.Init({
 			else func && func();
 		}, []);
 	},
+	SetArrBlockText: function (Arr, f, r1 = "点击开始游戏", r2 = "浏览下一页") {
+		let A = 0, len = Arr.length, Q = () => {
+			if (A == len) return f && f();
+			SummonNewBlock(Arr[A], () => {
+				++A, Q();
+			}, (A + 1 == len) ? r1 : r2);
+		}; Q(0);
+	}, 
 	SummonNewBlock: function(a, f, r) {
 		SetHidden($("dLoginDataHTML")), oSym.Stop();
 		$("dMsgFailed").innerHTML = a + '<p><p><span style="color:#15B70C">' + (r ? r : '点击开始游戏') +  '</span>';
@@ -168,7 +167,7 @@ oS.Init({
 			while (Sum >= 0) o = Arz[Math.floor(Math.random() * Arz["length"])], Sum -= o.prototype.Lvl, retArr[retArr["length"]] = [o, Math.floor(1 + Math.random() * oS.R)];
 			return retArr;
 		};
-		let Normal_Bot = () => { // 整句游戏主要使用的 bot
+		let Normal_Bot = () => { // 整局游戏主要使用的 bot
 			if (Arg[1]["ArZ"]["length"] == 0) return []; // 没有可以出的怪，摆烂
 			let Strong = Get_Range_R_Strong(), StrMpSort = Strong.map((i, j) => [i, j]).sort((a, b) => (a[0] - b[0]) ? (a[0] - b[0]) : (Math.random() - 0.5)), Arz = Arg[1]["ArZ"]["concat"]().sort((a, b) => a.prototype.Lvl - b.prototype.Lvl); // 从小到大
 			let Sum = Arg[11], Len = Arz["length"], SliceLen = Len - 1, NowLvl = Arz[SliceLen].prototype.Lvl, ZArz2 = [], RZlen = 0, retArr = [], z, r, l, k = StrMpSort["length"] - 1; // 选择僵尸

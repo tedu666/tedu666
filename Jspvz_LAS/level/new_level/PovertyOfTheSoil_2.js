@@ -21,28 +21,30 @@ oS.Init({ // 该注释为了方便学习者快速阅读代码
 		oP.FlagZombies == 20 && oP.SetTimeoutTomZombie([oFootballZombie, oDancingZombie, oConeheadZombie, oBucketheadZombie]); // 20波
 		oP.FlagZombies >= 15 && oP.FlagZombies <= 19 && (Math.random() < 0.25) && oP.SetTimeoutTomZombie([oZombie, oZombie2, oZombie3, oConeheadZombie, oBucketheadZombie, oNewspaperZombie, oScreenDoorZombie, oDancingZombie, oPoleVaultingZombie]); // 随机出 14~20 的
 		oP.FlagZombies >= 11 && oP.FlagZombies <= 13 && (Math.random() < 0.1) && oP.SetTimeoutTomZombie([oZombie, oZombie2, oZombie3, oConeheadZombie, oNewspaperZombie, oScreenDoorZombie, oPoleVaultingZombie]); // 随机出 11~13 的
-		oP.FlagZombies == 10 && oP.SetTimeoutTomZombie([oZombie, oZombie2, oZombie3, oPoleVaultingZombie]); // 15波
+		oP.FlagZombies == 10 && oP.SetTimeoutTomZombie([oZombie, oZombie2, oZombie3, oZombie, oZombie2, oZombie3, oPoleVaultingZombie]); // 15波
+		if (oP.FlagZombies == 2) SummonZombie(oPoleVaultingZombie, 3, 11);
+		if (oP.FlagZombies == 4 || oP.FlagZombies == 7) SummonZombie(oFootballZombie, 3, 11);
 	},
 	StartGame: function() { // 开始游戏时的函数
-		AppearTombstones(1, 9, 40), StopMusic(), AllAudioStop(); // 升起墓碑，停止音乐
+		AppearTombstones(1, 1, 2), AppearTombstones(2, 9, 38), StopMusic(), AllAudioStop(); // 升起墓碑，停止音乐
 		SetVisible($("tdShovel"), $("dFlagMeter"), $("dTop")); // 显示铲子
 		oS.InitLawnMower(); // 重置小推车
 		PrepareGrowPlants(function() { // 开始游戏后执行的函数
 			oP.Monitor(oS.Monitor, oS.UserDefinedFlagFunc);
 			BeginCool(), PlayMusic(oS.StartGameMusic); // 开始冷却、放音乐
 			oS.DKind && AutoProduceSun(50); // 掉阳光
-			oSym.addTask(12000, function() { // 关卡开局难度极大，故 120 秒准备
+			oSym.addTask(13500, function() { // 关卡开局难度极大，故 135 秒准备
 				oP.AddZombiesFlag(), SetVisible($("dFlagMeterContent")); // 开始第一波
 			}, []);
 		});
 	}
 }, {
 	// AZ 是一个列表，用于存放出场僵尸的数据，列表里每一项均为列表，其作用是 [僵尸, 关卡预览显示数量, 第一次出场的波数, [一定会出场的波数列表]]，如 [oZombie, 5, 3, [1, 10, 20]] 会让僵尸在预览中出现 5 只，且仅在第三波以后出现，但是第 1、10、20 波会固定生成一只僵尸
-	AZ: [[oZombie, 2, 1], [oZombie2, 2, 1], [oZombie3, 2, 1], [oConeheadZombie, 2, 4], [oBucketheadZombie, 1, 4, [7]], [oNewspaperZombie, 1, 3], [oScreenDoorZombie, 1, 10, [1]], [oFootballZombie, 2, 16, [4, 7, 10]], [oDancingZombie, 2, 19, [10]], [oPoleVaultingZombie, 1, 15, [2]]],
+	AZ: [[oZombie, 2, 1], [oZombie2, 2, 1], [oZombie3, 2, 1], [oConeheadZombie, 2, 4], [oBucketheadZombie, 1, 4, [7]], [oNewspaperZombie, 1, 3], [oScreenDoorZombie, 1, 10, [1]], [oFootballZombie, 2, 16, [10]], [oDancingZombie, 2, 19, [10]], [oPoleVaultingZombie, 1, 15]],
 	FlagNum: 30, // 本关波数
 	FlagToSumNum: { // a1与a2对应，但是a1对应的波数非理解我们理解的波数，要 -1
-		a1: [   3, 6, 8,  9, 10, 13, 15, 17, 19, 20, 23, 25, 27,  29],  // $SSml的特性，为了方便阅读采取这样的对齐
-		a2: [1, 2, 5, 7, 30, 10, 13, 16, 19, 52, 23, 27, 40, 53, 101] // 出怪价值
+		a1: [   2, 3, 4, 8,  9, 10, 13, 15, 17, 19, 20, 23, 25, 27,  29],  // $SSml的特性，为了方便阅读采取这样的对齐
+		a2: [1, 0, 0, 2, 7, 30, 10, 13, 16, 19, 52, 23, 27, 40, 53, 101] // 出怪价值
 	},
 	FlagToMonitor: { // 大波函数
 		9: [ShowLargeWave, 0],
@@ -55,4 +57,11 @@ oS.Init({ // 该注释为了方便学习者快速阅读代码
 		});
 		NewImg("PointerUD", "images/interface/PointerDown.gif", "top:185px;left:51%", EDAll); // 箭头
 	}
-}, {}); // 兼容 IE 是件大活
+}, {
+	// 僵尸obj，行，列
+	SummonZombie: function (id, R, C) {  
+		var a, e = Math.min(Math.max(R, 1), oS.R), b = Math.min(Math.max(C, -2), 13);
+		asyncInnerHTML((a = new id).CustomBirth(e, b, 1, "auto"), function(n, m) { EDPZ.appendChild(n); m.Birth(); }, a);
+		return ++oP.NumZombies, a; // 返回僵尸数据
+	}
+}); // 兼容 IE 是件大活

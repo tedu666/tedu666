@@ -14,17 +14,17 @@ var oDiggerZombie = InheritO(OrnNoneZombies, {
 		f.EleShadow = c.firstChild, f.EleBody = c.childNodes[1], SetHidden(f.EleShadow);
 		e ? oSym.addTask(e, function(h, g) {var i = $Z[h]; i && (i.FreeSetbodyTime = 0, SetBlock(g));}, [d, c]) : SetBlock(c);
 	},
-	HeadTargetPosition: [{x: 42, y: 146}, {x: 40, y: 147}],
+	HeadTargetPosition: [{x: 62, y: 46}, {x: 60, y: 47}],
 	getShadow: function(a) {
 		return "left:" + a.beAttackedPointL + "px;top:" + (a.height - 20) + "px"
 	},
 	PicArr: (function() {
 		var a = "images/Zombies/Diggerzombie/";
-		return ["images/Card/Zombies/Diggerzombie.png", a + "0.gif", a + "DiggerZombie.gif", a + "Walk1.gif", a + "Walk2.gif", a + "Walk3.gif", a + "Attack1.gif", a + "Attack2.gif", a + "Head.gif" + $Random, a + "Die.gif" + $Random, a + "Up.gif" + $Random, a + "Down.gif" + $Random, a + "BoomDie.gif"]
+		return ["images/Card/Zombies/Diggerzombie.png", a + "0.gif", a + "DiggerZombie.gif", a + "Walk1.gif", a + "Walk2.gif", a + "Walk3.gif", a + "Attack1.gif", a + "Attack2.gif", a + "Head.gif" + $Random, a + "Die.gif" + $Random, a + "Up.gif" + $Random, a + "Down.gif" + $Random, a + "BoomDie.gif" + $Random]
 	} ()),
-	AudioArr: ["zombie_entering_water"],
+	AudioArr: ["dirt_rise"],
 	Go_Up: function(a, WD) { // WD: 方向，1右0左
-		a.beAttacked && (a.WalkDirection = WD, PlayAudio("zombie_entering_water"), a.Altitude = 4, SetVisible(a.EleShadow), a.EleBody.src = a.PicArr[a.UpGif] + Math.random(), a.OSpeed = a.Speed = 0), a.ChkActs = function() {return 1;}; // 跳起来
+		a.beAttacked && (a.WalkDirection = WD, PlayAudio("dirt_rise"), a.Altitude = 4, SetVisible(a.EleShadow), a.EleBody.src = a.PicArr[a.UpGif] + Math.random(), a.OSpeed = a.Speed = 0), a.ChkActs = function() {return 1;}; // 跳起来
 		oSym.addTask(100, function(c, b) {
 			WD ? (b.AttackGif = b.AttackGif_Up0, b.AttackedRX += 30, b.beAttackedPointL = 70, b.beAttackedPointR = 130, b.Ele.lastChild.style.left = "40px", b.JudgeAttack = b.JudgeAttack_Up1) : (b.AttackGif = b.AttackGif_Up1); // GIF
 			$Z[c] && b.beAttacked && (WD && b.ExchangeLR(b, WD), b.Altitude = 1, b.isAttacking = 0, b.EleBody.src = b.PicArr[b.NormalGif = b.DownGif]); // 眩晕
@@ -34,11 +34,10 @@ var oDiggerZombie = InheritO(OrnNoneZombies, {
 		}, [a.id, a]);
 	},
 	ChkActs: function(f, d, g, c) { // 到了左边自己钻出来
-		if(f.Altitude == 0 && f.AttackedRX < GetX(1) - 15) return f.Go_Up(f, 1), 1;
-
+		if (f.Altitude == 0 && f.AttackedRX < GetX(1) - 15) return f.Go_Up(f, 1), 1;
 		var b, a, e; ! (f.FreeFreezeTime || f.FreeSetbodyTime) ? (f.beAttacked && !f.isAttacking && f.JudgeAttack_Dig(), !f.isAttacking ? ((a = f.AttackedRX -= (b = f.Speed)) < -50 ? (g.splice(c, 1), f.DisappearDie(), e = 0) : (a < 100 && !f.PointZombie && (f.PointZombie = 1, !oS.CardKind && (StopMusic(), PlayAudio("losemusic", false)), f.ChangeR({
 			R: d, ar: [oS.R - 1], CustomTop: 400 - f.height + f.GetDY()
-		})), f.ZX = f.AttackedLX -= b, f.Ele.style.left = Math.floor(f.X -= b) + "px", e = 1)) : e = 1) : e = 1;
+		})), f.ZX = f.AttackedLX -= b, f.Ele.style.left = Math.floor(f.X -= b) + "px", f.PHeight = GetRound(f.ZX), f.Ele.style.top = (f.pixelTop = f.ActualTop - f.PHeight) + "px", e = 1)) : e = 1) : e = 1;
 		return e
 	},
 	CanDig: {"oPotatoMine": true},

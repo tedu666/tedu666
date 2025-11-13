@@ -90,3 +90,68 @@ var oEffect = NewF( //画布效果，effect
 		return this["__Init__"](Pt, HTML_Node), this;
 	}
 );
+
+
+var oScreen = {
+	Width: 900, FightingLeft: 0, 
+	Init: function () {
+		let self = this;
+		self.Width = 900, self.FightingLeft = 0;
+		EDAll["style"]["width"] = self.Width + "px";
+		EDAll["style"]["margin-left"] = (-self.Width / 2) + "px";
+		$("dAnnouncement")["style"]["width"] = (self.Width - 20) + "px";
+		$("dAnnouncement")["style"]["margin-left"] = (-self.Width / 2) + "px";
+	}, 
+	// 用于处理变宽
+	MakeWidth: function (StartTime, VirtuallyEle, Ver) {
+		let self = this, TimeDouble = 10 / oSym.TimeStep * oSym.NowStep;
+		let STime = StartTime ?? oSym.SysTime(), NowTime = oSym.SysTime(), K = (NowTime - STime) * TimeDouble;
+		let Duration = 1000, MinWidth = 900, MaxWidth = 1000, FightingLeft = 55;
+
+		let T = K / Duration, Percentage = (T < 0.5) ? (4 * T * T * T) : ((T - 1) * (2 * T - 2) * (2 * T - 2) + 1);
+		if (StartTime == null) {
+			self.Init(), Ver ??= oEf.NowVersion;
+			EDPZ.style.left = EDMove.style.left = "55px";
+			$("tGround").style.left = "-60px";
+			$("dCardList").style.left = "55px";
+			$("dTop").style.left = "160px";
+
+		}
+		if (Ver != oEf.NowVersion) return;
+
+		EDAll.scrollLeft = 55 - 55 * Percentage;
+		$("dCardList").style.left = (55 - 55 * Percentage) + "px";
+		$("dTop").style.left = (160 - 55 * Percentage) + "px";
+
+		if (K < Duration) { 
+			if (Percentage >= 0) {
+				EDAll["style"]["width"] = (MinWidth + (MaxWidth - MinWidth) * Percentage) + "px";
+				EDAll["style"]["margin-left"] = -((MinWidth + (MaxWidth - MinWidth) * Percentage) / 2) + "px";
+				$("dAnnouncement")["style"]["width"] = (MinWidth + (MaxWidth - MinWidth) * Percentage - 20) + "px";
+				$("dAnnouncement")["style"]["margin-left"] = -((MinWidth + (MaxWidth - MinWidth) * Percentage) / 2) + "px";
+			}
+			requestAnimationFrame(() => { self.MakeWidth(STime, VirtuallyEle, Ver); });
+		} else {
+			EDAll.scrollLeft = 0, $("dCardList").style.left = "0px", $("dTop").style.left = "105px";
+			self.Width = MaxWidth, self.FightingLeft = FightingLeft, EDAlloffsetLeft = EDAll.offsetLeft;
+		}
+	}, 
+	EasyMakeWidth: function (MaxWidth, Duration, Obj = {}) {
+		let { StartTime, VirtuallyEle, Ver } = Obj;
+		let self = this, TimeDouble = 10 / oSym.TimeStep * oSym.NowStep, MinWidth = 900;
+		let STime = StartTime ?? oSym.SysTime(), NowTime = oSym.SysTime(), K = (NowTime - STime) * TimeDouble;
+		let T = K / Duration, Percentage = (T < 0.5) ? (4 * T * T * T) : ((T - 1) * (2 * T - 2) * (2 * T - 2) + 1);
+		if (StartTime == null) self.Init(), Ver ??= oEf.NowVersion;
+		if (Ver != oEf.NowVersion) return;
+		if (K < Duration) { 
+			if (Percentage >= 0) {
+				EDAll["style"]["width"] = (MinWidth + (MaxWidth - MinWidth) * Percentage) + "px";
+				EDAll["style"]["margin-left"] = -((MinWidth + (MaxWidth - MinWidth) * Percentage) / 2) + "px";
+				$("dAnnouncement")["style"]["width"] = (MinWidth + (MaxWidth - MinWidth) * Percentage - 20) + "px";
+				$("dAnnouncement")["style"]["margin-left"] = -((MinWidth + (MaxWidth - MinWidth) * Percentage) / 2) + "px";
+			}
+			requestAnimationFrame(() => { self.EasyMakeWidth(MaxWidth, Duration, {"StartTime": STime, "VirtuallyEle": VirtuallyEle, "Ver": Ver}); });
+		} else EDAll.scrollLeft = 0, self.Width = MaxWidth;
+	}, 
+
+};

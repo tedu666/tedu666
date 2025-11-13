@@ -1,14 +1,16 @@
 // 选项 SelectModal("System/Config")
 oS.Init({
+	ExitReload: false, LvlClearFunc: () => (oS.ExitReload && location["reload"]()), 
 	PicArr: ["new_skin/Images/InterFace/Travel_Background.png"],
 	backgroundImage: "new_skin/Images/InterFace/Travel_Background.png",
-	// LoadMusic: "pure_snows", StartGameMusic: "pure_snows",
+	// LoadMusic: "Pure_Snows", StartGameMusic: "Pure_Snows",
 	LoadAccess: function() {
 		let Staff = oS["Staff_HTML"]["join"]("");
 		$("tGround")["style"] = "background:url(new_skin/Images/InterFace/Travel_Background.png) no-repeat;left:0px;top:-100px;width:900px;height:730px;background-size:100% 100%;visibility:visible;", SetVisible($("dMenu")); // 背景图片、暂停按钮
 		NewEle("dStaff_Block", "div", "visibility:visible;height:100%;width:100%;z-index:100;display:block;overflow:auto;white-space:pre;", {"className": "WindowFrame Hidden_Container Not_Chose"}, EDAll); // pointer-events:none;
+		NewEle("DivPrompt", "div", "position:absolute;z-index:110;left:20px;top:560px;font-size:25px;font-family:Regular;color:rgb(255,255,255);white-space:pre;border-radius:8.5px;background:rgba(0,0,0,0.5);pointer-events:none;", {}, EDAll);
 		NewEle("dStaff_HTML", "div", "line-height:1;text-align:center;color:#FFFFFF;font-size:15px;font-family:RanTian,Regular,Briannetod,微软雅黑,Verdana,Tahoma;-webkit-text-stroke-width:0px;-webkit-text-stroke-color:#000000;word-break:break-all;white-space:pre;tab-size:1;", {"innerHTML": Staff}, $("dStaff_Block"));
-		InitOnclick(), AllAudioStop(), PlayMusic(oS.LoadMusic = "pure_snows");
+		InitOnclick(), AllAudioStop(), PlayMusic(oS.LoadMusic = "Pure_Snows");
 	},
 	Staff_HTML: [
 		'<!-- 样式 -->',
@@ -25,6 +27,23 @@ oS.Init({
 		'<input id="dDownLdSaves" type="button" value="下载存档" class="ButtonStyle" style="float:left;position:absolute;left:175px;top:650px;">', 
 		'<input id="dUpLoadSaves" type="button" value="读取存档" class="ButtonStyle" style="float:left;position:absolute;left:350px;top:650px;">', 
 		'<input id="dDeleteSaves" type="button" value="清空存档" class="ButtonStyle" style="float:left;position:absolute;left:525px;top:650px;color:#FF0000;">', 
+
+		'<div id="dBulletSettingDiv" style="position:absolute;left:35px;top:745px;font-size:25px;font-family:Regular;color:rgb(255,255,255);white-space:pre;">子弹设置: </div>', 
+		'<div style="position:absolute;left:165px;top:745px;font-size:26px;font-family:Regular;color:rgb(255,255,255);white-space:pre;-webkit-text-stroke-width:0.5px;">1.显示模式: </div>', 
+		'<label style="position:absolute;left:305px;top:745px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dBulletShowChoseB0" type="radio" name="BulletShowStyle" value="Canvas" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> Canvas (最快) </label>', 
+		'<label style="position:absolute;left:490px;top:745px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dBulletShowChoseB1" type="radio" name="BulletShowStyle" value="Dom" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> Dom (较慢) </label>', 
+		'<label style="position:absolute;left:655px;top:745px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dBulletShowChoseB2" type="radio" name="BulletShowStyle" value="Animate" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> Animate (最慢) </label>', 
+		'<div style="position:absolute;left:165px;top:795px;font-size:26px;font-family:Regular;color:rgb(255,255,255);white-space:pre;-webkit-text-stroke-width:0.5px;">2.画布设置: </div>', 
+		'<label style="position:absolute;left:315px;top:795px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dBulletCanvasTypeChoseB0" type="radio" name="BulletCanvasType" value="All" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> 多层画布 </label>', 
+		'<label style="position:absolute;left:470px;top:795px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dBulletCanvasTypeChoseB1" type="radio" name="BulletCanvasType" value="Only" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> 单层画布 </label>', 
+
+		'<div id="dAudioSettingDiv" style="position:absolute;left:35px;top:945px;font-size:25px;font-family:Regular;color:rgb(255,255,255);white-space:pre;">音频设置: </div>', 
+		'<div style="position:absolute;left:165px;top:945px;font-size:26px;font-family:Regular;color:rgb(255,255,255);white-space:pre;-webkit-text-stroke-width:0.5px;">1.音频播放总开关: </div>', 
+		'<label style="position:absolute;left:385px;top:945px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dAudioPlayChoseB0" type="radio" name="AudioPlayStyle" value="On" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> 正常播放 (较慢) </label>', 
+		'<label style="position:absolute;left:615px;top:945px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dAudioPlayChoseB1" type="radio" name="AudioPlayStyle" value="Off" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> 强制静音 (较快) </label>', 
+		'<div style="position:absolute;left:165px;top:995px;font-size:26px;font-family:Regular;color:rgb(255,255,255);white-space:pre;-webkit-text-stroke-width:0.5px;">2.本地音乐播放模式: </div>', 
+		'<label style="position:absolute;left:415px;top:995px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dAudioHTML5ChoseB0" type="radio" name="AudioHTML5Style" value="true" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> HTML5 (较好) </label>', 
+		'<label style="position:absolute;left:600px;top:995px;font-size:25px;font-family:Regular;color:rgb(250,250,250);white-space:pre;"><input id="dAudioHTML5ChoseB1" type="radio" name="AudioHTML5Style" value="false" onchange="" style="transform:scale(1.4);accent-color:#FF0066;"> Webaudio (较差) </label>', 
 
 		// '<table border="0" cellspacing="0" cellpadding="0" style="position: absolute; line-height: 30px; font-size: 12px; text-align: center; border-radius: 12.5px; overflow: hidden; left: 15px; top: 85px; height: 500px; width: 210px;"><tbody><tr style="color: rgb(0, 102, 0); font-weight: bold; height: 40px;"><td width="100%" colspan="3" style="font-size: 20px; font-family: Regular; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255);">主动技能</td></tr><tr style="height: 2px; background-color: rgb(255, 255, 255);"><td colspan="3"></td></tr><tr style="color: rgb(0, 102, 0); font-weight: bold;"><td onclick="CopyText(this[&quot;innerText&quot;])" style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 15%;"><input type="radio" name="主动技能" value="1" style="width: 15px; height: 15px;"></td><td style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 80%;"><a style="font-size: 25px; line-height: 1.5; word-break: break-all; font-family: 楷体;">乱葬岗</a><br><a style="font-size: 15px; line-height: 1.5; word-break: break-all; font-family: 楷体;">使其余玩家在 6-9 列<br>间生长 12 格墓碑</a></td><td style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 5%;"></td></tr><tr style="color: rgb(0, 102, 0); font-weight: bold;"><td onclick="CopyText(this[&quot;innerText&quot;])" style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 15%;"><input type="radio" name="主动技能" value="1" style="width: 15px; height: 15px;"></td><td style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 80%;"><a style="font-size: 25px; line-height: 1.5; word-break: break-all; font-family: 楷体;">天翻地覆</a><br><a style="font-size: 15px; line-height: 1.5; word-break: break-all; font-family: 楷体;">使其余玩家的屏幕<br>每5秒旋转180度<br>（共旋转10次）</a></td><td style="font-size: 15px; font-family: 楷体, 宋体, 黑体; text-align: center; background: rgba(0, 0, 0, 0.733); color: rgb(255, 255, 255); width: 5%;"></td></tr></tbody></table>', 
 
@@ -52,8 +71,8 @@ oS.Init({
 		'<!-- 音乐列表，可以点击音乐播放 -->',
 		'<a style="font-size:55px;-webkit-text-stroke-width:2px;">本地音乐列表</a><br><br>',
 		'<a style="font-size:25px;line-height:1.25;">原版植物大战僵尸音乐/音效</a><br> <!-- 本地音乐是jspvz自带的 -->',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'pure_snows\')">pure snows ~  ——  水月陵</a><br>',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'nice_graveyard\')">素敵な墓場で暮しましょ  ——  上海アリス幻樂団</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Pure_Snows\')">pure snows ~  ——  水月陵</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Nice_Graveyard\')">素敵な墓場で暮しましょ  ——  上海アリス幻樂団</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Glorious_Morning\')">Glorious Morning  ——  Waterflame</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'True_Admin\')">聖徳伝説 ～ True Administrator  ——  上海アリス幻樂団</a><br>',
 		'<a style="font-size:200px;"><br></a> <!-- 大跨度 -->',
@@ -100,6 +119,41 @@ oS.Init({
 				if (Result) UpLoadSaves({}), location["reload"]();
 			});
 		};
+
+		// Bullet Setting
+		{ 
+			let BulletEle = { "Canvas": "dBulletShowChoseB0", "Dom": "dBulletShowChoseB1", "Animate": "dBulletShowChoseB2", "default": "ERROR" };
+			let EleName = $SEql(Store.get("__JSPVZ_KAC_BulletShowMode_"), BulletEle);
+			if (EleName == "ERROR") Store.set("__JSPVZ_KAC_BulletShowMode_", "Canvas"), EleName = "dBulletShowChoseB0";
+			$(EleName).checked = true;
+			$("dBulletShowChoseB0").onchange = function () { Store.set("__JSPVZ_KAC_BulletShowMode_", this.value), SetReload(); };
+			$("dBulletShowChoseB1").onchange = function () { Store.set("__JSPVZ_KAC_BulletShowMode_", this.value), SetReload(); };
+			$("dBulletShowChoseB2").onchange = function () { Store.set("__JSPVZ_KAC_BulletShowMode_", this.value), SetReload(); };
+		}
+		{
+			let BulletEle = { "All": "dBulletCanvasTypeChoseB0", "Only": "dBulletCanvasTypeChoseB1", "default": "ERROR" };
+			let EleName = $SEql(Store.get("__JSPVZ_KAC_BulletCanvasStyle_"), BulletEle);
+			if (EleName == "ERROR") Store.set("__JSPVZ_KAC_BulletCanvasStyle_", "All"), EleName = "dBulletCanvasTypeChoseB0";
+			$(EleName).checked = true;
+			$("dBulletCanvasTypeChoseB0").onchange = function () { Store.set("__JSPVZ_KAC_BulletCanvasStyle_", this.value), SetReload(); };
+			$("dBulletCanvasTypeChoseB1").onchange = function () { Store.set("__JSPVZ_KAC_BulletCanvasStyle_", this.value), SetReload(); };
+		}
+		{
+			let AudioEle = { "On": "dAudioPlayChoseB0", "Off": "dAudioPlayChoseB1", "default": "ERROR" };
+			let EleName = $SEql(Store.get("__JSPVZ_KAC_ProhibitAudio_"), AudioEle);
+			if (EleName == "ERROR") Store.set("__JSPVZ_KAC_ProhibitAudio_", false), EleName = "dAudioPlayChoseB0";
+			$(EleName).checked = true;
+			$("dAudioPlayChoseB0").onchange = function () { Store.set("__JSPVZ_KAC_ProhibitAudio_", this.value), SetReload(); };
+			$("dAudioPlayChoseB1").onchange = function () { Store.set("__JSPVZ_KAC_ProhibitAudio_", this.value), SetReload(); };
+		}
+		{
+			let AudioEle = { "true": "dAudioHTML5ChoseB0", "false": "dAudioHTML5ChoseB1", "default": "ERROR" };
+			let EleName = $SEql(Store.get("__JSPVZ_KAC_LocalHTML5Audio_"), AudioEle);
+			if (EleName == "ERROR") Store.set("__JSPVZ_KAC_LocalHTML5Audio_", false), EleName = "dAudioHTML5ChoseB0";
+			$(EleName).checked = true;
+			$("dAudioHTML5ChoseB0").onchange = function () { Store.set("__JSPVZ_KAC_LocalHTML5Audio_", this.value), SetReload(); };
+			$("dAudioHTML5ChoseB1").onchange = function () { Store.set("__JSPVZ_KAC_LocalHTML5Audio_", this.value), SetReload(); };
+		}
 	}, 
 	AddConfirm: (TEXT = "输入 “JSPVZ-LAS” 确认删除", Value = "JSPVZ-LAS", CallBack = () => {}) => { // 在游戏内显示一个输入框来让用户确认重大消息
 		let DivA = NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:240", 0, EDAll);
@@ -111,5 +165,10 @@ oS.Init({
 		if (Value === "") SetHidden(dConfirmInput);
 		dConfirmAccept["onclick"] = dConfirmAccept["click"] = () => { if (dConfirmInput["value"] == Value) ClearChild(dConfirm, DivA), CallBack(true); };
 		dConfirmCancel["onclick"] = dConfirmCancel["click"] = () => { ClearChild(dConfirm, DivA), CallBack(false); };
+	}, 
+	SetReload: () => {
+		oS.ExitReload = true; let DivPrompt = $("DivPrompt");
+		oEf.Animate(DivPrompt, [{"top": "610px"}, {"top": "560px"}], 0.2, "ease-out");
+		DivPrompt["innerText"] = "设置已保存，退出关卡时将自动刷新 (" + (new Date).toLocaleString() + ")";
 	}
 });

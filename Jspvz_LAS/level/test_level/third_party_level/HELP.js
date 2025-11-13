@@ -212,7 +212,7 @@ oS.Init({
 	LargeWaveFlag: {
 		11: $("imgFlag1"),
 	},
-	StartGameMusic: "To_Be",
+	StartGameMusic: "遍参",
 	UserDefinedFlagFunc: function(a) {
 		if(oP.FlagNum == oP.FlagZombies){
 			delete oAudio['Boss'];
@@ -235,11 +235,11 @@ oS.Init({
 		}
 	},
 	LoadAccess: function(start_game){
-		delete oAudio['To_Be'];
+		delete oAudio['遍参'];
 		NewURLAudio({
-			url: "https://music.163.com/song/media/outer/url?id=857905.mp3",
-			audioname: "To_Be",
-			loop: true
+			url: "https://music.163.com/song/media/outer/url?id=22765961.mp3",
+			audioname: "遍参",
+			loop: true, volume: 0.6
 		});
 
 		//load new bg
@@ -269,7 +269,7 @@ oS.Init({
 		SetVisible($("tdShovel"), $("dFlagMeter"), $("dTop"));
 		oS.InitLawnMower();
 		PrepareGrowPlants(function() {
-			PlayMusic(oS.LoadMusic = oS.StartGameMusic = "To_Be");
+			PlayMusic(oS.LoadMusic = oS.StartGameMusic = "遍参");
 			oP.Monitor(oS.Monitor, oS.UserDefinedFlagFunc);
 			BeginCool();
 			oSym.addTask(1500,

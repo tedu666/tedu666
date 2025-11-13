@@ -1,4 +1,3 @@
-//需要修复：临界值僵尸问题
 oS.Init({
 	PName: [oSunFlower, oSunFlower, oSquash, oScaredyShroom, oGatlingPea_Pro, oTorchwood_Pro, oWallNut, oTallNut, oPuffShroom],
 	ZName: [oZombie, oZombie2, oZombie3, oPoleVaultingZombie, oBucketheadZombie ,oFootballZombie, oZomboni, oJackinTheBoxZombie, oDancingZombie, oBackupDancer],
@@ -6,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-2 护花者",
 	LvlEName: "EX_Save_Flower_2",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Nice_Graveyard",
 	CanSelectCard: 0,
 	MusicMode: 1,
 	SunNum: 75,
@@ -17,19 +16,17 @@ oS.Init({
 		20: $("imgFlag2"),
 		30: $("imgFlag1")
 	},
-	UserDefinedFlagFunc: function(){
-		if(oP.FlagZombies == 1){
+	UserDefinedFlagFunc: function() {
+		if (oP.FlagZombies == 1) {
 			let R = Math.floor(Math.random() * oS.R + 1);
-			for(let i = 1; i <= 16; i++){
-				SummonZombie(oFootballZombie, R, 11), ++ oP.NumZombies;
-			};
+			for (let i = 1; i <= 16; ++i) SummonZombie(oFootballZombie, R, 11), ++oP.NumZombies;
 		};
 	},
-	LoadAccess: function(LevelDefFuc){
+	LoadAccess: function (LevelDefFuc) {
 		for(let i = 1; i <= oS.R; i++) Summon_Flower(i, 4), CustomSpecial(oTorchwood_Pro, i, 6);
 		LevelDefFuc(), Start_Ctk_Flower();
 	},
-	StartGame: function(){
+	StartGame: function () {
 		StopMusic();
 		(!oS.MusicMode) && (PlayMusic(oS.LoadMusic = oS.StartGameMusic));
 		SetVisible($("tdShovel"), $("dFlagMeter"), $("dTop"));
@@ -37,7 +34,7 @@ oS.Init({
 		PrepareGrowPlants(function() {
 			(oS.MusicMode) && (PlayMusic(oS.LoadMusic = oS.StartGameMusic));
 			oP.Monitor(oS.Monitor, oS.UserDefinedFlagFunc);
-			for(let i in ArCard){DoCoolTimer(i,0);};
+			for (let i in ArCard) DoCoolTimer(i,0);
 			AutoProduceSun(25);
 			oSym.addTask(1500, function() {
 				oP.AddZombiesFlag();
@@ -82,13 +79,9 @@ oS.Init({
 		++ArPCard.SelNum, b.Select = 1;
 		oS.StaticCard && (g = NewEle("dCard" + c + "_$_" + Math.random(), "div", "", {onclick: function() {SelectCard(c);}},$("dCardList")), NewImg(0, f.src, "width:100px;height:120px", g), innerText(NewEle("sSunNum" + c, "span", 0, 0, g), i.SunNum), f.style.top = "-42px");
 	},
-	SummonZombie: function(id , e , b) {  //僵尸obj，行，列
-		e = Math.min(Math.max(e , 1) , oS.R),b = Math.min(Math.max(b , -2) , 11);
-		asyncInnerHTML((a = new id).CustomBirth(e, b, 1, "auto"),
-		function(n, m) {
-			EDPZ.appendChild(n);
-			m.Birth();
-		},a);
+	SummonZombie: function(id, R, C) {  //僵尸obj，行，列
+		var a, e = Math.min(Math.max(R, 1), oS.R), b = Math.min(Math.max(C, -2), 11);
+		asyncInnerHTML((a = new id).CustomBirth(e, b, 1, "auto"), function(n, m) { EDPZ.appendChild(n); m.Birth(); },a);
 		return a;//返回僵尸数据
 	}
 });

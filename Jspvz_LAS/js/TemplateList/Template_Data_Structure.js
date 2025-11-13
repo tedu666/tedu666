@@ -65,7 +65,11 @@ let LimitAVL = class { // 基于 Avl + 值域 的区间查询删除系统
 	};
 	pushList (inArr) {
 		let self = this, M = {}, T, K, Q, Data, Arr;
-		for (let _ of inArr) T = _["GetValue"](), K = Math["max"](0, Math["floor"](T / self["Scope"])), M[K] ? M[K]["push"](_) : (M[K] = [_]);
+		for (let _ of inArr) {
+			T = _["GetValue"](); if (isNaN(T)) T = 0; // 如果 T 是 NaN，归零
+			if (T == Infinity) continue; // 主动放弃 infinity
+			K = Math["max"](0, Math["floor"](T / self["Scope"])), M[K] ? M[K]["push"](_) : (M[K] = [_]);
+		}
 		for (let dNum in M) Q = Number(dNum), Data = self["AVL"]["find"](Q), (Data === null) ? (Arr = M[dNum], Arr["Order"] = false, self["AVL"]["insert"](Q, Arr)) : (Arr = Data["data"], Arr["Order"] = false, Arr["push"]["apply"](Arr, M[dNum]));
 	};
 	Qfind (Arr, f) {

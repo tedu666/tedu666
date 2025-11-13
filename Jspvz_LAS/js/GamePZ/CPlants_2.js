@@ -99,7 +99,7 @@ var oFlowerVase = InheritO(CPlants, {
 			"onclick": function () { self.Die(); }, 
 			"onmouseover": function() { SetAlpha(Ele, 50, 0.5); }, 
 			"onmouseout": function() { SetAlpha(Ele, 100, 1); }
-		}, EDAll);
+		}, dMove);
 
 		self.ControlBase("Summon", "Auto"); // 生成底座
 		self.VaseValue = self.VaseValue || { "Type": "SunNum", "Value": 50 }; // 如果没有信息，默认创建一个 50 阳光的罐子
@@ -124,7 +124,7 @@ var oFlowerVase = InheritO(CPlants, {
 
 		switch (Type) { // 根据内容生成
 			case "Plants": // 丢出植物卡片
-				AppearCard(GetX(self.C) - self.width / 2, GetY(self.R) - 30, Value, 0, self.CardTime);
+				AppearCard(GetX(self.C) - self.width / 2, GetY(self.R, self.C) - 30, Value, 0, self.CardTime);
 				break;
 
 			case "Zombie": // 生成僵尸
@@ -138,9 +138,9 @@ var oFlowerVase = InheritO(CPlants, {
 				break;
 
 			case "SunNum": // 生成阳光
-				if (Value > 500) AppearSun(GetX(self.C) - self.width / 2, GetY(self.R) - 30, Value - 500, 0), Value = 500; // 大于五百的阳光直接生成一个大的
-				while (Value > 25) AppearSun(GetX(self.C) - self.width / 2, GetY(self.R) - 30, 25, 0), Value -= 25; // 500 以内的，一个一个生成
-				AppearSun(GetX(self.C) - self.width / 2, GetY(self.R) - 30, Value, 0), Value = 0; // 余下的单独生成
+				if (Value > 500) AppearSun(GetX(self.C) - self.width / 2, GetY(self.R, self.C) - 30, Value - 500, 0), Value = 500; // 大于五百的阳光直接生成一个大的
+				while (Value > 25) AppearSun(GetX(self.C) - self.width / 2, GetY(self.R, self.C) - 30, 25, 0), Value -= 25; // 500 以内的，一个一个生成
+				AppearSun(GetX(self.C) - self.width / 2, GetY(self.R, self.C) - 30, Value, 0), Value = 0; // 余下的单独生成
 				break;
 		}
 	}, 
@@ -205,7 +205,7 @@ var oFlowerVase = InheritO(CPlants, {
 
 		if (SpecialFunc) SpecialFunc(Obj); // 让调用者自己操作花瓶信息
 
-		Obj.Birth(GetX(SetC), GetY(SetR), SetR, SetC, [], null);
+		Obj.Birth(GetX(SetC), GetY(SetR, SetC), SetR, SetC, [], null);
 
 		return Obj;
 	}, 
@@ -226,7 +226,7 @@ oRepeater2 = InheritO(oRepeater, {
 	PicArr: ["images/Card/Plants/Repeater2.png", "images/Plants/Repeater2/0.gif", "images/Plants/Repeater2/Repeater2.gif", "images/Plants/PB00.gif", "images/Plants/PeaBulletHit.gif"],
 	NormalAttack1: function() {
 		let Pea = new oPeaBullet(), self = this;
-		Pea.Birth({ X: self["AttackedLX"] + 30, Y: 32, Z: self["pixelTop"] + 50, Assign: { BirthSpeed: -5, PeaProperty: 0 } });
+		Pea.Birth({ X: self["AttackedLX"] + 30, Y: 32 + self["PHeight"], Z: self["ActualTop"] + 50, Assign: { BirthSpeed: -5, PeaProperty: 0 } });
 	},
 	getTriggerRange: function(a, b, c) {
 		return [[100, b + 25, 1]]
@@ -243,7 +243,7 @@ oGatlingPea_Pro = InheritO(oGatlingPea, {
 	NormalAttack1: function() {
 		let Pea = new oPeaBullet(), self = this;
 		Pea.Birth({ 
-			X: self["AttackedLX"] + 30, Y: 32, Z: self["pixelTop"] + 60, 
+			X: self["AttackedLX"] + 30, Y: 32 + self["PHeight"], Z: self["ActualTop"] + 60, 
 			Assign: { 
 				NormalAttack: 30, BirthSpeed: 5, PeaProperty: 0 
 			} 
@@ -266,7 +266,7 @@ oTorchwood_Pro = InheritO(oTorchwood, {
 	height: 141,
 	EName: "oTorchwood_Pro",
 	Tooltip: "通过火炬树桩的豌豆将变为火球<br>死亡时化为灰烬烧光整行",
-	PicArr: ["images/Card/Plants/Torchwood.png","new_skin/Images/Plants/Torchwood/0.webp","new_skin/Images/Plants/Torchwood/Torchwood.webp","images/Plants/PB00.gif","images/Plants/PB01.gif","images/Plants/PB11.gif","images/Plants/Torchwood/SputteringFire.gif"],
+	PicArr: ["images/Card/Plants/Torchwood.png","new_skin/Images/Plants/Torchwood/0.gif","new_skin/Images/Plants/Torchwood/Torchwood.gif","images/Plants/PB00.gif","images/Plants/PB01.gif","images/Plants/PB11.gif","images/Plants/Torchwood/SputteringFire.gif"],
 	Is_AOE: false,
 	Judge_Strength: 1,
 	PrivateDie: function(c, s) {
@@ -302,7 +302,7 @@ oTorchwood_Pro = InheritO(oTorchwood, {
 			var h = j, f = h.R, c = oZ.getArZ(100, oS.W, f), e = c.length, g = oGd.$Ice[f], d = oGd.$Crater, id = "dFire_" + Math.random();
 			while (e--) {c[e].getExplosion();}
 
-			NewImg(id, "images/Plants/Jalapeno/JalapenoAttack.gif?" + Math.random(), "width:755px;height:131px;left:" + GetX(0) + "px;top:" + (GetY(f) - 131), EDAll);
+			NewImg(id, "images/Plants/Jalapeno/JalapenoAttack.gif?" + Math.random(), "width:755px;height:131px;left:" + GetX(0) + "px;top:" + (GetY(f, 11) - 131), EDAll);
 
 			ClearChild($("dIceCar" + f)), oSym.addTask(135, ClearChild, [$(id)]);
 			if (g) {for (e = g[1]; e < 11; e++) {delete d[f + "_" + e];}}
@@ -343,7 +343,7 @@ oFlowerVase_New = InheritO(oFlowerVase, {
 
 		if (SpecialFunc) SpecialFunc(Obj); // 让调用者自己操作花瓶信息
 
-		Obj.Birth(GetX(SetC), GetY(SetR), SetR, SetC, [], null);
+		Obj.Birth(GetX(SetC), GetY(SetR, SetC), SetR, SetC, [], null);
 
 		return Obj;
 	}, 

@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_3.png",
 	LevelName: "EX-9 珍惜者",
 	LvlEName: "EX_New_Pool_9",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Cherry_Blossoms",
 	CanSelectCard: 1,
 	MusicMode: 1,
 	SunNum: 750,
@@ -45,12 +45,10 @@ oS.Init({
 		});
 	},
 	InitLawnMower: function() {
-		CustomSpecial(oLawnCleaner_New, 1, -1);
-		CustomSpecial(oLawnCleaner_New, 2, -1);
-		CustomSpecial(oLawnCleaner_New, 3, -1);
-		CustomSpecial(oLawnCleaner_New, 4, -1);
-		CustomSpecial(oLawnCleaner_New, 5, -1);
-		CustomSpecial(oLawnCleaner_New, 6, -1);
+		CustomSpecial(oLawnCleaner_New, 1, -1),	CustomSpecial(oLawnCleaner_New, 2, -1), CustomSpecial(oLawnCleaner_New, 3, -1);
+		CustomSpecial(oLawnCleaner_New, 4, -1), CustomSpecial(oLawnCleaner_New, 5, -1), CustomSpecial(oLawnCleaner_New, 6, -1);
+
+		for (let i = 1, j; i <= oS.R; ++i) j = oGd.$[i + "_-1_1"], j && oEf.Animate($(j.id), [{"left": "-100px"}, {"left": $(j.id).style.left + "px"}], 1.2, "ease-out");
 	},
 	Summon_Start_Func: function(){
 		SetBlock($("Div_TimeTask")); // 提示栏、初始数据
@@ -77,7 +75,7 @@ oS.Init({
 
 			oS.Summon_Start_Func();
 
-			NewEle("DivTeach", "div", "pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关信息！"}, EDMove);
+			NewEle("DivTeach", "div", "line-height:45px;pointer-events:none;", {innerHTML: "您可以点击上方灰白数据面板重新查看本关信息！"}, EDMove);
 			oSym.addTask(250, function() {ClearChild($("DivTeach"));}, []);
 		});
 	},
@@ -89,14 +87,14 @@ oS.Init({
 	FlagNum: 30,
 	FlagToSumNum: {
 		a1: [   3, 5, 7,  9, 10, 13, 16, 18, 19, 20, 22, 25, 27, 28,  29],
-		a2: [2, 3, 4, 6, 20,  8, 13, 16, 22, 80, 26, 32, 40, 51, 70, 250]
+		a2: [0, 3, 4, 6, 20,  8, 13, 16, 22, 80, 26, 32, 40, 51, 70, 250]
 	},
 	FlagToMonitor: {
 		9: [ShowLargeWave, 0],
 		19: [ShowLargeWave, 0],
 		29: [ShowFinalWave, 0]
 	},
-	FlagMaxWaitTime: 1990, // 最多等待 19 秒再出下一波僵尸
+	FlagMaxWaitTime: 2490, // 最多等待 25 秒再出下一波僵尸
 	FlagZombieWaitTime: 300, // 如果这一波所有僵尸死亡，那么 3 秒钟内出下一波
 	FlagToEnd: function() {
  		NewEle("DivA", "div", "position:absolute;width:900px;height:600px;background:#FFF;filter:alpha(opacity=0);opacity:0;z-index:160", 0, EDMove);
@@ -136,6 +134,14 @@ oS.Init({
 			else func && func();
 		}, []);
 	},
+	SetArrBlockText: function (Arr, f, r1 = "点击开始游戏", r2 = "浏览下一页") {
+		let A = 0, len = Arr.length, Q = () => {
+			if (A == len) return f && f();
+			SummonNewBlock(Arr[A], () => {
+				++A, Q();
+			}, (A + 1 == len) ? r1 : r2);
+		}; Q(0);
+	}, 
 	SummonNewBlock: function(a, f, r) {
 		SetHidden($("dLoginDataHTML")), oSym.Stop();
 		$("dMsgFailed").innerHTML = a + '<p><p><span style="color:#15B70C">' + (r ? r : '点击开始游戏') +  '</span>';
@@ -164,6 +170,11 @@ oS.Init({
 	},
 	Trigger_Plants_Die: function (Obj, R, C, Kind) {
 		(C >= 1) && (oGd.GatherFog(R, C, 1, 1, 1), Show_Ban_Block(R, C)); // 嗝屁
+	}, 
+	SummonZombie: function (id, R, C) {  // 僵尸obj，行，列
+		var a, e = Math.min(Math.max(R, 1), oS.R), b = Math.min(Math.max(C, -2), 13);
+		asyncInnerHTML((a = new id).CustomBirth(e, b, 1, "auto"), function(n, m) { EDPZ.appendChild(n); m.Birth(); }, a);
+		return ++oP.NumZombies, a; // 返回僵尸数据
 	}
 });
 

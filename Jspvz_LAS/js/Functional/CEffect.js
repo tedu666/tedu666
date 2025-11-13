@@ -59,7 +59,59 @@ let oEf = {
 		return new Promise((Resolve) => {
 			oEf.Animate(Ele, Style, Duration, Ease, Resolve, Delay, Repetitions);
 		});
-	}
+	}, 
+
+	// Code From PVZTR 背景粒子
+	BgParticle: (() => {
+		class ParticlePool {
+			constructor () { this.particlePool = []; }
+			get (img, left, top) { if (this.particlePool.length) { let obj = this.particlePool.pop(); obj.img = img, obj.left = left, obj.top = top; return obj; } return {img, left, top}; }
+			recycle(obj) { this.particlePool.push(obj); }
+			destroy() { this.ParticlePool = null; }
+		};
+
+		let Ret = ({ url, style, k = 1, spd = Math.sqrt(2) * 2.5, timeout = 5, move, size = { width: 36, height: 37 } }) => {
+			// if (oSym.LowPerformanceMode) return false;
+
+			if ($isNull(move)) {
+				let rad = Math.atan2(1, k), spdY = Math.sin(rad) * spd, spdX = Math.cos(rad) * spd;
+				move = (i) => { i.left += spdX * oSym.NowSpeed, i.top += spdY * oSym.NowSpeed; };
+			}
+
+			// 准备工作
+			let canvas = NewEle(`BgParticle_${Math.random()}`, "canvas", style, { height: 600, width: 1600, className: "BgParticle" }, EDAll);
+			let destroy = false, offscreen, ctx;
+
+			if (canvas.transferControlToOffscreen) offscreen = canvas.transferControlToOffscreen(), ctx = offscreen.getContext("2d");
+			else ctx = canvas.getContext("2d");
+
+			//绘制粒子
+			let image = new Image(), pool = new ParticlePool(), particles = new Set(), originalTop = -size.height - 3;
+
+			image.src = url, oSym.addTask(timeout, function create () {
+				if (!destroy) {
+					let times = 1 / timeout;
+					for (let i = 0; i < times; i++) particles.add(pool.get(image, Math.random() * 2400 - 600, originalTop));
+					oSym.addTask(timeout, create);
+				} else pool.destroy();
+			});
+
+			// 绘制动画
+			let curT = Date.now(), lastT = curT, deltaTime = 0;
+			requestAnimationFrame(function draw() {
+				ctx.clearRect(0, 0, 1600, 600), curT = Date.now(), deltaTime = (curT - lastT) / 16.6667;
+				for (let json of particles) {
+					let {img, left, top} = json;
+					if (json.top >= 600) pool.recycle(json), particles.delete(json);
+					else ctx.drawImage(img, Math.round(left), Math.round(top), size.width, size.height), move(json), json.left = (json.left - left) * deltaTime + left, json.top = (json.top - top) * deltaTime + top;
+				}
+				lastT = curT, canvas.parentNode ? requestAnimationFrame(draw) : (destroy = true);
+			});
+			return canvas;
+		};
+
+		return Ret;
+	})()
 };
 
 
@@ -194,20 +246,20 @@ let oPTGif = class {
 	static DrawImage(Ctx, Img, X = 0, Y = 0, Horizontal = 1, Vertical = 1, Angle = 0, Src = "") {
 		let [MoveX, MoveY] = oPTG_Store["GetMove"](Src);
 
-	    Ctx["save"](); // 保存当前画布状态
+		Ctx["save"](); // 保存当前画布状态
 
-	    if (Img["Mode"] == "Object") { // 对象模式
-		    Ctx["translate"](X + Img["Width"] * 0.5 - MoveX, Y + Img["Height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
-		    Ctx["scale"](Horizontal, Vertical); // 调整缩放
-		    Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
-	    	Ctx["drawImage"](Img["Ele"], Img["LeftPos"], Img["TopPos"], Img["Width"], Img["Height"], - Img["Width"] * 0.5, - Img["Height"] * 0.5, Img["Width"], Img["Height"]); // 将图像绘制到画布上
+		if (Img["Mode"] == "Object") { // 对象模式
+			Ctx["translate"](X + Img["Width"] * 0.5 - MoveX, Y + Img["Height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
+			Ctx["scale"](Horizontal, Vertical); // 调整缩放
+			Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
+			Ctx["drawImage"](Img["Ele"], Img["LeftPos"], Img["TopPos"], Img["Width"], Img["Height"], - Img["Width"] * 0.5, - Img["Height"] * 0.5, Img["Width"], Img["Height"]); // 将图像绘制到画布上
 		} else { // 画板或其他剩余模式
-		    Ctx["translate"](X + Img["width"] * 0.5 - MoveX, Y + Img["height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
-		    Ctx["scale"](Horizontal, Vertical); // 调整缩放
-		    Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
-	    	Ctx["drawImage"](Img, - Img["width"] * 0.5, - Img["height"] * 0.5, Img["width"], Img["height"]); // 将图像绘制到画布上
+			Ctx["translate"](X + Img["width"] * 0.5 - MoveX, Y + Img["height"] * 0.5 - MoveY); // 移动绘图原点到图像中心
+			Ctx["scale"](Horizontal, Vertical); // 调整缩放
+			Ctx["rotate"](Angle / 180 * Math["PI"]); // 旋转图像
+			Ctx["drawImage"](Img, - Img["width"] * 0.5, - Img["height"] * 0.5, Img["width"], Img["height"]); // 将图像绘制到画布上
 		}
 
-	    Ctx["restore"](); // 恢复画布状态
+		Ctx["restore"](); // 恢复画布状态
 	};
 };

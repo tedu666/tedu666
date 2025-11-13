@@ -2,13 +2,13 @@
 oS.Init({
 	PicArr: ["new_skin/Images/InterFace/Travel_Background.png"],
 	backgroundImage: "new_skin/Images/InterFace/Travel_Background.png",
-	// LoadMusic: "pure_snows", StartGameMusic: "pure_snows",
+	// LoadMusic: "Pure_Snows", StartGameMusic: "Pure_Snows",
 	LoadAccess: function() {
 		let Staff = oS["Staff_HTML"]["join"]("");
 		$("tGround")["style"] = "background:url(new_skin/Images/InterFace/Travel_Background.png) no-repeat;left:0px;top:-100px;width:900px;height:730px;background-size:100% 100%;visibility:visible;", SetVisible($("dMenu")); // 背景图片、暂停按钮
 		NewEle("dStaff_Block", "div", "visibility:visible;height:100%;width:100%;z-index:100;display:block;overflow:auto;white-space:pre;", {"className": "WindowFrame Hidden_Container Not_Chose"}, EDAll); // pointer-events:none;
 		NewEle("dStaff_HTML", "div", "line-height:1;text-align:center;color:#FFFFFF;font-size:15px;font-family:RanTian,Regular,Briannetod,微软雅黑,Verdana,Tahoma;-webkit-text-stroke-width:0px;-webkit-text-stroke-color:#000000;word-break:break-all;white-space:pre;tab-size:1;", {"innerHTML": Staff}, $("dStaff_Block"));
-		AllAudioStop(), PlayMusic(oS.LoadMusic = "pure_snows");
+		AllAudioStop(), PlayMusic(oS.LoadMusic = "Pure_Snows");
 	},
 	Staff_HTML: [
 		'<!-- 制作名单 -->',
@@ -25,23 +25,29 @@ oS.Init({
 		'',
 		'<!-- 图片素材 -->',
 		'<a style="font-size:65px;-webkit-text-stroke-width:2px;">素材提供</a><br>',
-		'<a style="font-size:35px;line-height:1.3;">lonelystar<br>江南游戏<br>PVZ2素材吧<br>jspvz低玩<br>B站的J<br></a><br><a style="font-size:225px;"><br></a>',
+		'<a style="font-size:35px;line-height:1.3;">lonelystar<br>江南游戏<br>PVZ2素材吧<br>jspvz低玩<br>B站的J<br>Dr・糕萌酸钾-Studio<br>MC大战僵尸2<br></a><br><a style="font-size:225px;"><br></a>',
 		'',
 		'<!-- 制作人 -->',
 		'<a style="font-size:65px;line-height:1.25;-webkit-text-stroke-width:2px;">主要制作人</a><br>',
 		'<a style="font-size:35px;line-height:1.3;">我是帅<br></a><br><a style="font-size:225px;"><br></a>',
 		'',
+		'<!-- 关卡设计 -->',
+		'<a style="font-size:65px;line-height:1.25;-webkit-text-stroke-width:2px;">关卡设计</a><br>',
+		'<a style="font-size:35px;line-height:1.3;word-spacing:1em;">我是帅 snz 寒冰投手 B站的J<br></a><br><a style="font-size:225px;"><br></a>',
+		'',
 		'<!-- 特别感谢 -->',
 		'<a style="font-size:65px;line-height:1.25;-webkit-text-stroke-width:2px;">特别感谢</a><br>',
-		'<a style="font-size:35px;line-height:1.5;word-spacing:1em;">snz jspvz低玩 WU师葵 白鹤亮翅<br>寒冰投手 B站的J<br>屏幕前的你</a><br><a style="font-size:225px;"><br></a>',
+		'<a style="font-size:35px;line-height:1.5;word-spacing:1em;">snz jspvz低玩 WU师葵 白鹤亮翅<br>寒冰投手 B站的J lioumengqi<br>嘿嘿黑黑 SN0SE Dr・糕萌酸钾-Studio<br>冰洁菌 jspvz玩家rtty<br>屏幕前的你</a><br><a style="font-size:225px;"><br></a>',
 		'',
 		'<!-- 音乐列表，可以点击音乐播放 -->',
 		'<a style="font-size:55px;-webkit-text-stroke-width:2px;">本地音乐列表</a><br><br>',
 		'<a style="font-size:25px;line-height:1.25;">原版植物大战僵尸音乐/音效</a><br> <!-- 本地音乐是jspvz自带的 -->',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'pure_snows\')">pure snows ~  ——  水月陵</a><br>',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'nice_graveyard\')">素敵な墓場で暮しましょ  ——  上海アリス幻樂団</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Pure_Snows\')">pure snows ~  ——  水月陵</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Nice_Graveyard\')">素敵な墓場で暮しましょ  ——  上海アリス幻樂団</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Glorious_Morning\')">Glorious Morning  ——  Waterflame</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'True_Admin\')">聖徳伝説 ～ True Administrator  ——  上海アリス幻樂団</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'Cherry_Blossoms\')">死霊の夜桜  ——  上海アリス幻樂団</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play(\'th13\')">欲望缓步  ——  Dr・糕萌酸钾-Studio</a><br>',
 		'<a style="font-size:200px;"><br></a> <!-- 大跨度 -->',
 		'',
 		'<!-- 在线版音乐列表 -->',
@@ -53,13 +59,14 @@ oS.Init({
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(4)">my most precious treasure -orgel-  ——  麻枝准</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(5)">you  ——  M.Graveyard</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(6)">東方緋想天  ——  黄昏フロンティア  /  上海アリス幻樂団</a><br>',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(7)">To Be...  ——  Valentin</a><br>',
+		// '<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(7)">To Be...  ——  Valentin</a><br>',
+		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(7)">遍参 / NKZ  ——  上海アリス幻樂団</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(8)">enemy country  ——  ANANT-GARDE EYES</a><br>',
-		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(9)">森林  ——  灰澈</a><br>',
+		// '<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(9)">森林  ——  灰澈</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(10)">空中に沈む輝針城  ——  上海アリス幻樂団</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(11)">寂静之空  ——  傅许</a><br>',
 		'<a style="font-size:25px;line-height:1.25;cursor:pointer;" onclick="Play2(12)">Haunted  ——  Shirk</a><br>',
-		'<a style="font-size:200px;"><br></a> <!-- 大跨度 -->',
+		'<br><a style="font-size:18px;">（部分关卡中使用的音乐请在关卡对应的制作者名单里查看相关信息）</a><br><a style="font-size:200px;"><br></a> <!-- 大跨度 -->',
 		'',
 		'<!-- 免责声明等 -->',
 		'<a style="font-size:55px;-webkit-text-stroke-width:2px;color:#FF4141">版权与免责声明</a><br><br><br><br>',
@@ -77,7 +84,7 @@ oS.Init({
 	],
 }, {}, {
 	"Play": (N) => (StopMusic(oS.LoadMusic), PlayMusic(oS.LoadMusic = N)), // 播放音乐
-	"Internet_URL_Music_List": ["761323", "22706973", "760979", "1319520140", "471936", "786262", "22765919", "857905", "471834", "495562302", "28219117", "461074907", "1312561189"],
+	"Internet_URL_Music_List": ["761323", "22706973", "760979", "1319520140", "471936", "786262", "22765919", "22765961", "471834", "495562302", "28219117", "461074907", "1312561189"],
 	"Can_Play_Internet": true,
 	"Play2": function (i) { // 网络音乐
 		if (window["Can_Play_Internet"] == false) return alert("您点击的速度太快了，请稍后再试！");

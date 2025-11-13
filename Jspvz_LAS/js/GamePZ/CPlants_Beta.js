@@ -6,11 +6,11 @@ var oCabbage_Pro = InheritO(oPeashooter, {
 	SunNum: 125, Attack: 45, // 攻击伤害
 	AttackGif: 5, 
 	Is_AOE: false, Judge_Strength: 1.1,
-	Attack_Await_Time: 260, Attack_Float_Time: 10, // 等待时间 总浮动
+	Attack_Await_Time: 260, Attack_Float_Time: 10, AttackBulletWaitTime: 70, // 等待时间 总浮动
 	AudioArr: ["CabbageAttack1", "CabbageAttack2"], // 音效
 	PicArr: function() {
 		var b = "new_skin/", a = b + "Images/Plants/Cabbage/";
-		return [b + "Images/Card/Cabbage.webp", a + "0.gif", a + "Cabbage.gif", a + "Bullet.png", a + "BulletHit.gif", a + "CabbageAttack.gif"];
+		return [b + "Images/Card/Cabbage.gif", a + "0.gif", a + "Cabbage.gif", a + "Bullet.png", a + "BulletHit.gif", a + "CabbageAttack.gif"];
 	}(),
 	Tooltip: '向敌人抛出卷心菜',
 	Produce: '向敌人抛出卷心菜<p>伤害：<font color="#FF0000">中等<br></font>范围：<font color="#FF0000">投掷</font></p>卷心菜投手用卷心菜砸僵尸干得很好，它以此赚钱，毕竟，它擅长这个。只是首先他不明白僵尸们是怎么爬上屋顶的。<p>技术支持/素材 - 江南游戏',
@@ -33,10 +33,10 @@ var oCabbage_Pro = InheritO(oPeashooter, {
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(135, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 
-		oSym.addTask(70, () => {
+		oSym.addTask(self["AttackBulletWaitTime"], () => {
 			let Pea = new oThrownBullet(); if (!$P[self["id"]]) return;
 			PlayAudio(self.AudioArr[Math.floor(Math.random() * 2)]);
-			Pea.Birth({ X: self.pixelLeft + 50, Y: 60, Z: self.pixelTop + 90, RegularR: self.R, Attack: self["Attack"], Assign: {} });
+			Pea.Birth({ X: self.pixelLeft + 50, Y: 60 + self.PHeight, Z: self.ActualTop + 90, RegularR: self.R, Attack: self["Attack"], Assign: {} });
 		}, []);
 	}
 }), 
@@ -47,11 +47,11 @@ oMelonPult_Pro = InheritO(oCabbage_Pro, {
 	SunNum: 300, coolTime: 15,
 	Attack: 100, Attack2: 40, // 西瓜伤害 溅射伤害
 	AttackGif: 4, Is_AOE: true,
-	Judge_Strength: 2.2, Attack_Await_Time: 300, // 等待时间
+	Judge_Strength: 2.2, Attack_Await_Time: 300, AttackBulletWaitTime: 95, // 等待时间、延迟
 	AudioArr: ["CabbageAttack1", "CabbageAttack2", "melonimpact1", "melonimpact2"],
 	PicArr: function () {
 		var a = "new_skin/", b = a + "Images/Plants/MelonPult/";
-		return [a + "Images/Card/MelonPult.webp", b + "0.webp", b + "static.webp", b + "Bullet.webp", b + "attack.webp"];
+		return [a + "Images/Card/MelonPult.gif", b + "0.gif", b + "static.gif", b + "Bullet.gif", b + "attack.gif"];
 	}(),
 	Tooltip: '可以对成群的僵尸造成巨大伤害',
 	Produce: '西瓜投手可以对成群的僵尸造成巨大伤害。<p>伤害：<font color="#FF0000">高</font><br>范围：<font color="#FF0000">投掷</font><br>特点：<font color="#FF0000">西瓜可以对目标附近的僵尸造成伤害</font></p>低调从来不是西瓜投手的风格，“太阳——赐予我——力量，我可是草地上最能打的人”，他说“我不是吹牛，瞅瞅那些统计数据，你就会明白了。”<p>技术支持/素材 - 江南游戏',
@@ -80,10 +80,10 @@ oMelonPult_Pro = InheritO(oCabbage_Pro, {
 
 		Ele.childNodes[1].src = self.PicArr[self.AttackGif], oSym.addTask(285, function(){$P[self.id] && (Ele.childNodes[1].src = self.PicArr[self.NormalGif]);}); // 攻击图片
 
-		oSym.addTask(95, () => {
+		oSym.addTask(self["AttackBulletWaitTime"], () => {
 			let Pea = new oThrownBullet(); if (!$P[self["id"]]) return;
 			PlayAudio(self.AudioArr[Math.floor(Math.random() * 2)]);
-			Pea.Birth({ X: self.pixelLeft + 45, Y: 70, Z: self.pixelTop + 80, RegularR: self.R, Attack: self["Attack"], 
+			Pea.Birth({ X: self.pixelLeft + 45, Y: 100 + self.PHeight, Z: self.ActualTop + 110, RegularR: self.R, Attack: self["Attack"], 
 				PicArr: [self["PicArr"][3]], NormalGif: 0, SplashGif: null, Assign: {
 					Width: 45, Height: 45, FlyMaxHei: 250, 
 					HitZombie: self["HitZombie"], Die: self["AttackOtherZombies"], 
@@ -91,6 +91,35 @@ oMelonPult_Pro = InheritO(oCabbage_Pro, {
 				} 
 			});
 		}, []);
+	}
+}), 
+oWinterMelon_Pro = InheritO(oMelonPult_Pro, {
+	EName: "oWinterMelon_Pro", CName: "新 · 冰西瓜投手",
+	SunNum: 550, coolTime: 55,
+	Attack: 110, Attack2: 50, // 西瓜伤害 溅射伤害
+	Judge_Strength: 3.8, Attack_Await_Time: 300, AttackBulletWaitTime: 40, // 等待时间
+	PicArr: function () {
+		var a = "new_skin/", b = a + "Images/Plants/WinterMelon/";
+		return [a + "Images/Card/WinterMelon.png", b + "static.gif", b + "0.gif", b + "bullet.gif", b + "attack.gif"];
+	}(),
+	Tooltip: '可以对成群的僵尸造成巨大伤害，并使它们减速',
+	Produce: '抛出冰瓜使范围内的敌人减速。<p>伤害：<font color="#FF0000">很高</font><br>范围：<font color="#FF0000">投掷</font><br>特点：<font color="#FF0000">可以抛出冰瓜使范围内的敌人减速</font></p>在冰西瓜确信自己已经彻底冷静，不会再因为各种小事抓狂后，他想去拍一些需要植物冷静、客观地称述知识的纪录片，题材可能囊括：让人冷静的秘诀，让人身心放松的冬季运动，以及他和冬瓜之间围绕冬瓜名字中的冬是不是在侵犯他“冰”西瓜姓名权的无休无止的官司。',
+	HitZombie: function (Zombie, ATK, Bself) {
+		let self = Bself["_PLANTSELF"], Attack = Bself["_ATTACK"], Attack2 = Bself["_ATTACK2"];
+		Zombie["getHit2"](Zombie, Attack), Zombie["getSlow"](Zombie, Zombie["id"], 1250);
+		return true;
+	}, 
+	AttackOtherZombies: function () { // 重写溅射僵尸
+		let Bself = this, self = Bself["_PLANTSELF"], Attack = Bself["_ATTACK"], Attack2 = Bself["_ATTACK2"];
+		let R = Number(Bself["RegularR"] ?? Bself["R"]), C = Bself["C"], X = Bself["Pos"][0];
+
+		PlayAudio(self["AudioArr"]["slice"](2, 4)[Math["floor"](Math["random"]() * 2)]);
+
+		for (let i = Math.max(1, R - 1); i <= Math.min(R + 1, oS.R); ++i) {
+			b = oZ.getArZ(X - 70, X + 90, i), e = b.length; // 获取
+			while(e--) (b[e] != Bself["TaskZombie"] && b[e].Altitude == 1) && (b[e].getHit2(b[e], self.Attack2), b[e].getSlow(b[e], b[e].id, 1250)); // 溅射
+		}
+		Bself["Destroy"]();
 	}
 });
 
@@ -121,7 +150,7 @@ var oCabbage = InheritO(oCabbage_Pro, {
 			let Pea = new oThrownBullet(); if (!$P[self["id"]]) return;
 			PlayAudio(self.AudioArr[Math.floor(Math.random() * 2)]);
 			Pea.Birth({ 
-				X: self.pixelLeft + 50, Y: 60, Z: self.pixelTop + 90, 
+				X: self.pixelLeft + 50, Y: 60 + self.PHeight, Z: self.ActualTop + 90, 
 				RegularR: self.R, Attack: self["Attack"], 
 				PicArr: [self["PicArr"][4], self["PicArr"][3]], 
 				Assign: { GetAngle: self["GetAngle"], FlyMaxHei: 225, HitZombieTime: 100, }
@@ -155,7 +184,7 @@ oMelonPult = InheritO(oMelonPult_Pro, {
 		oSym.addTask(55, () => {
 			let Pea = new oThrownBullet(); if (!$P[self["id"]]) return;
 			PlayAudio(self.AudioArr[Math.floor(Math.random() * 2)]);
-			Pea.Birth({ X: self.pixelLeft + 95, Y: 70, Z: self.pixelTop + 125, RegularR: self.R, Attack: self["Attack"], 
+			Pea.Birth({ X: self.pixelLeft + 95, Y: 70 + self.PHeight, Z: self.ActualTop + 125, RegularR: self.R, Attack: self["Attack"], 
 				PicArr: [self["PicArr"][3]], NormalGif: 0, SplashGif: null, Assign: {
 					Width: 50, Height: 55, FlyMaxHei: 250, ImgAngle: 0, 
 					HitZombie: self["HitZombie"], Die: self["AttackOtherZombies"], 
@@ -222,7 +251,7 @@ var oCattail = InheritO(oPeashooter, {
 		return Math.sqrt(dx * dx + dy * dy);
 	},
 	Get_Attack: function(dX, dY) { // 寻找最近的僵尸
-		let self = this, X = dX || GetX(self.C), Y = dY || GetY(self.R);
+		let self = this, X = dX || GetX(self.C), Y = dY || GetY(self.R, self.C);
 		let Arz, MinDis = Infinity, MinZ, NowDis, NowZ, IsBall = !!Object["values"]($Z)["find"]((f) => f.EName == "oBalloonZombie" && f.Altitude == 3 && f.ZX <= oS.W); // 是否还有气球
 		for (let i = 1; i <= oS.R; ++i) { // 左半部分
 			NowZ = null, Arz = oZ.getArZ(100, X, i), NowZ = Arz.findLast((f) => f.EName == "oBalloonZombie" && f.Altitude == 3); // 如果有气球

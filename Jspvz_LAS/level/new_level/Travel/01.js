@@ -5,7 +5,7 @@ oS.Init({
 	backgroundImage: "new_skin/Images/InterFace/background_new_1.png",
 	LevelName: "EX-1 新家园",
 	LvlEName: "EX_New_Home_1",
-	StartGameMusic: "nice_graveyard",
+	StartGameMusic: "Nice_Graveyard",
 	CanSelectCard: 1,
 	MaxSunNum: 750,
 	MusicMode: 1,
