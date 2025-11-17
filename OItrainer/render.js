@@ -511,6 +511,7 @@ function renderAll(){
         </div>
         <div class="student-status">
           <span class="label-pill ${pressureClass}">压力: ${Math.floor(s.pressure)} (${pressureLevel})</span>
+          <span class="label-pill" style="margin-left:6px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd">心理: ${Math.floor(s.mental)}</span>
         </div>
       </div>
       

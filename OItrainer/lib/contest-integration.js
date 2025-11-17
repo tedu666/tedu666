@@ -1046,6 +1046,9 @@
       if(compName === 'NOI'){
         reward = window.uniformInt ? 
           window.uniformInt(window.NOI_REWARD_MIN || 300000, window.NOI_REWARD_MAX || 500000) : 400000;
+      } else if(compName === '省选'){
+        reward = window.uniformInt ? 
+          window.uniformInt(window.CSP_S1_REWARD_MIN || 200000, window.CSP_S1_REWARD_MAX || 500000) : 250000;
       } else if(compName === 'NOIP'){
         reward = window.uniformInt ? 
           window.uniformInt(window.NOIP_REWARD_MIN || 100000, window.NOIP_REWARD_MAX || 200000) : 150000;
