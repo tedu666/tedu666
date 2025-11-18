@@ -189,10 +189,10 @@
     // 为每个国家生成 1-2 名选手（跳过中国，因为中国选手由 eligibleStudents 提供）
     for(const country of countries){
       if(country === '中国') continue; // 跳过中国
-      const count = (typeof window.uniformInt === 'function') ? window.uniformInt(1,2) : (Math.random() < 0.5 ? 1 : 2);
+      const count = (typeof window.uniformInt === 'function') ? window.uniformInt(1,2) : (getRandom() < 0.5 ? 1 : 2);
       for(let i=0;i<count;i++){
         // 在范围内随机一个比例
-        const ratio = minRatio + Math.random() * (maxRatio - minRatio);
+        const ratio = minRatio + getRandom() * (maxRatio - minRatio);
         
         // 确保各维度至少为中国平均的设定比例且不低于60
         const ability = Math.max(OTHER_CONTRY_MIN_ABILITY, Math.floor(avgAbility * ratio));
@@ -206,8 +206,8 @@
           thinking,
           coding,
           knowledge: {},
-          pressure: Math.random() * 20,
-          mental: 70 + Math.random() * 20,
+          pressure: getRandom() * 20,
+          mental: 70 + getRandom() * 20,
           active: true,
           isInternational: true,
           // methods expected by simulator

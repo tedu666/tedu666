@@ -1525,9 +1525,9 @@ function loadGame(){ try{
     if(!raw){ alert("无存档"); return; }
     let o = JSON.parse(raw);
     game = Object.assign(new GameState(), o);
-  window.game = game;
-  game.facilities = Object.assign(new Facilities(), o.facilities);
-  game.students = (o.students || []).map(s => {
+    window.game = game;
+    game.facilities = Object.assign(new Facilities(), o.facilities);
+    game.students = (o.students || []).map(s => {
     const student = Object.assign(new Student(), s);
     if(s.talents && Array.isArray(s.talents)){
       student.talents = new Set(s.talents);

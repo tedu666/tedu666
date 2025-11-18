@@ -172,7 +172,9 @@ function getStudentQualificationStatus(student) {
     const requiredComp = qualChain[nextComp.name];
     if (requiredComp) {
       // 检查学生是否在qualification集合中
-      const qualSet = game.qualification[currentHalf][requiredComp];
+      let qualSet = game.qualification[currentHalf][requiredComp];
+      if (qualSet && Array.isArray(qualSet)) game.qualification[currentHalf][requiredComp] = qualSet = new Set(qualSet);
+
       if (qualSet && (qualSet.has(student.name) || qualSet.has(student))) {
         result.hasQualification = true;
         result.html = `<span class="qualification-badge qualified" title="已晋级${nextComp.name}">✓ ${nextComp.name}</span>`;
@@ -405,7 +407,7 @@ function showChoiceModal(evt){
   const desc = evt?.description || '';
   const options = evt?.options || [];
   
-  const eventId = `choice_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const eventId = `choice_${Date.now()}_${getRandom().toString(36).substr(2, 9)}`;
   
   pushEvent({ 
     name: title, 
@@ -441,7 +443,7 @@ function renderAll(){
     const headerNextSmall = $('header-next-comp-small'); if(headerNextSmall) headerNextSmall.innerText = nextCompText;
     const headerWeatherText = $('header-weather-text'); if(headerWeatherText) headerWeatherText.innerText = weatherDesc;
     const headerTempHeader = $('header-temp-header'); if(headerTempHeader) headerTempHeader.innerText = tempText;
-  const q = QUOTES[ Math.floor(Math.random() * QUOTES.length) ];
+  const q = QUOTES[ Math.floor(getRandom() * QUOTES.length) ];
   $('daily-quote').innerText = q;
   let match = nextCompText.match(/还有(\d+)周/);
   let weeksLeft = match ? parseInt(match[1],10) : null;

@@ -875,7 +875,7 @@
         description: '学校财政紧张，削减了OI队的预算',
         check: c => {
           // 每天25%的概率触发
-          return Math.random() < 0.02 && c.game.budget > 200000;
+          return getRandom() < 0.02 && c.game.budget > 200000;
         },
         run: c => {
           if (!c.game || typeof c.game.budget !== 'number') return null;
