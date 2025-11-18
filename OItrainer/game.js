@@ -5,6 +5,73 @@
 
 // 避免在脚本加载时使用未初始化的局部 `game`（会触发 TDZ）。
 // 使用 `window.game` 作为全局持有者，并在需要时懒初始化。
+
+((o) => {
+  let Sleep = o["Sleep"] = (T) => (T != 0) ? (new Promise((R) => setTimeout(R, T))) : (null);
+  let EncryptionStr = (() => { let res = window['MD5'] || window['btoa'] || ((str) => str.toString()); return res; })();
+  let MurmurHash3 = (Str) => {
+    let i = 0, hash;
+    for (i, hash = 1779033703 ^ Str.length; i < Str.length; i++) {
+      let bitwise_xor_from_character = hash ^ Str.charCodeAt(i);
+      hash = Math.imul(bitwise_xor_from_character, 3432918353);
+      hash = hash << 13 | hash >>> 19;
+    } return () => {
+      hash = Math.imul(hash ^ (hash >>> 16), 2246822507);
+      hash = Math.imul(hash ^ (hash >>> 13), 3266489909);
+      return (hash ^= hash >>> 16) >>> 0;
+    }
+  };
+  let Mulberry32 = (RandVal) => {
+    return () => {
+      let for_bit32_mul = RandVal += 0x6D2B79F5;
+      let cast32_one = for_bit32_mul ^ for_bit32_mul >>> 15;
+      let cast32_two = for_bit32_mul | 1;
+      for_bit32_mul = Math.imul(cast32_one, cast32_two);
+      for_bit32_mul ^= for_bit32_mul + Math.imul(for_bit32_mul ^ for_bit32_mul >>> 7, for_bit32_mul | 61);
+      return ((for_bit32_mul ^ for_bit32_mul >>> 14) >>> 0) / 4294967296;
+    }
+  };
+
+  let Salt = "TestData" + Math.random(); // 种子码，可修改
+  let Rnd = Mulberry32(MurmurHash3(EncryptionStr(Salt))());
+
+  let I = o["I"] = (X, ret) => isNaN(ret = parseInt(X)) ? (0) : ret;
+  let L = o["L"] = (X) => BigInt(Number.isInteger(Number(X)) ? X : I(X));
+  let shuffle = o["shuffle"] = (Arr = []) => Arr.sort(() => Rnd() - 0.5);
+
+  o["DownloadFile"] = (FileName, Content, ContentType = "application/octet-stream; Charset=utf-8") => {
+    var a = document["createElement"]("a"), blob = new Blob([Content], { "type": ContentType });
+    a["href"] = window["URL"]["createObjectURL"](blob), a["download"] = FileName, a["click"]();
+  }
+  o["UpLoadFile"] = async (ContentType = "application/x-www-form-urlencoded; Charset=utf-8") => new Promise((Resolve, Error) => {
+    var Input = document["createElement"]("input");
+    Input["type"] = "file", Input["accept"] = ContentType, Input["multiple"] = false, Input["click"]();
+    Input["onchange"] = () => Input["files"][0]["text"]()["then"]((Data) => Resolve(Data))["catch"]((Reason) => Error(Reason));
+  });
+
+  // 将数组转换为基本类型
+  o["ati"] = (Arr = []) => Arr.flat().map((X) => I(X));
+  o["atri"] = (...Arr) => Arr.flat().map((X) => I(X));
+  o["atL"] = (Arr = []) => Arr.flat().map((X) => L(X));
+  o["atrL"] = (...Arr) => Arr.flat().map((X) => L(X));
+
+  // 随机数字/字符
+  o["rInt"] = (l = 0, r = 0) => I(l) + I(Rnd() * (I(r) - I(l) + 1));
+  o["rLong"] = (l = 0n, r = 0n) => {
+    let Q = L(r) - L(l), S = Q.toString(), len = S.length, ret = "", f = false;
+    for (let i = 0, j; i < len; ++i) j = rInt(0, f ? 9 : S[i]), f |= (j != S[i]), ret += j;
+    return L(l) + L(ret);
+  };
+  o["rStr"] = (len, c = "abcdefghijklmnopqrstuvwxyz") => {
+    let ret = ""; for (let i = 1; i <= len; ++i) ret += c[o["rInt"](0, c.length - 1)]; return ret;
+  };
+
+  // 将数组转换为文本空格形式，并添加换行
+  o["ats"] = (Arr = []) => Arr.flat().join(" ") + "\n";
+  o["atrs"] = (...Arr) => Arr.flat().join(" ") + "\n";
+
+})(window);
+
 if(typeof window.game === 'undefined' || !window.game){
   try{ window.game = new GameState(); }catch(e){ /* 如果 GameState 不可用，保留为 undefined，稍后在 onload 中处理 */ }
 }
@@ -1432,6 +1499,25 @@ function saveGame(silent = false){
     console.error("Save game failed:", e);
   }
 }
+
+function saveFileGame () {
+  try{
+    const saveData = JSON.parse(JSON.stringify(game, (key, value) => {
+      if(value instanceof Set){
+        return Array.from(value);
+      }
+      return value;
+    }));
+    const savedStr = JSON.stringify(saveData);
+    DownloadFile(`[OITrainer] 存档文件 ${(new Date())["toLocaleString"]()}.json`, savedStr);
+  }catch(e){ 
+    if (!silent) {
+      alert("保存失败："+e);
+    }
+    console.error("Save game failed:", e);
+  }
+}
+
 function loadGame(){ try{ 
     let raw = null;
     try{ raw = sessionStorage.getItem('oi_coach_save'); }catch(e){ raw = null; }
@@ -1448,13 +1534,52 @@ function loadGame(){ try{
     } else if(s.talents && typeof s.talents === 'object'){
       student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k]));
     }
+
+    if (game.completedCompetitions && Array.isArray(game.completedCompetitions)) {
+      game.completedCompetitions = new Set(game.completedCompetitions);
+    } else if(s.completedCompetitions && typeof s.completedCompetitions === 'object'){
+      game.completedCompetitions = new Set(Object.keys(s.completedCompetitions).filter(k => s.completedCompetitions[k]));
+    }
+
     return student;
   });
   // 根据游戏难度恢复比赛难度增幅
   if(game.difficulty===1){ window.DIFFICULTY_MULTIPLIER = 1.0; }
   else if(game.difficulty===2){ window.DIFFICULTY_MULTIPLIER = 1.2; }
   else if(game.difficulty===3){ window.DIFFICULTY_MULTIPLIER = 1.5; }
-  renderAll(); alert("已载入存档"); }catch(e){ alert("载入失败："+e); } }
+  renderAll(); alert("已载入存档"); }catch(e){ alert("载入失败："+e); } 
+}
+
+async function loadFileGame(){ 
+  try{ 
+    let raw = await UpLoadFile();
+    let o = JSON.parse(raw);
+    game = Object.assign(new GameState(), o);
+    window.game = game;
+    game.facilities = Object.assign(new Facilities(), o.facilities);
+    game.students = (o.students || []).map(s => {
+      const student = Object.assign(new Student(), s);
+      if(s.talents && Array.isArray(s.talents)){
+        student.talents = new Set(s.talents);
+      } else if(s.talents && typeof s.talents === 'object'){
+        student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k]));
+      }
+
+      if (game.completedCompetitions && Array.isArray(game.completedCompetitions)) {
+        game.completedCompetitions = new Set(game.completedCompetitions);
+      } else if(s.completedCompetitions && typeof s.completedCompetitions === 'object'){
+        game.completedCompetitions = new Set(Object.keys(s.completedCompetitions).filter(k => s.completedCompetitions[k]));
+      }
+
+      return student;
+    });
+    // 根据游戏难度恢复比赛难度增幅
+    if(game.difficulty===1){ window.DIFFICULTY_MULTIPLIER = 1.0; }
+    else if(game.difficulty===2){ window.DIFFICULTY_MULTIPLIER = 1.2; }
+    else if(game.difficulty===3){ window.DIFFICULTY_MULTIPLIER = 1.5; }
+    renderAll(); alert("已载入存档"); 
+  }catch(e){ alert("载入失败："+e); } 
+}
 
 function silentLoad(){ try{ 
   let raw = null;
