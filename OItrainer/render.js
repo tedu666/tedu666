@@ -172,7 +172,9 @@ function getStudentQualificationStatus(student) {
     const requiredComp = qualChain[nextComp.name];
     if (requiredComp) {
       // 检查学生是否在qualification集合中
-      const qualSet = game.qualification[currentHalf][requiredComp];
+      let qualSet = game.qualification[currentHalf][requiredComp];
+      if (qualSet && Array.isArray(qualSet)) game.qualification[currentHalf][requiredComp] = qualSet = new Set(qualSet);
+
       if (qualSet && (qualSet.has(student.name) || qualSet.has(student))) {
         result.hasQualification = true;
         result.html = `<span class="qualification-badge qualified" title="已晋级${nextComp.name}">✓ ${nextComp.name}</span>`;
