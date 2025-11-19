@@ -10,7 +10,7 @@ class SeededRandom {
     this.seed = (seed === undefined || seed === null) ? Date.now() : seed;
     // 对于非原生模式，使用种子初始化状态
     if (!this.useNative) {
-      this.state0 = this.seed ^ 0x12345678;
+      this.state0 = this.seed ^ 0e12345678;
       this.state1 = (this.seed * 0x9E3779B9) ^ 0x87654321;
     }
   }

@@ -838,7 +838,7 @@ function outingTrainingWithSelection(difficulty_choice, province_choice, selecte
     
     if(inspireTalents && inspireTalents.length > 0){
       for(const talentName of inspireTalents){
-        if(Math.random() < 0.3){
+        if(getRandom() < 0.3){
           if(!s.talents.has(talentName)){
             s.talents.add(talentName);
             pushEvent({ 
