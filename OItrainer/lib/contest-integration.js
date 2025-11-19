@@ -998,6 +998,8 @@
     // 记录晋级了当前比赛的学生
     if(!game.qualification[seasonIdx]) game.qualification[seasonIdx] = {};
     if(!game.qualification[seasonIdx][compName]) game.qualification[seasonIdx][compName] = new Set();
+    if(!game.qualification[seasonIdx][compName]) game.qualification[seasonIdx][compName] = new Set();
+    if(game.qualification[seasonIdx][compName] && Array.isArray(game.qualification[seasonIdx][compName])) game.qualification[seasonIdx][compName] = new Set(game.qualification[seasonIdx][compName]);
 
     for(let r of results){
       // 只处理参赛且晋级的学生
